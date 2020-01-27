@@ -11,14 +11,17 @@ Algorithms implemented:
 
 External library: bcprov-jdk15on-157
 
-## Español
+## EspaÃ±ol
 
-Desarrollo Java con tecnología Swing para el cifrado / descifrado usando distintos algoritmos:
+Desarrollo Java con tecnologÃ­a Swing para el cifrado / descifrado usando distintos algoritmos:
 
 Algoritmos implementados:
 
 - Base64
 - Hash -> MD5, SHA1
-- Simétrico -> AES (ECB,CBC) y DES
+- SimÃ©trico -> AES (ECB,CBC) y DES
 
 Libreria externa: bcprov-jdk15on-157
+
+## License
+The Spring pet-clinic application is released under GNU General Public License v3.0
