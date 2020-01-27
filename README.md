@@ -24,4 +24,4 @@ Algoritmos implementados:
 Libreria externa: bcprov-jdk15on-157
 
 ## License
-The Spring pet-clinic application is released under GNU General Public License v3.0
+The cryptoKit application is released under GNU General Public License v3.0
