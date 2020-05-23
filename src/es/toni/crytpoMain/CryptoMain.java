@@ -128,7 +128,7 @@ public class CryptoMain extends javax.swing.JFrame{
         separadorVerticalCentral.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         infoLabel.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
-        infoLabel.setText("Libreria externa: bcprov-jdk15on-157");
+        infoLabel.setText("Libreria externa: bcprov-jdk15on-165");
         
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
