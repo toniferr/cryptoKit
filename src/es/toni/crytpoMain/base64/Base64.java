@@ -1,6 +1,9 @@
-package es.toni.crytpoMain;
+package es.toni.crytpoMain.base64;
 
-public class UtilsBase64 {
+import es.toni.crytpoMain.utils.Constantes;
+import es.toni.crytpoMain.utils.Validation;
+
+public class Base64 {
 	
 	  /**
 	  * 
@@ -9,7 +12,7 @@ public class UtilsBase64 {
 	  * @return string - cadena cifrada Base64
 	  */
 	 public static String cifrarBase64(Integer index,String texto){
-	 	if (!UtilsValidation.validarDatos(index,texto)){
+	 	if (!Validation.validarDatos(index,texto)){
 	 		return Constantes.DATOS_INCORRECTOS;
 	 	} else {
 		    	switch(index){
@@ -30,7 +33,7 @@ public class UtilsBase64 {
      * @return string - cadena descifrada Base64
      */
     public static String descifrarBase64(Integer index,String texto){
-    	if (!UtilsValidation.validarDatos(index,texto)){
+    	if (!Validation.validarDatos(index,texto)){
     		return Constantes.DATOS_INCORRECTOS;
     	}else{
 	    	switch(index){

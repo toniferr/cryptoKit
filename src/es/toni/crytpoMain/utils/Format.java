@@ -1,6 +1,6 @@
-package es.toni.crytpoMain;
+package es.toni.crytpoMain.utils;
 
-public class UtilsFormat {
+public class Format {
 
     /**
      * 

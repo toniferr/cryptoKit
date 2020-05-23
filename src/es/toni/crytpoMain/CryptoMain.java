@@ -10,7 +10,11 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import es.toni.crytpoMain.UtilsBase64;
+
+import es.toni.crytpoMain.base64.Base64;
+import es.toni.crytpoMain.hash.Hash;
+import es.toni.crytpoMain.symmetric.AlgSimetrico;
+import es.toni.crytpoMain.utils.Constantes;
 
 
 /**
@@ -21,32 +25,33 @@ public class CryptoMain extends javax.swing.JFrame{
 	private static final long serialVersionUID = 1L;
                   
     private javax.swing.JComboBox<String> algoritmo;
-    private javax.swing.JLabel algoritmoLabel;
     private javax.swing.JComboBox<String> cifrado;
-    private javax.swing.JLabel cifradoLabel;
     private javax.swing.JTextField clave;
-    private javax.swing.JLabel claveLabel;
-    private javax.swing.JScrollPane scrollMensaje;
-    private javax.swing.JScrollPane scrollResultado;
-    private javax.swing.JSeparator separadorVerticalCentral;
-    private javax.swing.JButton limpiarButton;
     private javax.swing.JTextArea mensaje;
-    private javax.swing.JLabel mensajeLabel;
     private javax.swing.JTextArea resultado;
-    private javax.swing.JLabel resultadoLabel;
-    private javax.swing.JButton salirButton;
-    private javax.swing.JButton cifrarButton;
-    private javax.swing.JButton descifrarButton;
     private javax.swing.JTextField vector;
-    private javax.swing.JLabel vectorLabel;
-    private javax.swing.JLabel infoLabel;
 
     public CryptoMain() {
         initComponents();
     	setLocationRelativeTo(null);
     }
 
-    private void initComponents() {
+    private void initComponents() {    	
+
+        final javax.swing.JLabel algoritmoLabel;
+        final javax.swing.JLabel cifradoLabel;
+        final javax.swing.JLabel claveLabel;
+        final javax.swing.JScrollPane scrollMensaje;
+        final javax.swing.JScrollPane scrollResultado;
+        final javax.swing.JSeparator separadorVerticalCentral;
+        final javax.swing.JButton limpiarButton;
+        final javax.swing.JLabel mensajeLabel;
+        final javax.swing.JLabel resultadoLabel;
+        final javax.swing.JButton salirButton;
+        final javax.swing.JButton cifrarButton;
+        final javax.swing.JButton descifrarButton;
+        final javax.swing.JLabel vectorLabel;
+        final javax.swing.JLabel infoLabel;
 
         cifrarButton = new javax.swing.JButton();
         descifrarButton = new javax.swing.JButton();
@@ -251,23 +256,23 @@ public class CryptoMain extends javax.swing.JFrame{
      */
     private void cifrarButtonActionPerformed(java.awt.event.ActionEvent evt){                                               
         switch(cifrado.getSelectedIndex()){
-        case 0:
-        	resultado.setText(Constantes.DATOS_INCORRECTOS);
-        case 1: 
-        	resultado.setText(UtilsBase64.cifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
-            clave.setText("");
-            vector.setText("");
-        	break;
-        case 2:
-        	resultado.setText(UtilsHash.cifrarHash(algoritmo.getSelectedIndex(),mensaje.getText()));
-            clave.setText("");
-            vector.setText("");
-        	break;
-        case 3:
-        	resultado.setText(UtilsSimetrico.cifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
-        	if (algoritmo.getSelectedIndex() != 0) {
-                vector.setText("");
-        	}
+	        case 0:
+	        	resultado.setText(Constantes.DATOS_INCORRECTOS);
+	        case 1: 
+	        	resultado.setText(Base64.cifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
+	            clave.setText("");
+	            vector.setText("");
+	        	break;
+	        case 2:
+	        	resultado.setText(Hash.cifrarHash(algoritmo.getSelectedIndex(),mensaje.getText()));
+	            clave.setText("");
+	            vector.setText("");
+	        	break;
+	        case 3:
+	        	resultado.setText(AlgSimetrico.cifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
+	        	if (algoritmo.getSelectedIndex() != 0) {
+	                vector.setText("");
+	        	}
         	break;
         default: resultado.setText(Constantes.NO_APLICA);
         }
@@ -288,7 +293,7 @@ public class CryptoMain extends javax.swing.JFrame{
         case 0:
         	resultado.setText(Constantes.DATOS_INCORRECTOS);
         case 1: 
-        	resultado.setText(UtilsBase64.descifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
+        	resultado.setText(Base64.descifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
             clave.setText("");
             vector.setText("");
         	break;
@@ -298,7 +303,7 @@ public class CryptoMain extends javax.swing.JFrame{
             vector.setText("");
         	break;
         case 3:
-        	resultado.setText(UtilsSimetrico.descifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
+        	resultado.setText(AlgSimetrico.descifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
         	if (algoritmo.getSelectedIndex() != 0) {
                 vector.setText("");
         	}

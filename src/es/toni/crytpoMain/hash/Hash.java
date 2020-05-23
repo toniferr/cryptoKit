@@ -1,11 +1,15 @@
-package es.toni.crytpoMain;
+package es.toni.crytpoMain.hash;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class UtilsHash {
+import es.toni.crytpoMain.utils.Constantes;
+import es.toni.crytpoMain.utils.Format;
+import es.toni.crytpoMain.utils.Validation;
+
+public class Hash {
 	
     /**
      * 
@@ -14,7 +18,7 @@ public class UtilsHash {
      * @return string - cadena cifrada Hash
      */
     public static String cifrarHash(Integer index,String texto){
-    	if (!UtilsValidation.validarDatos(index,texto)){
+    	if (!Validation.validarDatos(index,texto)){
     		return Constantes.DATOS_INCORRECTOS;
     	}else{
     		switch(index){
@@ -56,7 +60,7 @@ public class UtilsHash {
 		} 
 		messageDigest.update(mensajeACifrar);
 		byte[] resumen = messageDigest.digest();
-		return UtilsFormat.bytesToHex(resumen);
+		return Format.bytesToHex(resumen);
     }
     
 }
