@@ -18,7 +18,7 @@ External libraries:
 
 **Install & execute**
 
-Open the generated jar file "/jar/cryptoKit.jar"
+Download and open the generated jar file "/jar/cryptoKit.jar"
 
 ## Español
 
@@ -38,7 +38,7 @@ Librerias externas:
 
 **Instalación & ejecución**
 
-Abre el archivo jar generado en "/jar/cryptoKit.jar"
+Descarga y abre el archivo jar generado en "/jar/cryptoKit.jar"
 
 ## License
 The cryptoKit application is released under GNU General Public License v3.0
