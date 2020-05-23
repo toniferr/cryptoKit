@@ -1,6 +1,7 @@
 # cryptoKit
 
 ## English
+
 Java Development in Swing technology for encryption / decryption using distinct algorithms:
 
 Java version: 11
@@ -14,6 +15,10 @@ Algorithms implemented:
 External libraries: 
 - bcprov-jdk15on-165
 - jaxb-api-2.3.1
+
+**Install & execute**
+
+Open the generated jar file "/jar/cryptoKit.jar"
 
 ## Español
 
@@ -30,6 +35,10 @@ Algoritmos implementados:
 Librerias externas: 
 - bcprov-jdk15on-165
 - jaxb-api-2.3.1
+
+**Instalación & ejecución**
+
+Abre el archivo jar generado en "/jar/cryptoKit.jar"
 
 ## License
 The cryptoKit application is released under GNU General Public License v3.0
