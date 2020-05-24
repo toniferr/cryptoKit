@@ -12,7 +12,7 @@ public class AlgoritmoDES {
      * @param texto
      * @return string - cadena descifrada DES  
      */
-    public static String cifrarDES(String texto,String clave,Integer tipo){
+    public static String cifrarDESECB(String texto,String clave){
     	try {
 	    	SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
 	    	DESKeySpec kspec = new DESKeySpec(clave.getBytes());

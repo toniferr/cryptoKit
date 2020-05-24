@@ -52,7 +52,7 @@ public class AlgSimetrico {
 	    		case 1:
 	    			return AlgoritmoAES.cifrarAESPKCS7(texto,clave);
 	    		case 2:
-	    			return AlgoritmoDES.cifrarDES(texto,clave,0);
+	    			return AlgoritmoDES.cifrarDESECB(texto,clave);
 	    		default:
     			return "";
     		}

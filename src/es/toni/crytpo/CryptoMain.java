@@ -107,7 +107,7 @@ public class CryptoMain extends JFrame{
 
         cifradoLabel.setText("Cifrado");
         
-        cifrado.setModel(new DefaultComboBoxModel<>(new String[] { "","Base64", "Hash", "Simetrico", "Asimetrico - NA", "pem - NA"}));
+        cifrado.setModel(new DefaultComboBoxModel<>(new String[] { "","Base64", "Hash", "Simetrico", "Asimetrico - NA"}));
         cifrado.addItemListener((ItemListener) new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
 				changeComboAlgoritmo(e);
@@ -364,7 +364,7 @@ public class CryptoMain extends JFrame{
 	        case "Simetrico":
 	        	algoritmo.addItem("AES/CBC/PKCS5Padding");
 	        	algoritmo.addItem("AES/ECB/PKCS7Padding BC");
-	        	algoritmo.addItem("DES/CBC/PKCS5Padding");
+	        	algoritmo.addItem("DES/ECB/PKCS5Padding");
 	        	break;
         default: break;
         }
