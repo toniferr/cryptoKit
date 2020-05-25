@@ -348,6 +348,7 @@ public class CryptoMain extends JFrame{
 	        	algoritmo.addItem("java.security.MessageDigest SHA-256");
 	        	algoritmo.addItem("java.security.MessageDigest SHA-512");
 	        	algoritmo.addItem("org.bouncycastle.jcajce SHA3-256");
+	        	algoritmo.addItem("org.bouncycastle.jcajce SHA3-512");
 	        	break;
 	        case "Simetrico":
 	        	algoritmo.addItem("AES/CBC/PKCS5Padding");

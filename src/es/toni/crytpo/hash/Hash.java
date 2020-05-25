@@ -1,7 +1,5 @@
 package es.toni.crytpo.hash;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -9,7 +7,6 @@ import org.bouncycastle.jcajce.provider.digest.SHA3;
 import org.bouncycastle.util.encoders.Hex;
 
 import es.toni.crytpo.utils.Constantes;
-import es.toni.crytpo.utils.Format;
 import es.toni.crytpo.utils.Validation;
 
 public class Hash {
@@ -36,39 +33,65 @@ public class Hash {
      */
     public static String cifrar(String texto,Integer tipo){
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-		try {
-			outputStream.write(texto.getBytes());
-		} catch (IOException e1) {
-			return "Error de la aplicación en el texto a cifrar Hash";
-		}
-		byte[] mensajeACifrar = outputStream.toByteArray( );
+		byte[] mensajeACifrar = texto.getBytes();
 		
-		MessageDigest messageDigest = null;
+		if (tipo == 0){
+			return cifrarMessageDigest(mensajeACifrar, "MD5");
+		}
+		if (tipo == 1){
+			return cifrarMessageDigest(mensajeACifrar, "SHA1");
+		}
+		if (tipo == 2){
+			return cifrarMessageDigest(mensajeACifrar, "SHA-256");
+		}
+		if (tipo == 3){
+			return cifrarMessageDigest(mensajeACifrar, "SHA-512");
+		}
+		if (tipo == 4 || tipo == 5){
+			return cifrarSha3(mensajeACifrar, tipo);
+		}
+		return "Tipo de Hash no reconocido";
+    }
+    
+    /**
+     * 
+     * @param mensajeACifrar
+     * @param cifrado
+     * @return string - cadena cifrada hash 
+     */
+    public static String cifrarMessageDigest (byte[] mensajeACifrar, String cifrado) {
+    	MessageDigest messageDigest;
 		try {
-			if (tipo == 0){
-				messageDigest = MessageDigest.getInstance("MD5");
-			}
-			if (tipo == 1){
-				messageDigest = MessageDigest.getInstance("SHA1");
-			}
-			if (tipo == 2){
-				messageDigest = MessageDigest.getInstance("SHA-256");
-			}
-			if (tipo == 3){
-				messageDigest = MessageDigest.getInstance("SHA-512");
-			}
-			if (tipo == 4){
-		       SHA3.DigestSHA3 digestSHA3 = new SHA3.Digest256();
-		       byte[] digest = digestSHA3.digest(texto.getBytes());
-		       return Hex.toHexString(digest);
-			}
+			messageDigest = MessageDigest.getInstance(cifrado);
 		} catch (NoSuchAlgorithmException e) {
 			return "Error de la aplicación al lanzar algoritmo";
-		} 
+		}
 		messageDigest.update(mensajeACifrar);
 		byte[] resumen = messageDigest.digest();
-		return Format.bytesToHex(resumen);
+		return Hex.toHexString(resumen);
+    }
+    
+    /**
+     * 
+     * @param mensajeACifrar
+     * @param tipo
+     * @return string - cadena cifrada hash 
+     */
+    public static String cifrarSha3 (byte[] mensajeACifrar, Integer tipo) {
+    	
+       SHA3.DigestSHA3 digestSHA3 = null;
+       if (tipo == 4) {
+    	   digestSHA3 = new SHA3.Digest256();
+       }
+       if (tipo == 5) {
+    	   digestSHA3 = new SHA3.Digest512();
+       }
+       if (digestSHA3 != null) {
+           byte[] digest = digestSHA3.digest(mensajeACifrar);
+           return Hex.toHexString(digest);
+       }else {
+    	   return "Tipo de Hash no reconocido";
+       }
     }
     
 }
