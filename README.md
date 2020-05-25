@@ -9,7 +9,7 @@ Java version: 11
 Algorithms implemented:
 
 - Base64
-- Hash -> MD5, SHA1
+- Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512
 - Symmetric -> AES (ECB,CBC) and DES
 
 External libraries: 
@@ -29,7 +29,7 @@ Version Java: 11
 Algoritmos implementados:
 
 - Base64
-- Hash -> MD5, SHA1
+- Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512
 - Simétrico -> AES (ECB,CBC) y DES
 
 Librerias externas: 
@@ -43,5 +43,6 @@ Descarga y abre el archivo jar generado en "/jar/cryptoKit.jar"
 ## License
 The cryptoKit application is released under GNU General Public License v3.0
 
+--------------------------------------------------------------------------------------------------------------
 
 Consultar la wiki https://github.com/toniferr/cryptoKit/wiki para más información
