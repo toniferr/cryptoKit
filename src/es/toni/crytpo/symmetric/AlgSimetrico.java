@@ -1,29 +1,6 @@
 package es.toni.crytpo.symmetric;
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-
-import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.paddings.PKCS7Padding;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
-import org.bouncycastle.crypto.params.KeyParameter;
-
 import es.toni.crytpo.utils.Constantes;
-import es.toni.crytpo.utils.Format;
 import es.toni.crytpo.utils.Validation;
 
 public class AlgSimetrico {
@@ -32,18 +9,12 @@ public class AlgSimetrico {
      * 
      * @param index
      * @param texto
+     * @param clave
+     * @param vector
      * @return string - cadena cifrada simetrico
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
-     * @throws InvalidAlgorithmParameterException 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException 
-     * @throws UnsupportedEncodingException 
-     * @throws InvalidKeySpecException 
      */
     public static String cifrarSimetrico(Integer index,String texto,String clave,String vector){
-    	if (!Validation.validarDatos(index,texto)){
+    	if (!Validation.validarDatos(texto)){
     		return Constantes.DATOS_INCORRECTOS;
     	}else{
     		switch(index){
@@ -52,7 +23,7 @@ public class AlgSimetrico {
 	    		case 1:
 	    			return AlgoritmoAES.cifrarAESPKCS7(texto,clave);
 	    		case 2:
-	    			return AlgoritmoDES.cifrarDESECB(texto,clave);
+	    			return AlgoritmoDES.cifrarDESecb(texto,clave);
 	    		default:
     			return "";
     		}
@@ -63,16 +34,12 @@ public class AlgSimetrico {
      * 
      * @param index
      * @param texto
+     * @param clave
+     * @param vector
      * @return string - cadena cifrada simetrico
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
-     * @throws InvalidAlgorithmParameterException 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException 
      */
     public static String descifrarSimetrico(Integer index,String texto,String clave,String vector){
-    	if (!Validation.validarDatos(index,texto)){
+    	if (!Validation.validarDatos(texto)){
     		return Constantes.DATOS_INCORRECTOS;
     	}else{
     		switch(index){
@@ -81,7 +48,7 @@ public class AlgSimetrico {
     		case 1:
     			return AlgoritmoAES.descifrarAESPKCS7(texto,clave);
     		case 2:
-    			return AlgoritmoDES.descifrarDES(texto,clave);
+    			return AlgoritmoDES.descifrarDESecb(texto,clave);
     		default:
     			return "";
     		}

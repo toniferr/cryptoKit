@@ -6,13 +6,10 @@ public class Validation {
      * 
      * @param index
      * @param text
-     * @return
+     * @return boolean
      */
-    public static boolean validarDatos(Integer index, String text){
-    	if (text.equals("")) {
-    		return false;
-    	}
-    	return true;
+    public static boolean validarDatos(String text){
+    	return !text.equals("");
     }
     
 }

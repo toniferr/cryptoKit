@@ -247,14 +247,6 @@ public class CryptoMain extends JFrame{
     /**
      * 
      * @param evt
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
-     * @throws InvalidAlgorithmParameterException 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException 
-     * @throws UnsupportedEncodingException 
-     * @throws InvalidKeySpecException 
      */
     private void cifrarButtonActionPerformed(ActionEvent evt){                                               
         switch(cifrado.getSelectedIndex()){
@@ -283,12 +275,6 @@ public class CryptoMain extends JFrame{
     /**
      * 
      * @param evt
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
-     * @throws InvalidAlgorithmParameterException 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException 
      */
     private void descifrarButtonActionPerformed(ActionEvent evt){                                                  
     	switch(cifrado.getSelectedIndex()){

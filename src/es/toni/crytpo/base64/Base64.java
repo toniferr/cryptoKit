@@ -12,7 +12,7 @@ public class Base64 {
 	  * @return string - cadena cifrada Base64
 	  */
 	 public static String cifrarBase64(Integer index,String texto){
-	 	if (!Validation.validarDatos(index,texto)){
+	 	if (!Validation.validarDatos(texto)){
 	 		return Constantes.DATOS_INCORRECTOS;
 	 	} else {
 		    	switch(index){
@@ -33,7 +33,7 @@ public class Base64 {
      * @return string - cadena descifrada Base64
      */
     public static String descifrarBase64(Integer index,String texto){
-    	if (!Validation.validarDatos(index,texto)){
+    	if (!Validation.validarDatos(texto)){
     		return Constantes.DATOS_INCORRECTOS;
     	}else{
 	    	switch(index){

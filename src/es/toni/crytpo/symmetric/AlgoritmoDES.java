@@ -10,9 +10,10 @@ public class AlgoritmoDES {
     /**
      * 
      * @param texto
-     * @return string - cadena descifrada DES  
+     * @param clave
+     * @return string - cadena descifrada DES con modo de cifrado ECB
      */
-    public static String cifrarDESECB(String texto,String clave){
+    public static String cifrarDESecb(String texto,String clave){
     	try {
 	    	SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
 	    	DESKeySpec kspec = new DESKeySpec(clave.getBytes());
@@ -30,9 +31,10 @@ public class AlgoritmoDES {
     /**
      * 
      * @param texto
-     * @return string - cadena descifrada DES  
+     * @param clave
+     * @return string - cadena descifrada DES con modo de cifrado ECB
      */
-    public static String descifrarDES(String texto,String clave){
+    public static String descifrarDESecb(String texto,String clave){
     	try {
 	    	SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
 	    	DESKeySpec kspec = new DESKeySpec(clave.getBytes());

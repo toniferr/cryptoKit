@@ -6,7 +6,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/ferre/eclipse-workspace/cryptoKit/lib/bcprov-jdk15on-165.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ferre/eclipse-workspace/cryptoKit/lib/bcprov-jdk15on-165.jar" sourcepath="C:/Users/ferre/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.65/bcprov-jdk15on-1.65-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jaxb-api-2.3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

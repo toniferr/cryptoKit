@@ -18,14 +18,14 @@ public class Hash {
      * @return string - cadena cifrada Hash
      */
     public static String cifrarHash(Integer index,String texto){
-    	if (!Validation.validarDatos(index,texto)){
+    	if (!Validation.validarDatos(texto)){
     		return Constantes.DATOS_INCORRECTOS;
     	}else{
     		switch(index){
     		case 0:
-    			return cifrarMD5_SHA1(texto,0);
+    			return cifrarMD5sha1(texto,index);
     		case 1:
-    			return cifrarMD5_SHA1(texto,1);
+    			return cifrarMD5sha1(texto,index);
     		default:
     			return "";
     		}
@@ -35,9 +35,10 @@ public class Hash {
     /**
      * 
      * @param texto
-     * @return string - cadena cifrada MD5 
+     * @param tipo
+     * @return string - cadena cifrada hash 
      */
-    public static String cifrarMD5_SHA1(String texto,Integer tipo){
+    public static String cifrarMD5sha1(String texto,Integer tipo){
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 		try {

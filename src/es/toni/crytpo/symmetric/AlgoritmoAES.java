@@ -1,13 +1,6 @@
 package es.toni.crytpo.symmetric;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
@@ -26,12 +19,7 @@ public class AlgoritmoAES {
      * 
      * @param texto
      * @return string - cadena descifrada AES 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidAlgorithmParameterException 
-     * @throws InvalidKeyException 
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
+     * @throws Exception
      */
     public static String cifrarAESPKCS5(String texto,String clave,String vector){
     	try{
@@ -50,12 +38,7 @@ public class AlgoritmoAES {
      * 
      * @param texto
      * @return string - cadena descifrada AES 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidAlgorithmParameterException 
-     * @throws InvalidKeyException 
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
+     * @throws Exception
      */
     public static String cifrarAESPKCS7(String texto,String clave){
     	try{
@@ -74,12 +57,7 @@ public class AlgoritmoAES {
      * 
      * @param texto
      * @return string - cadena cifrada AES 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidAlgorithmParameterException 
-     * @throws InvalidKeyException 
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
+     * @throws Exception
      */
     public static String descifrarAESPKCS5(String texto,String clave,String vector){
     	try {
@@ -98,12 +76,7 @@ public class AlgoritmoAES {
      * 
      * @param texto
      * @return string - cadena cifrada AES 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidAlgorithmParameterException 
-     * @throws InvalidKeyException 
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
+     * @throws Exception
      */
     public static String descifrarAESPKCS7(String texto,String clave){
     	try {
