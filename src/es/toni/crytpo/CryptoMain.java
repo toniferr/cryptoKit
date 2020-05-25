@@ -267,7 +267,7 @@ public class CryptoMain extends JFrame{
 	        	if (algoritmo.getSelectedIndex() != 0) {
 	                vector.setText("");
 	        	}
-        	break;
+	        	break;
 	        default: resultado.setText(Constantes.NO_APLICA);
         }
     }                                              
@@ -345,6 +345,7 @@ public class CryptoMain extends JFrame{
 	        case "Hash":
 	        	algoritmo.addItem("java.security.MessageDigest MD5");
 	        	algoritmo.addItem("java.security.MessageDigest SHA1");
+	        	algoritmo.addItem("java.security.MessageDigest SHA-256");
 	        	break;
 	        case "Simetrico":
 	        	algoritmo.addItem("AES/CBC/PKCS5Padding");

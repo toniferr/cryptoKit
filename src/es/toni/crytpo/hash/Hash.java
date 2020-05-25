@@ -21,14 +21,7 @@ public class Hash {
     	if (!Validation.validarDatos(texto)){
     		return Constantes.DATOS_INCORRECTOS;
     	}else{
-    		switch(index){
-    		case 0:
-    			return cifrarMD5sha1(texto,index);
-    		case 1:
-    			return cifrarMD5sha1(texto,index);
-    		default:
-    			return "";
-    		}
+    		return cifrar(texto,index);
     	}
     }
     
@@ -38,7 +31,7 @@ public class Hash {
      * @param tipo
      * @return string - cadena cifrada hash 
      */
-    public static String cifrarMD5sha1(String texto,Integer tipo){
+    public static String cifrar(String texto,Integer tipo){
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 		try {
@@ -55,6 +48,9 @@ public class Hash {
 			}
 			if (tipo == 1){
 				messageDigest = MessageDigest.getInstance("SHA1");
+			}
+			if (tipo == 2){
+				messageDigest = MessageDigest.getInstance("SHA-256");
 			}
 		} catch (NoSuchAlgorithmException e) {
 			return "Error de la aplicación al lanzar algoritmo";
