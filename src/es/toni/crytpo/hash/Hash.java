@@ -52,6 +52,9 @@ public class Hash {
 			if (tipo == 2){
 				messageDigest = MessageDigest.getInstance("SHA-256");
 			}
+			if (tipo == 3){
+				messageDigest = MessageDigest.getInstance("SHA-512");
+			}
 		} catch (NoSuchAlgorithmException e) {
 			return "Error de la aplicación al lanzar algoritmo";
 		} 
