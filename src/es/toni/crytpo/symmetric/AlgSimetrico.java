@@ -23,6 +23,8 @@ public class AlgSimetrico {
 	    		case 1:
 	    			return AlgoritmoAES.cifrarAESPKCS7(texto,clave);
 	    		case 2:
+	    			return AlgoritmoDES.cifrarDEScbc(texto,clave,vector);
+	    		case 3:
 	    			return AlgoritmoDES.cifrarDESecb(texto,clave);
 	    		default:
     			return "";
@@ -48,6 +50,8 @@ public class AlgSimetrico {
     		case 1:
     			return AlgoritmoAES.descifrarAESPKCS7(texto,clave);
     		case 2:
+    			return AlgoritmoDES.descifrarDEScbc(texto,clave,vector);
+    		case 3:
     			return AlgoritmoDES.descifrarDESecb(texto,clave);
     		default:
     			return "";

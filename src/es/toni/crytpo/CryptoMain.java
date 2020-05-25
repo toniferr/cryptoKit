@@ -252,6 +252,7 @@ public class CryptoMain extends JFrame{
         switch(cifrado.getSelectedIndex()){
 	        case 0:
 	        	resultado.setText(Constantes.DATOS_INCORRECTOS);
+	        	break;
 	        case 1: 
 	        	resultado.setText(Base64.cifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
 	            clave.setText("");
@@ -278,25 +279,26 @@ public class CryptoMain extends JFrame{
      */
     private void descifrarButtonActionPerformed(ActionEvent evt){                                                  
     	switch(cifrado.getSelectedIndex()){
-        case 0:
-        	resultado.setText(Constantes.DATOS_INCORRECTOS);
-        case 1: 
-        	resultado.setText(Base64.descifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
-            clave.setText("");
-            vector.setText("");
+	        case 0:
+	        	resultado.setText(Constantes.DATOS_INCORRECTOS);
+	        	break;
+	        case 1: 
+	        	resultado.setText(Base64.descifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
+	            clave.setText("");
+	            vector.setText("");
+	        	break;
+	        case 2:
+	        	resultado.setText(Constantes.ERROR_DESCIFRAR_HASH);
+	            clave.setText("");
+	            vector.setText("");
+	        	break;
+	        case 3:
+	        	resultado.setText(AlgSimetrico.descifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
+	        	if (algoritmo.getSelectedIndex() != 0) {
+	                vector.setText("");
+	        	}
         	break;
-        case 2:
-        	resultado.setText(Constantes.ERROR_DESCIFRAR_HASH);
-            clave.setText("");
-            vector.setText("");
-        	break;
-        case 3:
-        	resultado.setText(AlgSimetrico.descifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
-        	if (algoritmo.getSelectedIndex() != 0) {
-                vector.setText("");
-        	}
-        	break;
-        default: resultado.setText(Constantes.NO_APLICA);
+	        default: resultado.setText(Constantes.NO_APLICA);
         }
     }      
     
@@ -353,6 +355,7 @@ public class CryptoMain extends JFrame{
 	        case "Simetrico":
 	        	algoritmo.addItem("AES/CBC/PKCS5Padding");
 	        	algoritmo.addItem("AES/ECB/PKCS7Padding BC");
+	        	algoritmo.addItem("DES/CBC/PKCS5Padding");
 	        	algoritmo.addItem("DES/ECB/PKCS5Padding");
 	        	break;
         default: break;

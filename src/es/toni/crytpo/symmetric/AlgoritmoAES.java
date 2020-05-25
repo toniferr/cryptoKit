@@ -9,12 +9,10 @@ import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.paddings.PKCS7Padding;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
-
-import es.toni.crytpo.utils.Format;
+import org.bouncycastle.util.encoders.Hex;
 
 public class AlgoritmoAES {
 	
-	  
     /**
      * 
      * @param texto
@@ -47,7 +45,7 @@ public class AlgoritmoAES {
 	        byte[] output = new byte[pbbc.getOutputSize(texto.getBytes().length)];
 	        int bytesWrittenOut = pbbc.processBytes(texto.getBytes(), 0, texto.getBytes().length, output, 0);
 	        pbbc.doFinal(output, bytesWrittenOut);
-	        return Format.bytesToHex(output);			
+	        return Hex.toHexString(output);			
     	}catch (Exception e){
     		return e.toString();
     	}
@@ -92,7 +90,7 @@ public class AlgoritmoAES {
 	        }
 	        byte res0[] = new byte[i+1];
 	        System.arraycopy(output, 0, res0, 0, res0.length);
-	        return Format.bytesToHex(output);
+	        return Hex.toHexString(output);
     	}catch (Exception e){
     		return e.toString();
     	}

@@ -15,12 +15,11 @@ public class Base64 {
 	 	if (!Validation.validarDatos(texto)){
 	 		return Constantes.DATOS_INCORRECTOS;
 	 	} else {
-		    	switch(index){
-		        case 0: 
-		        	return new String(java.util.Base64.getEncoder().encode(texto.getBytes()));
-		        default: 
-		        	return "";
-		    	}
+	 		if (index == 0) {
+	 			return new String(java.util.Base64.getEncoder().encode(texto.getBytes()));
+	 		} else {
+	 			return "Error en la elección de librería Base64";
+	 		}
 	 	}
 	 }
     
@@ -34,11 +33,10 @@ public class Base64 {
     	if (!Validation.validarDatos(texto)){
     		return Constantes.DATOS_INCORRECTOS;
     	}else{
-	    	switch(index){
-	        case 0: 
+	    	if (index == 0 ) {
 	        	return new String(java.util.Base64.getDecoder().decode(texto));
-	        default: 
-	        	return "";
+	    	} else {
+	        	return "Error en la elección de librería Base64";
 	    	}
     	}
     }
