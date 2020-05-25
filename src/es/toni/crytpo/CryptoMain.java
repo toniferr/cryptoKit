@@ -180,7 +180,7 @@ public class CryptoMain extends JFrame{
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                     .addComponent(resultadoLabel)
-                                    .addComponent(scrollResultado, GroupLayout.PREFERRED_SIZE, 302, GroupLayout.PREFERRED_SIZE))))
+                                    .addComponent(scrollResultado, GroupLayout.PREFERRED_SIZE, 402, GroupLayout.PREFERRED_SIZE))))
                         .addGap(26, 26, 26))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(descifrarButton)
@@ -347,6 +347,7 @@ public class CryptoMain extends JFrame{
 	        	algoritmo.addItem("java.security.MessageDigest SHA1");
 	        	algoritmo.addItem("java.security.MessageDigest SHA-256");
 	        	algoritmo.addItem("java.security.MessageDigest SHA-512");
+	        	algoritmo.addItem("org.bouncycastle.jcajce SHA3-256");
 	        	break;
 	        case "Simetrico":
 	        	algoritmo.addItem("AES/CBC/PKCS5Padding");

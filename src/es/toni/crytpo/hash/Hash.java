@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.bouncycastle.jcajce.provider.digest.SHA3;
+import org.bouncycastle.util.encoders.Hex;
+
 import es.toni.crytpo.utils.Constantes;
 import es.toni.crytpo.utils.Format;
 import es.toni.crytpo.utils.Validation;
@@ -54,6 +57,11 @@ public class Hash {
 			}
 			if (tipo == 3){
 				messageDigest = MessageDigest.getInstance("SHA-512");
+			}
+			if (tipo == 4){
+		       SHA3.DigestSHA3 digestSHA3 = new SHA3.Digest256();
+		       byte[] digest = digestSHA3.digest(texto.getBytes());
+		       return Hex.toHexString(digest);
 			}
 		} catch (NoSuchAlgorithmException e) {
 			return "Error de la aplicación al lanzar algoritmo";
