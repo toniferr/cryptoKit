@@ -45,4 +45,4 @@ The cryptoKit application is released under GNU General Public License v3.0
 
 --------------------------------------------------------------------------------------------------------------
 
-Consultar la wiki https://github.com/toniferr/cryptoKit/wiki para más información
+Consultar https://github.com/toniferr/cryptoKit/wiki para más información
