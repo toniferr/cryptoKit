@@ -10,7 +10,7 @@ Algorithms implemented:
 
 - Base64
 - Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512
-- Symmetric -> AES (ECB,CBC) and DES
+- Symmetric -> AES (ECB,CBC) and DES (ECB,CBC)
 
 External libraries: 
 - bcprov-jdk15on-165
@@ -30,7 +30,7 @@ Algoritmos implementados:
 
 - Base64
 - Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512
-- Simétrico -> AES (ECB,CBC) y DES
+- Simétrico -> AES (ECB,CBC) y DES (ECB,CBC)
 
 Librerias externas: 
 - bcprov-jdk15on-165
