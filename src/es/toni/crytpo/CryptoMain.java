@@ -353,7 +353,7 @@ public class CryptoMain extends JFrame{
 	        	algoritmo.addItem("org.bouncycastle.jcajce SHA3-512");
 	        	break;
 	        case "Simetrico":
-	        	algoritmo.addItem("AES/CBC/PKCS5Padding");
+	        	algoritmo.addItem("AES/CBC/PKCS7Padding BC");
 	        	algoritmo.addItem("AES/ECB/PKCS7Padding BC");
 	        	algoritmo.addItem("DES/CBC/PKCS5Padding");
 	        	algoritmo.addItem("DES/ECB/PKCS5Padding");

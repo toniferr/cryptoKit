@@ -68,7 +68,7 @@ public class Hash {
 		}
 		messageDigest.update(mensajeACifrar);
 		byte[] resumen = messageDigest.digest();
-		return Hex.toHexString(resumen);
+		return Hex.toHexString(resumen)+" (hexadecimal)";
     }
     
     /**
@@ -88,7 +88,7 @@ public class Hash {
        }
        if (digestSHA3 != null) {
            byte[] digest = digestSHA3.digest(mensajeACifrar);
-           return Hex.toHexString(digest);
+           return Hex.toHexString(digest)+" (hexadecimal)";
        }else {
     	   return "Tipo de Hash no reconocido";
        }
