@@ -340,8 +340,7 @@ public class CryptoMain extends JFrame{
     	algoritmo.removeAllItems();
     	switch(text){
 	        case "Base64": 
-	        	algoritmo.addItem("java.util");
-	        	algoritmo.addItem("org.bouncycastle.util.encoders");
+	        	algoritmo.addItem("java.util.Base64");
 	        	break;
 	        case "Hash":
 	        	algoritmo.addItem("java.security.MessageDigest MD5");

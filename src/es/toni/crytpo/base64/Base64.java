@@ -18,8 +18,6 @@ public class Base64 {
 		    	switch(index){
 		        case 0: 
 		        	return new String(java.util.Base64.getEncoder().encode(texto.getBytes()));
-		        case 1:
-		        	return new String(org.bouncycastle.util.encoders.Base64.encode(texto.getBytes()));
 		        default: 
 		        	return "";
 		    	}
@@ -39,8 +37,6 @@ public class Base64 {
 	    	switch(index){
 	        case 0: 
 	        	return new String(java.util.Base64.getDecoder().decode(texto));
-	        case 1: 
-	        	return new String(org.bouncycastle.util.encoders.Base64.decode(texto));
 	        default: 
 	        	return "";
 	    	}
