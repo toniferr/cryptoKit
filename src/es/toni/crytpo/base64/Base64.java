@@ -18,7 +18,7 @@ public class Base64 {
 	 		if (index == 0) {
 	 			return new String(java.util.Base64.getEncoder().encode(texto.getBytes()));
 	 		} else {
-	 			return "Error en la elección de librería Base64";
+	 			return "Error de la aplicación al lanzar algoritmo";
 	 		}
 	 	}
 	 }
@@ -36,7 +36,7 @@ public class Base64 {
 	    	if (index == 0 ) {
 	        	return new String(java.util.Base64.getDecoder().decode(texto));
 	    	} else {
-	        	return "Error en la elección de librería Base64";
+	        	return "Error de la aplicación al lanzar algoritmo";
 	    	}
     	}
     }

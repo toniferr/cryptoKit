@@ -50,7 +50,7 @@ public class Hash {
 		if (tipo == 4 || tipo == 5){
 			return cifrarSha3(mensajeACifrar, tipo);
 		}
-		return "Tipo de Hash no reconocido";
+		return "Error de la aplicación al lanzar algoritmo";
     }
     
     /**
@@ -90,7 +90,7 @@ public class Hash {
            byte[] digest = digestSHA3.digest(mensajeACifrar);
            return Hex.toHexString(digest)+" (hexadecimal)";
        }else {
-    	   return "Tipo de Hash no reconocido";
+    	   return "Error de la aplicación al lanzar algoritmo";
        }
     }
     

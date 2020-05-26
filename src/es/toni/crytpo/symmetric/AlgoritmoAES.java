@@ -51,6 +51,27 @@ public class AlgoritmoAES {
     		return e.toString();
     	}
     }
+    
+    /**
+     * 
+     * @param texto
+     * @return string - cadena descifrada AES 
+     * @throws Exception
+     */
+    public static String cifrarAESgcmSinPadding(String texto,String clave,String vector){
+    	try{
+    		Security.addProvider(new BouncyCastleProvider());
+    		Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
+			SecretKeySpec skeySpec = new SecretKeySpec(clave.getBytes(),"AES");
+			IvParameterSpec ivParameterSpec = new IvParameterSpec(vector.getBytes());
+			
+			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivParameterSpec);
+			byte[] bloqueCifrado = cipher.doFinal(texto.getBytes());
+	    	return Hex.toHexString(bloqueCifrado)+" (hexadecimal)";
+    	}catch (Exception e){
+    		return e.toString();
+    	}
+    }
         
     /**
      * 
@@ -82,6 +103,27 @@ public class AlgoritmoAES {
     	try {
     		Security.addProvider(new BouncyCastleProvider());
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
+			SecretKeySpec skeySpec = new SecretKeySpec(clave.getBytes(),"AES");
+			IvParameterSpec ivParameterSpec = new IvParameterSpec(vector.getBytes());
+			
+			cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivParameterSpec);
+			byte[] bloqueCifrado = cipher.doFinal(Hex.decode(texto.getBytes()));
+			return new String(bloqueCifrado);
+    	}catch (Exception e){
+    		return e.toString();
+    	}
+    }
+    
+    /**
+     * 
+     * @param texto
+     * @return string - cadena descifrada AES 
+     * @throws Exception
+     */
+    public static String descifrarAESgcmSinPadding(String texto,String clave,String vector){
+    	try{
+    		Security.addProvider(new BouncyCastleProvider());
+			Cipher cipher = Cipher.getInstance("AES/GCM/notPadding", "BC");
 			SecretKeySpec skeySpec = new SecretKeySpec(clave.getBytes(),"AES");
 			IvParameterSpec ivParameterSpec = new IvParameterSpec(vector.getBytes());
 			

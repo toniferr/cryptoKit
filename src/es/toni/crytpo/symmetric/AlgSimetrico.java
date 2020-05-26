@@ -19,15 +19,17 @@ public class AlgSimetrico {
     	}else{
     		switch(index){
 	    		case 0:
-	    			return AlgoritmoAES.cifrarAESPKCS5(texto,clave,vector);
-	    		case 1:
-	    			return AlgoritmoAES.cifrarAESPKCS7(texto,clave);
-	    		case 2:
 	    			return AlgoritmoDES.cifrarDEScbcPkcs5(texto,clave,vector);
-	    		case 3:
+	    		case 1:
 	    			return AlgoritmoDES.cifrarDESecbPkcs5(texto,clave);
+	    		case 2:
+	    			return AlgoritmoAES.cifrarAESPKCS5(texto,clave,vector);
+	    		case 3:
+	    			return AlgoritmoAES.cifrarAESPKCS7(texto,clave);
+	    		case 4:
+	    			return AlgoritmoAES.cifrarAESgcmSinPadding(texto, clave, vector);
 	    		default:
-    			return "";
+    			return "Error de la aplicación al lanzar algoritmo";
     		}
     	}
     }
@@ -46,15 +48,17 @@ public class AlgSimetrico {
     	}else{
     		switch(index){
     		case 0:
-    			return AlgoritmoAES.descifrarAESPKCS5(texto,clave,vector);
-    		case 1:
-    			return AlgoritmoAES.descifrarAESPKCS7(texto,clave);
-    		case 2:
     			return AlgoritmoDES.descifrarDEScbcPkcs5(texto,clave,vector);
-    		case 3:
+    		case 1:
     			return AlgoritmoDES.descifrarDESecbPkcs5(texto,clave);
+    		case 2:
+    			return AlgoritmoAES.descifrarAESPKCS5(texto,clave,vector);
+    		case 3:
+    			return AlgoritmoAES.descifrarAESPKCS7(texto,clave);
+    		case 4:
+    			return AlgoritmoAES.descifrarAESgcmSinPadding(texto, clave, vector);
     		default:
-    			return "";
+    			return "Error de la aplicación al lanzar algoritmo";
     		}
     	}
     }

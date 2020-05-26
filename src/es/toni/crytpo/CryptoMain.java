@@ -255,25 +255,22 @@ public class CryptoMain extends JFrame{
 	        	resultado.setText(Constantes.DATOS_INCORRECTOS);
 	        	break;
 	        case 1:		
-	        	resultado.setText(HexCode.cifrar(mensaje.getText()));
 	            clave.setText("");
 	            vector.setText("");
+	        	resultado.setText(HexCode.cifrar(mensaje.getText()));
 	        	break;
 	        case 2: 
-	        	resultado.setText(Base64.cifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
 	            clave.setText("");
 	            vector.setText("");
+	        	resultado.setText(Base64.cifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
 	        	break;
 	        case 3:
-	        	resultado.setText(Hash.cifrarHash(algoritmo.getSelectedIndex(),mensaje.getText()));
 	            clave.setText("");
 	            vector.setText("");
+	        	resultado.setText(Hash.cifrarHash(algoritmo.getSelectedIndex(),mensaje.getText()));
 	        	break;
 	        case 4:
 	        	resultado.setText(AlgSimetrico.cifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
-	        	if (algoritmo.getSelectedIndex() != 0) {
-	                vector.setText("");
-	        	}
 	        	break;
 	        default: resultado.setText(Constantes.NO_APLICA);
         }
@@ -289,25 +286,22 @@ public class CryptoMain extends JFrame{
 	        	resultado.setText(Constantes.DATOS_INCORRECTOS);
 	        	break;
 	        case 1:
-	        	resultado.setText(HexCode.descifrar(mensaje.getText()));
 	            clave.setText("");
 	            vector.setText("");
+	        	resultado.setText(HexCode.descifrar(mensaje.getText()));
 	        	break;
 	        case 2: 
-	        	resultado.setText(Base64.descifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
 	            clave.setText("");
 	            vector.setText("");
+	        	resultado.setText(Base64.descifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
 	        	break;
 	        case 3:
-	        	resultado.setText(Constantes.ERROR_DESCIFRAR_HASH);
 	            clave.setText("");
 	            vector.setText("");
+	        	resultado.setText(Constantes.ERROR_DESCIFRAR_HASH);
 	        	break;
 	        case 4:
 	        	resultado.setText(AlgSimetrico.descifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
-	        	if (algoritmo.getSelectedIndex() != 0) {
-	                vector.setText("");
-	        	}
         	break;
 	        default: resultado.setText(Constantes.NO_APLICA);
         }
@@ -367,10 +361,11 @@ public class CryptoMain extends JFrame{
 	        	algoritmo.addItem("org.bouncycastle.jcajce SHA3-512");
 	        	break;
 	        case "Simetrico":
-	        	algoritmo.addItem("AES/CBC/PKCS7Padding BC");
-	        	algoritmo.addItem("AES/ECB/PKCS7Padding BC");
 	        	algoritmo.addItem("DES/CBC/PKCS5Padding");
 	        	algoritmo.addItem("DES/ECB/PKCS5Padding");
+	        	algoritmo.addItem("AES/CBC/PKCS7Padding BC");
+	        	algoritmo.addItem("AES/ECB/PKCS7Padding BC");
+	        	algoritmo.addItem("AES/GCM/NotPadding BC");
 	        	break;
         default: break;
         }
