@@ -29,6 +29,7 @@ import javax.swing.WindowConstants;
 
 import es.toni.crytpo.base64.Base64;
 import es.toni.crytpo.hash.Hash;
+import es.toni.crytpo.hex.HexCode;
 import es.toni.crytpo.symmetric.AlgSimetrico;
 import es.toni.crytpo.utils.Constantes;
 
@@ -107,7 +108,7 @@ public class CryptoMain extends JFrame{
 
         cifradoLabel.setText("Cifrado");
         
-        cifrado.setModel(new DefaultComboBoxModel<>(new String[] { "","Base64", "Hash", "Simetrico", "Asimetrico - NA"}));
+        cifrado.setModel(new DefaultComboBoxModel<>(new String[] { "","Hexadecimal", "Base64", "Hash", "Simetrico", "Asimetrico - NA"}));
         cifrado.addItemListener((ItemListener) new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
 				changeComboAlgoritmo(e);
@@ -253,17 +254,22 @@ public class CryptoMain extends JFrame{
 	        case 0:
 	        	resultado.setText(Constantes.DATOS_INCORRECTOS);
 	        	break;
-	        case 1: 
+	        case 1:		
+	        	resultado.setText(HexCode.cifrar(mensaje.getText()));
+	            clave.setText("");
+	            vector.setText("");
+	        	break;
+	        case 2: 
 	        	resultado.setText(Base64.cifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
 	            clave.setText("");
 	            vector.setText("");
 	        	break;
-	        case 2:
+	        case 3:
 	        	resultado.setText(Hash.cifrarHash(algoritmo.getSelectedIndex(),mensaje.getText()));
 	            clave.setText("");
 	            vector.setText("");
 	        	break;
-	        case 3:
+	        case 4:
 	        	resultado.setText(AlgSimetrico.cifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
 	        	if (algoritmo.getSelectedIndex() != 0) {
 	                vector.setText("");
@@ -282,17 +288,22 @@ public class CryptoMain extends JFrame{
 	        case 0:
 	        	resultado.setText(Constantes.DATOS_INCORRECTOS);
 	        	break;
-	        case 1: 
+	        case 1:
+	        	resultado.setText(HexCode.descifrar(mensaje.getText()));
+	            clave.setText("");
+	            vector.setText("");
+	        	break;
+	        case 2: 
 	        	resultado.setText(Base64.descifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
 	            clave.setText("");
 	            vector.setText("");
 	        	break;
-	        case 2:
+	        case 3:
 	        	resultado.setText(Constantes.ERROR_DESCIFRAR_HASH);
 	            clave.setText("");
 	            vector.setText("");
 	        	break;
-	        case 3:
+	        case 4:
 	        	resultado.setText(AlgSimetrico.descifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));
 	        	if (algoritmo.getSelectedIndex() != 0) {
 	                vector.setText("");
@@ -341,6 +352,9 @@ public class CryptoMain extends JFrame{
     private void anadirItemsComboAlgoritmo(String text){
     	algoritmo.removeAllItems();
     	switch(text){
+	        case "Hexadecimal": 
+	        	algoritmo.addItem("org.bouncycastle.util.encoders.Hex");
+	        	break;
 	        case "Base64": 
 	        	algoritmo.addItem("java.util.Base64");
 	        	break;
