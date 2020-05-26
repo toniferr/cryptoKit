@@ -8,6 +8,7 @@ Java version: 11
 
 Algorithms implemented:
 
+- Hexadecimal
 - Base64
 - Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512
 - Symmetric -> AES (ECB,CBC) and DES (ECB,CBC)
@@ -28,6 +29,7 @@ Version Java: 11
 
 Algoritmos implementados:
 
+- Hexadecimal
 - Base64
 - Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512
 - Simétrico -> AES (ECB,CBC) y DES (ECB,CBC)
