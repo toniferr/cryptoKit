@@ -1,4 +1,6 @@
-# cryptoKit 
+[![CircleCI](https://circleci.com/gh/toniferr/cryptoKit.svg?style=svg)](https://circleci.com/gh/toniferr/cryptoKit)
+
+# cryptoKit
 
 ## English
 
