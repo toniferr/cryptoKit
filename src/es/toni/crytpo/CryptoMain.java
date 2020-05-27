@@ -358,6 +358,7 @@ public class CryptoMain extends JFrame{
 	        	algoritmo.addItem("AES/CBC/PKCS7Padding BC");
 	        	algoritmo.addItem("AES/ECB/PKCS7Padding BC");
 	        	algoritmo.addItem("AES/GCM/NoPadding BC");
+	        	algoritmo.addItem("Blowfish/CBC/PKCS5Padding BC");
 	        	algoritmo.addItem("Blowfish/ECB/PKCS5Padding BC");
 	        	break;
         default: break;
