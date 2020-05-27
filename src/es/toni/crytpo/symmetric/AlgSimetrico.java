@@ -28,6 +28,8 @@ public class AlgSimetrico {
 	    			return AlgoritmoAES.cifrarAESPKCS7(texto,clave);
 	    		case 4:
 	    			return AlgoritmoAES.cifrarAESgcmSinPadding(texto, clave, vector);
+	    		case 5:
+	    			return AlgoritmoBlowfish.cifrarBFSinPadding(texto, clave);
 	    		default:
     			return "Error de la aplicación al lanzar algoritmo";
     		}
@@ -57,6 +59,8 @@ public class AlgSimetrico {
     			return AlgoritmoAES.descifrarAESPKCS7(texto,clave);
     		case 4:
     			return AlgoritmoAES.descifrarAESgcmSinPadding(texto, clave, vector);
+    		case 5:
+    			return AlgoritmoBlowfish.descifrarBFSinPadding(texto, clave);
     		default:
     			return "Error de la aplicación al lanzar algoritmo";
     		}

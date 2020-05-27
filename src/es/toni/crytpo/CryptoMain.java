@@ -4,15 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -365,7 +357,8 @@ public class CryptoMain extends JFrame{
 	        	algoritmo.addItem("DES/ECB/PKCS5Padding");
 	        	algoritmo.addItem("AES/CBC/PKCS7Padding BC");
 	        	algoritmo.addItem("AES/ECB/PKCS7Padding BC");
-	        	algoritmo.addItem("AES/GCM/NotPadding BC");
+	        	algoritmo.addItem("AES/GCM/NoPadding BC");
+	        	algoritmo.addItem("Blowfish/ECB/PKCS5Padding BC");
 	        	break;
         default: break;
         }

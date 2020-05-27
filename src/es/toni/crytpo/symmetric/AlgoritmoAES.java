@@ -123,7 +123,7 @@ public class AlgoritmoAES {
     public static String descifrarAESgcmSinPadding(String texto,String clave,String vector){
     	try{
     		Security.addProvider(new BouncyCastleProvider());
-			Cipher cipher = Cipher.getInstance("AES/GCM/notPadding", "BC");
+			Cipher cipher = Cipher.getInstance("AES/GCM/noPadding", "BC");
 			SecretKeySpec skeySpec = new SecretKeySpec(clave.getBytes(),"AES");
 			IvParameterSpec ivParameterSpec = new IvParameterSpec(vector.getBytes());
 			
