@@ -18,8 +18,7 @@ jobs:
 
     environment:
       # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
+     MAVEN_OPTS: -Xmx3200m
 
     steps:
       - checkout
@@ -32,16 +31,10 @@ jobs:
           - v1-dependencies-
 
       - run: mvn install -DskipTests
-      - run: mvn dependency:go-offline
-
+      - run: mvn test
+      - run: "mvn cobertura:cobertura"
+      - run: "bash <(curl -s https://codecov.io/bash)"
       - save_cache:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      # run tests! and gen code coverage
-      - run: mvn clean test
-      - run: mvn clean integration-test
-
-      - store_artifacts:
-          path:  target
