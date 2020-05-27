@@ -67,10 +67,13 @@ public class CryptoMain extends JFrame{
         clave = new JTextField();
         vector = new JTextField();
         mensaje = new JTextArea();
-        resultado = new JTextArea();
+        resultado = new JTextArea();        
+
+    	clave.setEditable(false);
+    	vector.setEditable(false);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
+        
         cifrarButton.setText("Cifrar");
         cifrarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
@@ -100,7 +103,7 @@ public class CryptoMain extends JFrame{
 
         cifradoLabel.setText("Cifrado");
         
-        cifrado.setModel(new DefaultComboBoxModel<>(new String[] { "","Hexadecimal", "Base64", "Hash", "Simetrico", "Asimetrico - NA"}));
+        cifrado.setModel(new DefaultComboBoxModel<>(new String[] { "","Hexadecimal", "Base64", "Hash", "Simetrico"}));
         cifrado.addItemListener((ItemListener) new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
 				changeComboAlgoritmo(e);
@@ -246,19 +249,13 @@ public class CryptoMain extends JFrame{
 	        case 0:
 	        	resultado.setText(Constantes.DATOS_INCORRECTOS);
 	        	break;
-	        case 1:		
-	            clave.setText("");
-	            vector.setText("");
+	        case 1:			
 	        	resultado.setText(HexCode.cifrar(mensaje.getText()));
 	        	break;
 	        case 2: 
-	            clave.setText("");
-	            vector.setText("");
-	        	resultado.setText(Base64.cifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
+	        	resultado.setText(Base64.cifrarBase64(mensaje.getText()));
 	        	break;
 	        case 3:
-	            clave.setText("");
-	            vector.setText("");
 	        	resultado.setText(Hash.cifrarHash(algoritmo.getSelectedIndex(),mensaje.getText()));
 	        	break;
 	        case 4:
@@ -277,19 +274,13 @@ public class CryptoMain extends JFrame{
 	        case 0:
 	        	resultado.setText(Constantes.DATOS_INCORRECTOS);
 	        	break;
-	        case 1:
-	            clave.setText("");
-	            vector.setText("");
+	        case 1:	
 	        	resultado.setText(HexCode.descifrar(mensaje.getText()));
 	        	break;
 	        case 2: 
-	            clave.setText("");
-	            vector.setText("");
-	        	resultado.setText(Base64.descifrarBase64(algoritmo.getSelectedIndex(),mensaje.getText()));
+	        	resultado.setText(Base64.descifrarBase64(mensaje.getText()));
 	        	break;
 	        case 3:
-	            clave.setText("");
-	            vector.setText("");
 	        	resultado.setText(Constantes.ERROR_DESCIFRAR_HASH);
 	        	break;
 	        case 4:
@@ -339,12 +330,24 @@ public class CryptoMain extends JFrame{
     	algoritmo.removeAllItems();
     	switch(text){
 	        case "Hexadecimal": 
+	            clave.setText("");
+	            vector.setText("");
+	        	clave.setEditable(false);
+	        	vector.setEditable(false);	        	
 	        	algoritmo.addItem("org.bouncycastle.util.encoders.Hex");
 	        	break;
 	        case "Base64": 
+	            clave.setText("");
+	            vector.setText("");
+	        	clave.setEditable(false);
+	        	vector.setEditable(false);		        	
 	        	algoritmo.addItem("java.util.Base64");
 	        	break;
 	        case "Hash":
+	            clave.setText("");
+	            vector.setText("");
+	        	clave.setEditable(false);
+	        	vector.setEditable(false);		        	
 	        	algoritmo.addItem("java.security.MessageDigest MD5");
 	        	algoritmo.addItem("java.security.MessageDigest SHA1");
 	        	algoritmo.addItem("java.security.MessageDigest SHA-256");
@@ -352,7 +355,11 @@ public class CryptoMain extends JFrame{
 	        	algoritmo.addItem("org.bouncycastle.jcajce SHA3-256");
 	        	algoritmo.addItem("org.bouncycastle.jcajce SHA3-512");
 	        	break;
-	        case "Simetrico":
+	        case "Simetrico":	
+	            clave.setText("");
+	            vector.setText("");
+	        	clave.setEditable(true);
+	        	vector.setEditable(true);	        	
 	        	algoritmo.addItem("DES/CBC/PKCS5Padding");
 	        	algoritmo.addItem("DES/ECB/PKCS5Padding");
 	        	algoritmo.addItem("AES/CBC/PKCS7Padding BC");

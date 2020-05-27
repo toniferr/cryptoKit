@@ -39,8 +39,12 @@ public class HexCode {
      * @param tipo
      * @return string - cadena cifrada 
      */
-    public static String cifrar(String texto){    	
-		return new String(Hex.encode(texto.getBytes()));		
+    public static String cifrar(String texto){
+    	try {
+    		return new String(Hex.encode(texto.getBytes()));	
+    	} catch (Exception e) {
+    		return e.toString();
+    	}
     }
     
     /**
@@ -50,7 +54,11 @@ public class HexCode {
      * @return string - cadena cifrada
      */
     public static String descifrar(String texto){
-		return new String(Hex.decode(texto.getBytes()));
+		try {
+    		return new String(Hex.decode(texto.getBytes()));
+		} catch (Exception e) {
+			return e.toString();
+		}
     }
 
 }

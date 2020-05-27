@@ -11,14 +11,14 @@ public class Base64 {
 	  * @param texto
 	  * @return string - cadena cifrada Base64
 	  */
-	 public static String cifrarBase64(Integer index,String texto){
+	 public static String cifrarBase64(String texto){
 	 	if (!Validation.validarDatos(texto)){
 	 		return Constantes.DATOS_INCORRECTOS;
 	 	} else {
-	 		if (index == 0) {
+	 		try {
 	 			return new String(java.util.Base64.getEncoder().encode(texto.getBytes()));
-	 		} else {
-	 			return "Error de la aplicación al lanzar algoritmo";
+	 		} catch(Exception e) {
+	 			return e.toString();
 	 		}
 	 	}
 	 }
@@ -29,14 +29,14 @@ public class Base64 {
      * @param texto
      * @return string - cadena descifrada Base64
      */
-    public static String descifrarBase64(Integer index,String texto){
+    public static String descifrarBase64(String texto){
     	if (!Validation.validarDatos(texto)){
     		return Constantes.DATOS_INCORRECTOS;
     	}else{
-	    	if (index == 0 ) {
+	    	try {
 	        	return new String(java.util.Base64.getDecoder().decode(texto));
-	    	} else {
-	        	return "Error de la aplicación al lanzar algoritmo";
+	    	} catch (Exception e) {
+	        	return e.toString();
 	    	}
     	}
     }
