@@ -6,7 +6,7 @@ Java Development in Swing technology for encryption / decryption using distinct 
 
 Java version: 11
 
-Algorithms implemented:
+Implemented algorithms:
 
 - Hexadecimal
 - Base64
