@@ -20,7 +20,7 @@ External libraries:
 
 **Install & execute**
 
-Download and open the generated jar file "/jar/cryptoKit.jar"
+Download and open the generated jar in the folder "/target"
 
 ## Español
 
@@ -40,7 +40,7 @@ Librerias externas:
 
 **Instalación & ejecución**
 
-Descarga y abre el archivo jar generado en "/jar/cryptoKit.jar"
+Descarga y abre el archivo jar generado en el directorio "/target"
 
 --------------------------------------------------------------------------------------------------------------
 

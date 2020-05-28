@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: es.toni.crypto.hash.HashTest
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.135 s - in es.toni.crypto.hash.HashTest

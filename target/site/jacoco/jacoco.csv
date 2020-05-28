@@ -1,0 +1,17 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+cryptoKit,es.toni.crytpo.utils,Constantes,3,0,0,0,1,0,1,0,1,0
+cryptoKit,es.toni.crytpo.utils,Validation,3,8,0,2,1,1,1,2,1,1
+cryptoKit,es.toni.crytpo,CryptoMain.new ActionListener() {...},11,0,0,0,3,0,2,0,2,0
+cryptoKit,es.toni.crytpo,CryptoMain.new ActionListener() {...},11,0,0,0,3,0,2,0,2,0
+cryptoKit,es.toni.crytpo,CryptoMain.new ActionListener() {...},11,0,0,0,3,0,2,0,2,0
+cryptoKit,es.toni.crytpo,CryptoMain.new Runnable() {...},9,0,0,0,3,0,2,0,2,0
+cryptoKit,es.toni.crytpo,CryptoMain.new ItemListener() {...},11,0,0,0,3,0,2,0,2,0
+cryptoKit,es.toni.crytpo,CryptoMain.new ActionListener() {...},11,0,0,0,3,0,2,0,2,0
+cryptoKit,es.toni.crytpo,CryptoMain,879,0,21,0,233,0,25,0,9,0
+cryptoKit,es.toni.crytpo.symmetric,AlgSimetrico,87,0,20,0,23,0,19,0,3,0
+cryptoKit,es.toni.crytpo.symmetric,AlgoritmoBlowfish,165,0,0,0,35,0,5,0,5,0
+cryptoKit,es.toni.crytpo.symmetric,AlgoritmoAES,253,0,0,0,53,0,7,0,7,0
+cryptoKit,es.toni.crytpo.symmetric,AlgoritmoDES,153,0,0,0,35,0,5,0,5,0
+cryptoKit,es.toni.crytpo.hex,HexCode,15,26,2,2,7,6,3,4,1,4
+cryptoKit,es.toni.crytpo.hash,Hash,10,95,2,18,4,27,3,12,1,4
+cryptoKit,es.toni.crytpo.base64,Base64,15,21,2,2,7,4,3,2,1,2

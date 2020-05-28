@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CryptoMain.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">cryptoKit</a> &gt; <a href="index.source.html" class="el_package">es.toni.crytpo</a> &gt; <span class="el_source">CryptoMain.java</span></div><h1>CryptoMain.java</h1><pre class="source lang-java linenums">package es.toni.crytpo;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.LayoutStyle;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+
+import es.toni.crytpo.base64.Base64;
+import es.toni.crytpo.hash.Hash;
+import es.toni.crytpo.hex.HexCode;
+import es.toni.crytpo.symmetric.AlgSimetrico;
+import es.toni.crytpo.utils.Constantes;
+
+
+/**
+ * @author Toni Ferreiro
+ */
+public class CryptoMain extends JFrame{
+
+	private static final long serialVersionUID = 1L;
+                  
+    private JComboBox&lt;String&gt; algoritmo;
+    private JComboBox&lt;String&gt; cifrado;
+    private JTextField clave;
+    private JTextArea mensaje;
+    private JTextArea resultado;
+    private JTextField vector;
+
+<span class="nc" id="L43">    public CryptoMain() {</span>
+<span class="nc" id="L44">        initComponents();</span>
+<span class="nc" id="L45">    	setLocationRelativeTo(null);</span>
+<span class="nc" id="L46">    }</span>
+
+    private void initComponents() {    	
+
+<span class="nc" id="L50">        final JLabel algoritmoLabel = new JLabel();</span>
+<span class="nc" id="L51">        final JLabel cifradoLabel = new JLabel();</span>
+<span class="nc" id="L52">        final JLabel claveLabel = new JLabel();</span>
+<span class="nc" id="L53">        final JScrollPane scrollMensaje = new JScrollPane();</span>
+<span class="nc" id="L54">        final JScrollPane scrollResultado = new JScrollPane();</span>
+<span class="nc" id="L55">        final JSeparator separadorVerticalCentral = new JSeparator();</span>
+<span class="nc" id="L56">        final JButton limpiarButton = new JButton();</span>
+<span class="nc" id="L57">        final JLabel mensajeLabel = new JLabel();</span>
+<span class="nc" id="L58">        final JLabel resultadoLabel = new JLabel();</span>
+<span class="nc" id="L59">        final JButton salirButton = new JButton();</span>
+<span class="nc" id="L60">        final JButton cifrarButton = new JButton();</span>
+<span class="nc" id="L61">        final JButton descifrarButton = new JButton();</span>
+<span class="nc" id="L62">        final JLabel vectorLabel = new JLabel();</span>
+<span class="nc" id="L63">        final JLabel infoLabel = new JLabel();</span>
+
+<span class="nc" id="L65">        cifrado = new JComboBox&lt;&gt;();</span>
+<span class="nc" id="L66">        algoritmo = new JComboBox&lt;&gt;();</span>
+<span class="nc" id="L67">        clave = new JTextField();</span>
+<span class="nc" id="L68">        vector = new JTextField();</span>
+<span class="nc" id="L69">        mensaje = new JTextArea();</span>
+<span class="nc" id="L70">        resultado = new JTextArea();        </span>
+
+<span class="nc" id="L72">    	clave.setEditable(false);</span>
+<span class="nc" id="L73">    	vector.setEditable(false);</span>
+
+<span class="nc" id="L75">        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);</span>
+        
+<span class="nc" id="L77">        cifrarButton.setText(&quot;Cifrar&quot;);</span>
+<span class="nc" id="L78">        cifrarButton.addActionListener(new ActionListener() {</span>
+            public void actionPerformed(ActionEvent evt) {
+<span class="nc" id="L80">            	cifrarButtonActionPerformed(evt);</span>
+<span class="nc" id="L81">            }</span>
+        });
+
+<span class="nc" id="L84">        descifrarButton.setText(&quot;Descifrar&quot;);</span>
+<span class="nc" id="L85">        descifrarButton.addActionListener(new ActionListener() {</span>
+            public void actionPerformed(ActionEvent evt) {
+<span class="nc" id="L87">                descifrarButtonActionPerformed(evt);</span>
+<span class="nc" id="L88">            }</span>
+        });
+
+<span class="nc" id="L91">        limpiarButton.setText(&quot;Limpiar&quot;);</span>
+<span class="nc" id="L92">        limpiarButton.addActionListener(new ActionListener() {</span>
+            public void actionPerformed(ActionEvent evt) {
+<span class="nc" id="L94">                limpiarButtonActionPerformed(evt);</span>
+<span class="nc" id="L95">            }</span>
+        });
+<span class="nc" id="L97">        salirButton.setText(&quot;Salir&quot;);</span>
+<span class="nc" id="L98">        salirButton.addActionListener(new ActionListener() {</span>
+            public void actionPerformed(ActionEvent evt) {
+<span class="nc" id="L100">                salirButtonActionPerformed(evt);</span>
+<span class="nc" id="L101">            }</span>
+        });
+
+<span class="nc" id="L104">        cifradoLabel.setText(&quot;Cifrado&quot;);</span>
+        
+<span class="nc" id="L106">        cifrado.setModel(new DefaultComboBoxModel&lt;&gt;(new String[] { &quot;&quot;,&quot;Hexadecimal&quot;, &quot;Base64&quot;, &quot;Hash&quot;, &quot;Simetrico&quot;}));</span>
+<span class="nc" id="L107">        cifrado.addItemListener((ItemListener) new ItemListener(){</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc" id="L109">				changeComboAlgoritmo(e);</span>
+<span class="nc" id="L110">			}</span>
+        });
+
+<span class="nc" id="L113">        algoritmoLabel.setText(&quot;Algoritmo&quot;);</span>
+
+<span class="nc" id="L115">        claveLabel.setText(&quot;Clave/Semilla&quot;);</span>
+
+<span class="nc" id="L117">        vectorLabel.setText(&quot;Vector&quot;);</span>
+
+<span class="nc" id="L119">        mensajeLabel.setText(&quot;Mensaje&quot;);</span>
+
+<span class="nc" id="L121">        resultadoLabel.setText(&quot;Resultado&quot;);</span>
+
+<span class="nc" id="L123">        mensaje.setColumns(20);</span>
+<span class="nc" id="L124">        mensaje.setRows(5);</span>
+<span class="nc" id="L125">        scrollMensaje.setViewportView(mensaje);</span>
+
+<span class="nc" id="L127">        resultado.setColumns(20);</span>
+<span class="nc" id="L128">        resultado.setRows(5);</span>
+<span class="nc" id="L129">        scrollResultado.setViewportView(resultado);</span>
+
+<span class="nc" id="L131">        separadorVerticalCentral.setOrientation(SwingConstants.VERTICAL);</span>
+
+<span class="nc" id="L133">        infoLabel.setFont(new java.awt.Font(&quot;Tahoma&quot;, 0, 10)); // NOI18N</span>
+<span class="nc" id="L134">        infoLabel.setText(&quot;Provider externo: bcprov-jdk15on-165&quot;);</span>
+        
+<span class="nc" id="L136">        GroupLayout layout = new GroupLayout(getContentPane());</span>
+<span class="nc" id="L137">        getContentPane().setLayout(layout);</span>
+<span class="nc" id="L138">        layout.setHorizontalGroup(</span>
+<span class="nc" id="L139">            layout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L140">            .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()</span>
+<span class="nc" id="L141">                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L142">                    .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L143">                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)</span>
+<span class="nc" id="L144">                        .addComponent(cifrarButton)</span>
+<span class="nc" id="L145">                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED))</span>
+<span class="nc" id="L146">                    .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L147">                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L148">                            .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L149">                                .addGap(19, 19, 19)</span>
+<span class="nc" id="L150">                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)</span>
+<span class="nc" id="L151">                                    .addComponent(algoritmoLabel)</span>
+<span class="nc" id="L152">                                    .addComponent(cifradoLabel)</span>
+<span class="nc" id="L153">                                    .addComponent(claveLabel)</span>
+<span class="nc" id="L154">                                    .addComponent(vectorLabel))</span>
+<span class="nc" id="L155">                                .addGap(18, 18, 18)</span>
+<span class="nc" id="L156">                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)</span>
+<span class="nc" id="L157">                                    .addComponent(cifrado, 0, 223, Short.MAX_VALUE)</span>
+<span class="nc" id="L158">                                    .addComponent(algoritmo, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)</span>
+<span class="nc" id="L159">                                    .addComponent(clave, GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE)</span>
+<span class="nc" id="L160">                                    .addComponent(vector)))</span>
+<span class="nc" id="L161">                            .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()</span>
+<span class="nc" id="L162">                                .addGap(24, 24, 24)</span>
+<span class="nc" id="L163">                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L164">                                    .addComponent(mensajeLabel)</span>
+<span class="nc" id="L165">                                    .addComponent(scrollMensaje, GroupLayout.PREFERRED_SIZE, 281, GroupLayout.PREFERRED_SIZE))))</span>
+<span class="nc" id="L166">                        .addGap(10, 10, 10)))</span>
+<span class="nc" id="L167">                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)</span>
+<span class="nc" id="L168">                    .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L169">                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)</span>
+<span class="nc" id="L170">                            .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L171">                                .addComponent(limpiarButton)</span>
+<span class="nc" id="L172">                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)</span>
+<span class="nc" id="L173">                                .addComponent(salirButton))</span>
+<span class="nc" id="L174">                            .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L175">                                .addComponent(separadorVerticalCentral, GroupLayout.PREFERRED_SIZE, 34, GroupLayout.PREFERRED_SIZE)</span>
+<span class="nc" id="L176">                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)</span>
+<span class="nc" id="L177">                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L178">                                    .addComponent(resultadoLabel)</span>
+<span class="nc" id="L179">                                    .addComponent(scrollResultado, GroupLayout.PREFERRED_SIZE, 402, GroupLayout.PREFERRED_SIZE))))</span>
+<span class="nc" id="L180">                        .addGap(26, 26, 26))</span>
+<span class="nc" id="L181">                    .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L182">                        .addComponent(descifrarButton)</span>
+<span class="nc" id="L183">                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)</span>
+<span class="nc" id="L184">                        .addComponent(infoLabel)</span>
+<span class="nc" id="L185">                        .addContainerGap())))</span>
+        );
+<span class="nc" id="L187">        layout.setVerticalGroup(</span>
+<span class="nc" id="L188">            layout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L189">            .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L190">                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L191">                    .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L192">                        .addGap(19, 19, 19)</span>
+<span class="nc" id="L193">                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)</span>
+<span class="nc" id="L194">                            .addComponent(cifrarButton)</span>
+<span class="nc" id="L195">                            .addComponent(descifrarButton)))</span>
+<span class="nc" id="L196">                    .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L197">                        .addContainerGap()</span>
+<span class="nc" id="L198">                        .addComponent(infoLabel)))</span>
+<span class="nc" id="L199">                .addGap(2, 2, 2)</span>
+<span class="nc" id="L200">                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)</span>
+<span class="nc" id="L201">                    .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L202">                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L203">                            .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L204">                                .addGap(26, 26, 26)</span>
+<span class="nc" id="L205">                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)</span>
+<span class="nc" id="L206">                                    .addComponent(cifradoLabel)</span>
+<span class="nc" id="L207">                                    .addComponent(cifrado, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))</span>
+<span class="nc" id="L208">                            .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()</span>
+<span class="nc" id="L209">                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)</span>
+<span class="nc" id="L210">                                .addComponent(resultadoLabel)))</span>
+<span class="nc" id="L211">                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)</span>
+<span class="nc" id="L212">                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L213">                            .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L214">                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)</span>
+<span class="nc" id="L215">                                    .addComponent(algoritmoLabel)</span>
+<span class="nc" id="L216">                                    .addComponent(algoritmo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))</span>
+<span class="nc" id="L217">                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)</span>
+<span class="nc" id="L218">                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)</span>
+<span class="nc" id="L219">                                    .addComponent(claveLabel)</span>
+<span class="nc" id="L220">                                    .addComponent(clave, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))</span>
+<span class="nc" id="L221">                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)</span>
+<span class="nc" id="L222">                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)</span>
+<span class="nc" id="L223">                                    .addComponent(vectorLabel)</span>
+<span class="nc" id="L224">                                    .addComponent(vector, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))</span>
+<span class="nc" id="L225">                                .addGap(35, 35, 35)</span>
+<span class="nc" id="L226">                                .addComponent(mensajeLabel)</span>
+<span class="nc" id="L227">                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)</span>
+<span class="nc" id="L228">                                .addComponent(scrollMensaje, GroupLayout.PREFERRED_SIZE, 112, GroupLayout.PREFERRED_SIZE))</span>
+<span class="nc" id="L229">                            .addComponent(scrollResultado, GroupLayout.PREFERRED_SIZE, 249, GroupLayout.PREFERRED_SIZE)))</span>
+<span class="nc" id="L230">                    .addGroup(layout.createSequentialGroup()</span>
+<span class="nc" id="L231">                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)</span>
+<span class="nc" id="L232">                        .addComponent(separadorVerticalCentral, GroupLayout.PREFERRED_SIZE, 295, GroupLayout.PREFERRED_SIZE)))</span>
+<span class="nc" id="L233">                .addGap(18, 18, 18)</span>
+<span class="nc" id="L234">                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)</span>
+<span class="nc" id="L235">                    .addComponent(salirButton)</span>
+<span class="nc" id="L236">                    .addComponent(limpiarButton))</span>
+<span class="nc" id="L237">                .addContainerGap(16, Short.MAX_VALUE))</span>
+        );
+
+<span class="nc" id="L240">        pack();</span>
+<span class="nc" id="L241">    }// &lt;/editor-fold&gt;                             </span>
+
+    /**
+     * 
+     * @param evt
+     */
+    private void cifrarButtonActionPerformed(ActionEvent evt){                                               
+<span class="nc bnc" id="L248" title="All 6 branches missed.">        switch(cifrado.getSelectedIndex()){</span>
+	        case 0:
+<span class="nc" id="L250">	        	resultado.setText(Constantes.DATOS_INCORRECTOS);</span>
+<span class="nc" id="L251">	        	break;</span>
+	        case 1:			
+<span class="nc" id="L253">	        	resultado.setText(HexCode.cifrarStringToHex(mensaje.getText()));</span>
+<span class="nc" id="L254">	        	break;</span>
+	        case 2: 
+<span class="nc" id="L256">	        	resultado.setText(Base64.cifrarBase64(mensaje.getText()));</span>
+<span class="nc" id="L257">	        	break;</span>
+	        case 3:
+<span class="nc" id="L259">	        	resultado.setText(Hash.cifrarHash(algoritmo.getSelectedIndex(),mensaje.getText()) +&quot; (hexadecimal)&quot;);</span>
+<span class="nc" id="L260">	        	break;</span>
+	        case 4:
+<span class="nc" id="L262">	        	resultado.setText(AlgSimetrico.cifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()) +&quot; (hexadecimal)&quot;);</span>
+<span class="nc" id="L263">	        	break;</span>
+<span class="nc" id="L264">	        default: resultado.setText(Constantes.NO_APLICA);</span>
+        }
+<span class="nc" id="L266">    }                                              </span>
+
+    /**
+     * 
+     * @param evt
+     */
+    private void descifrarButtonActionPerformed(ActionEvent evt){                                                  
+<span class="nc bnc" id="L273" title="All 6 branches missed.">    	switch(cifrado.getSelectedIndex()){</span>
+	        case 0:
+<span class="nc" id="L275">	        	resultado.setText(Constantes.DATOS_INCORRECTOS);</span>
+<span class="nc" id="L276">	        	break;</span>
+	        case 1:	
+<span class="nc" id="L278">	        	resultado.setText(HexCode.descifrarHexToString(mensaje.getText()));</span>
+<span class="nc" id="L279">	        	break;</span>
+	        case 2: 
+<span class="nc" id="L281">	        	resultado.setText(Base64.descifrarBase64(mensaje.getText()));</span>
+<span class="nc" id="L282">	        	break;</span>
+	        case 3:
+<span class="nc" id="L284">	        	resultado.setText(Constantes.ERROR_DESCIFRAR_HASH);</span>
+<span class="nc" id="L285">	        	break;</span>
+	        case 4:
+<span class="nc" id="L287">	        	resultado.setText(AlgSimetrico.descifrarSimetrico(algoritmo.getSelectedIndex(),mensaje.getText(),clave.getText(),vector.getText()));</span>
+<span class="nc" id="L288">        	break;</span>
+<span class="nc" id="L289">	        default: resultado.setText(Constantes.NO_APLICA);</span>
+        }
+<span class="nc" id="L291">    }      </span>
+    
+    /**
+     * 
+     * @param evt
+     */
+    private void limpiarButtonActionPerformed(ActionEvent evt) { 
+<span class="nc" id="L298">        cifrado.setSelectedIndex(0);</span>
+<span class="nc" id="L299">        clave.setText(&quot;&quot;);</span>
+<span class="nc" id="L300">        vector.setText(&quot;&quot;);</span>
+<span class="nc" id="L301">        mensaje.setText(&quot;&quot;);</span>
+<span class="nc" id="L302">        resultado.setText(&quot;&quot;);</span>
+        
+<span class="nc" id="L304">    } </span>
+
+    /**
+     * 
+     * @param evt
+     */
+    private void salirButtonActionPerformed(ActionEvent evt) {                                            
+<span class="nc" id="L311">        this.dispose();</span>
+<span class="nc" id="L312">    }  </span>
+    
+    /**
+     * 
+     * @param evt
+     */
+    private void changeComboAlgoritmo(ItemEvent evt){
+<span class="nc bnc" id="L319" title="All 2 branches missed.">    	if (ItemEvent.DESELECTED == evt.getStateChange()){</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">    	} else if (ItemEvent.SELECTED == evt.getStateChange()){</span>
+<span class="nc" id="L321">    		anadirItemsComboAlgoritmo(evt.getItem().toString());</span>
+    	}
+<span class="nc" id="L323">    }</span>
+    
+    /**
+     * 
+     * @param text
+     */
+    private void anadirItemsComboAlgoritmo(String text){
+<span class="nc" id="L330">    	algoritmo.removeAllItems();</span>
+<span class="nc bnc" id="L331" title="All 5 branches missed.">    	switch(text){</span>
+	        case &quot;Hexadecimal&quot;: 
+<span class="nc" id="L333">	            clave.setText(&quot;&quot;);</span>
+<span class="nc" id="L334">	            vector.setText(&quot;&quot;);</span>
+<span class="nc" id="L335">	        	clave.setEditable(false);</span>
+<span class="nc" id="L336">	        	vector.setEditable(false);	        	</span>
+<span class="nc" id="L337">	        	algoritmo.addItem(&quot;org.bouncycastle.util.encoders.Hex&quot;);</span>
+<span class="nc" id="L338">	        	break;</span>
+	        case &quot;Base64&quot;: 
+<span class="nc" id="L340">	            clave.setText(&quot;&quot;);</span>
+<span class="nc" id="L341">	            vector.setText(&quot;&quot;);</span>
+<span class="nc" id="L342">	        	clave.setEditable(false);</span>
+<span class="nc" id="L343">	        	vector.setEditable(false);		        	</span>
+<span class="nc" id="L344">	        	algoritmo.addItem(&quot;java.util.Base64&quot;);</span>
+<span class="nc" id="L345">	        	break;</span>
+	        case &quot;Hash&quot;:
+<span class="nc" id="L347">	            clave.setText(&quot;&quot;);</span>
+<span class="nc" id="L348">	            vector.setText(&quot;&quot;);</span>
+<span class="nc" id="L349">	        	clave.setEditable(false);</span>
+<span class="nc" id="L350">	        	vector.setEditable(false);		        	</span>
+<span class="nc" id="L351">	        	algoritmo.addItem(&quot;java.security.MessageDigest MD5&quot;);</span>
+<span class="nc" id="L352">	        	algoritmo.addItem(&quot;java.security.MessageDigest SHA1&quot;);</span>
+<span class="nc" id="L353">	        	algoritmo.addItem(&quot;java.security.MessageDigest SHA-256&quot;);</span>
+<span class="nc" id="L354">	        	algoritmo.addItem(&quot;java.security.MessageDigest SHA-512&quot;);</span>
+<span class="nc" id="L355">	        	algoritmo.addItem(&quot;org.bouncycastle.jcajce SHA3-256&quot;);</span>
+<span class="nc" id="L356">	        	algoritmo.addItem(&quot;org.bouncycastle.jcajce SHA3-512&quot;);</span>
+<span class="nc" id="L357">	        	break;</span>
+	        case &quot;Simetrico&quot;:	
+<span class="nc" id="L359">	            clave.setText(&quot;&quot;);</span>
+<span class="nc" id="L360">	            vector.setText(&quot;&quot;);</span>
+<span class="nc" id="L361">	        	clave.setEditable(true);</span>
+<span class="nc" id="L362">	        	vector.setEditable(true);	        	</span>
+<span class="nc" id="L363">	        	algoritmo.addItem(&quot;DES/CBC/PKCS5Padding&quot;);</span>
+<span class="nc" id="L364">	        	algoritmo.addItem(&quot;DES/ECB/PKCS5Padding&quot;);</span>
+<span class="nc" id="L365">	        	algoritmo.addItem(&quot;AES/CBC/PKCS7Padding BC&quot;);</span>
+<span class="nc" id="L366">	        	algoritmo.addItem(&quot;AES/ECB/PKCS7Padding BC&quot;);</span>
+<span class="nc" id="L367">	        	algoritmo.addItem(&quot;AES/GCM/NoPadding BC&quot;);</span>
+<span class="nc" id="L368">	        	algoritmo.addItem(&quot;Blowfish/CBC/PKCS5Padding BC&quot;);</span>
+<span class="nc" id="L369">	        	algoritmo.addItem(&quot;Blowfish/ECB/PKCS5Padding BC&quot;);</span>
+<span class="nc" id="L370">	        	break;</span>
+        default: break;
+        }
+<span class="nc" id="L373">    }</span>
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        
+        /* Create and display the form */
+<span class="nc" id="L381">        java.awt.EventQueue.invokeLater(new Runnable() {</span>
+            public void run() {
+<span class="nc" id="L383">                new CryptoMain().setVisible(true);</span>
+<span class="nc" id="L384">            }</span>
+        });
+<span class="nc" id="L386">    }</span>
+    
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
