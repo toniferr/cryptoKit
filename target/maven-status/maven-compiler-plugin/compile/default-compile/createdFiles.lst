@@ -4,10 +4,13 @@ es\toni\crytpo\symmetric\AlgoritmoBlowfish.class
 es\toni\crytpo\utils\Validation.class
 es\toni\crytpo\CryptoMain$1.class
 es\toni\crytpo\CryptoMain.class
+es\toni\crypto\hex\HexTest.class
+es\toni\crypto\base64\Base64Test.class
 es\toni\crytpo\CryptoMain$4.class
 es\toni\crytpo\CryptoMain$5.class
 es\toni\crytpo\symmetric\AlgoritmoDES.class
 es\toni\crytpo\utils\Constantes.class
+es\toni\crypto\hash\HashTest.class
 es\toni\crytpo\CryptoMain$3.class
 es\toni\crytpo\symmetric\AlgSimetrico.class
 es\toni\crytpo\CryptoMain$6.class

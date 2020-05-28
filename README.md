@@ -17,7 +17,6 @@ Implemented algorithms:
 
 External libraries: 
 - bcprov-jdk15on-165
-- jaxb-api-2.3.1
 
 **Install & execute**
 
@@ -38,7 +37,6 @@ Algoritmos implementados:
 
 Librerias externas: 
 - bcprov-jdk15on-165
-- jaxb-api-2.3.1
 
 **Instalación & ejecución**
 
