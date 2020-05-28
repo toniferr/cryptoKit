@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/toniferr/cryptoKit.svg?style=svg)](https://circleci.com/gh/toniferr/cryptoKit) [![codecov](https://codecov.io/gh/toniferr/cryptoKit/branch/master/graph/badge.svg)](https://codecov.io/gh/toniferr/cryptoKit)
+[![Build Status](https://travis-ci.org/toniferr/cryptoKit.svg?branch=master)](https://travis-ci.org/toniferr/cryptoKit) [![CircleCI](https://circleci.com/gh/toniferr/cryptoKit.svg?style=svg)](https://circleci.com/gh/toniferr/cryptoKit) [![codecov](https://codecov.io/gh/toniferr/cryptoKit/branch/master/graph/badge.svg)](https://codecov.io/gh/toniferr/cryptoKit)
 
 # cryptoKit
 
@@ -33,7 +33,7 @@ Algoritmos implementados:
 
 - Hexadecimal
 - Base64
-- Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512 
+- Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512 [![Build Status](https://travis-ci.org/toniferr/cryptoKit.svg?branch=master)](https://travis-ci.org/toniferr/cryptoKit)
 - Simétrico -> DES (ECB,CBC), AES (ECB,CBC,GCM) y Blowfish (ECB, CBC)
 
 Librerias externas: 
