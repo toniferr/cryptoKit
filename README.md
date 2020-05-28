@@ -33,7 +33,7 @@ Algoritmos implementados:
 
 - Hexadecimal
 - Base64
-- Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512 [![Build Status](https://travis-ci.org/toniferr/cryptoKit.svg?branch=master)](https://travis-ci.org/toniferr/cryptoKit)
+- Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512
 - Simétrico -> DES (ECB,CBC), AES (ECB,CBC,GCM) y Blowfish (ECB, CBC)
 
 Librerias externas: 
