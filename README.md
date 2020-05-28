@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/toniferr/cryptoKit.svg?branch=master)](https://travis-ci.org/toniferr/cryptoKit) [![CircleCI](https://circleci.com/gh/toniferr/cryptoKit.svg?style=svg)](https://circleci.com/gh/toniferr/cryptoKit)
+[![Build Status](https://travis-ci.org/toniferr/cryptoKit.svg?branch=master)](https://travis-ci.org/toniferr/cryptoKit) [![CircleCI](https://circleci.com/gh/toniferr/cryptoKit.svg?style=svg)](https://circleci.com/gh/toniferr/cryptoKit) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 # cryptoKit
 
