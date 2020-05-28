@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/toniferr/cryptoKit.svg?branch=master)](https://travis-ci.org/toniferr/cryptoKit) [![CircleCI](https://circleci.com/gh/toniferr/cryptoKit.svg?style=svg)](https://circleci.com/gh/toniferr/cryptoKit) [![codecov](https://codecov.io/gh/toniferr/cryptoKit/branch/master/graph/badge.svg)](https://codecov.io/gh/toniferr/cryptoKit)
+[![Build Status](https://travis-ci.org/toniferr/cryptoKit.svg?branch=master)](https://travis-ci.org/toniferr/cryptoKit) [![CircleCI](https://circleci.com/gh/toniferr/cryptoKit.svg?style=svg)](https://circleci.com/gh/toniferr/cryptoKit)
 
 # cryptoKit
 
