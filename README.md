@@ -13,10 +13,11 @@ Implemented algorithms:
 - Hexadecimal
 - Base64
 - Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512
-- Symmetric -> DES (ECB,CBC), AES (ECB,CBC,GCM) and Blowfish (ECB, CBC)
+- Symmetric -> DES (ECB,CBC), AES (ECB,CBC,GCM) and Blowfish (ECB, CBC). (Last update : PBEWithHMACSHA512AndAES_256 with Jasypt).
 
 External libraries: 
-- bcprov-jdk15on-165
+- bcprov-jdk15on-1.70
+- org.jasypt-1.93
 
 ## Español
 
@@ -29,10 +30,10 @@ Algoritmos implementados:
 - Hexadecimal
 - Base64
 - Hash -> MD5, SHA1, SHA-256, SHA-512, SHA3-256, SHA3-512
-- SimÃ©trico -> DES (ECB,CBC), AES (ECB,CBC,GCM) y Blowfish (ECB, CBC)
+- Simétrico -> DES (ECB,CBC), AES (ECB,CBC,GCM) y Blowfish (ECB, CBC). (Última actualización: PBEWithHMACSHA512AndAES_256 con Jasypt)
 
 Librerias externas: 
-- bcprov-jdk15on-165
+- bcprov-jdk15on-170
 
 --------------------------------------------------------------------------------------------------------------
 
