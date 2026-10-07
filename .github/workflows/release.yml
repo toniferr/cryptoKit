@@ -1,0 +1,135 @@
+name: Release
+
+# Pushing a version tag (e.g. 2.0.0, without "v", like 1.0.0) builds the jar and portable packages for Windows,
+# macOS and Linux, and publishes a GitHub release with the matching section of CHANGELOG.md as its notes.
+on:
+  push:
+    tags: ["[0-9]+.[0-9]+.[0-9]+"]
+
+permissions:
+  contents: read
+
+jobs:
+  jar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: The tag must match the version in pom.xml
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(mvn -q -B help:evaluate -Dexpression=project.version -DforceStdout)
+          echo "pom.xml version: $version, tag: $TAG"
+          test "$version" = "$TAG"
+
+      - name: Build and test
+        run: mvn -B verify
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: jar
+          path: target/cryptoKit-${{ github.ref_name }}.jar
+
+  portable:
+    needs: jar
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x64
+          - os: windows-latest
+            platform: windows-x64
+          - os: macos-latest
+            platform: macos-arm64
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: jar
+          path: input
+
+      # An application image with its own trimmed Java runtime: unzip and run, no Java needed.
+      - name: jpackage
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          jpackage --type app-image --dest out --name cryptoKit --app-version "$TAG" \
+            --vendor "Toni Ferreiro" --description "Encrypt, decrypt, hash and sign" \
+            --input input --main-jar "cryptoKit-$TAG.jar" --main-class es.toni.crypto.CryptoKit \
+            --add-modules java.base,java.desktop,java.prefs,java.logging,java.naming,java.sql,jdk.crypto.ec,jdk.unsupported,jdk.localedata,jdk.charsets \
+            --jlink-options "--strip-debug --no-man-pages --no-header-files"
+
+      # The launcher is a GUI program on Windows (no console output), so test the bundled runtime with the bundled jar.
+      - name: Smoke test
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          java_bin=$(find out -path '*runtime*/bin/java' -o -path '*runtime*/bin/java.exe' | head -1)
+          jar=$(find out -name "cryptoKit-$TAG.jar" | head -1)
+          "$java_bin" -jar "$jar" sha256 hash abc | grep -q ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+          "$java_bin" -jar "$jar" keygen ed25519 | grep -q "BEGIN PRIVATE KEY"
+
+      - name: Zip
+        env:
+          NAME: cryptoKit-${{ github.ref_name }}-${{ matrix.platform }}.zip
+        run: |
+          cd out
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            pwsh -Command "Compress-Archive -Path cryptoKit -DestinationPath $NAME"
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            ditto -c -k --keepParent cryptoKit.app "$NAME"
+          else
+            zip -qr "$NAME" cryptoKit
+          fi
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: portable-${{ matrix.platform }}
+          path: out/*.zip
+
+  release:
+    needs: [jar, portable]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: Release notes from CHANGELOG.md
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          awk -v head="## [$TAG]" 'index($0, head) == 1 {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > notes.md
+          test -s notes.md
+          (cd assets && sha256sum * > SHA256SUMS)
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "cryptoKit $TAG" --notes-file notes.md assets/*
