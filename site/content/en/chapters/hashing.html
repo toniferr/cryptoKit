@@ -1,0 +1,124 @@
+<!--meta
+{
+  "slug": "hash-functions",
+  "title": "Hash functions",
+  "chain": "Hashes",
+  "headline": "Fingerprints of data",
+  "dek": "A hash function squeezes any input, a word or a whole disk, into a short fingerprint that changes completely if a single bit changes. Fingerprints protect downloads, passwords, signatures, Git and Bitcoin. Breaking them means finding two inputs with the same fingerprint, and the birthday paradox says that is far easier than it sounds.",
+  "era": "1979 – 2020",
+  "people": ["Ralph Merkle", "Ivan Damgård", "Ron Rivest", "Xiaoyun Wang", "Marc Stevens", "Joan Daemen", "Guido Bertoni", "Mihir Bellare", "Hugo Krawczyk", "Jean-Philippe Aumasson"],
+  "theorems": ["Birthday bound: collisions after $\\approx 2^{n/2}$ tries", "Merkle–Damgård: a collision-resistant compression function gives a collision-resistant hash", "Length extension", "Sponge security $\\approx 2^{c/2}$"]
+}
+-->
+
+<p>A <strong>cryptographic hash function</strong> $H$ maps an input of any length to an output of fixed length $n$, typically 256 bits, called the digest. There is no key. It must be fast to compute and, in a precise sense, impossible to steer: the digest of SHA-256 for “abc” is <code>ba7816bf…</code>, and for “abd” something with no visible relation to it. Hashes are the most used cryptographic primitive of all: they identify Git commits, the blocks of Bitcoin's chain, the files of software updates; they are inside every signature, every password database and every TLS handshake.</p>
+
+<h2 id="properties">Three kinds of resistance</h2>
+
+<div class="definition">
+  <span class="th-title">Definition <span class="th-name">(security of a hash function)</span></span>
+  <ul>
+    <li><strong>Preimage resistance</strong> (one-wayness): given a digest $y$, it is infeasible to find any $x$ with $H(x) = y$.</li>
+    <li><strong>Second-preimage resistance</strong>: given $x$, it is infeasible to find $x' \ne x$ with $H(x') = H(x)$.</li>
+    <li><strong>Collision resistance</strong>: it is infeasible to find any pair $x \ne x'$ with $H(x) = H(x')$.</li>
+  </ul>
+</div>
+
+<p>Collisions must exist, since infinitely many inputs share $2^n$ outputs; the requirement is that nobody can find one. For an ideal $n$-bit hash, finding a preimage takes about $2^n$ tries. Finding a collision takes far fewer.</p>
+
+<h2 id="avalanche">The avalanche</h2>
+
+<p>A good hash behaves like a random function: every output bit depends on every input bit, and changing the input flips each output bit with probability one half, independently of the others.</p>
+
+<figure class="demo" data-demo="hashing/avalanche">
+  <figcaption>SHA-256 in your browser (a complete implementation, checked against the official vectors). Each square is one of the 256 bits of the digest; outlined squares changed with your last edit. Change one letter, or add a space: about 128 bits flip, every time, with no pattern.</figcaption>
+</figure>
+
+<h2 id="birthday">The birthday paradox</h2>
+
+<p>In a room of 23 people, the probability that two share a birthday is more than one half. The paradox, which is not a paradox, is that we compare pairs, and 23 people make 253 pairs. The same arithmetic governs collisions.</p>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(birthday bound)</span></span>
+  <p>If $q$ values are drawn independently and uniformly from a set of $N$ elements, the probability that two of them coincide is</p>
+  $$1 - \prod_{i=1}^{q-1}\left(1 - \frac{i}{N}\right) \approx 1 - e^{-q(q-1)/2N}.$$
+  <p>It reaches one half at $q \approx 1.18\sqrt{N}$, and the expected number of draws until the first collision is $\sqrt{\pi N / 2}$. For an $n$-bit hash, $N = 2^n$: collisions appear after about $2^{n/2}$ hashes.</p>
+</div>
+
+<details class="proof">
+  <summary>Proof of the approximation</summary>
+  <div>
+    <p>The $i$-th draw avoids the $i - 1$ earlier ones with probability $1 - (i-1)/N$, so no collision happens with probability $\prod_{i=1}^{q-1}(1 - i/N)$. Using $1 - x \le e^{-x}$, this is at most $\exp(-\sum_i i/N) = e^{-q(q-1)/2N}$, and for $q \ll N$ the approximation is tight. Setting it to $1/2$ gives $q^2 \approx 2N \ln 2$, that is $q \approx 1.18\sqrt N$.</p>
+  </div>
+</details>
+
+<p>So a 128-bit hash offers only 64 bits of collision resistance, within reach of a large computation; that is why modern hashes have at least 256 bits. The same bound limits 64-bit block ciphers (<a href="@ch:block#des">Sweet32</a>) and random nonces.</p>
+
+<figure class="demo" data-demo="hashing/birthday">
+  <figcaption>A real birthday attack. The figure hashes “cryptoKit #0”, “cryptoKit #1”… with SHA-256, keeps only the first k bits, and stops at the first two messages whose truncated digests coincide. With 24 bits that takes a few thousand messages, not sixteen million; each extra 4 bits multiplies the work by four, not sixteen. The curve is the theoretical probability; the marker shows where your search stopped.</figcaption>
+</figure>
+
+<h2 id="merkle-damgard">Merkle–Damgård</h2>
+
+<p>How do you hash an input of any length with a function of fixed size? Ralph Merkle (in his 1979 thesis) and Ivan Damgård (1989) independently found the construction behind MD5, SHA-1 and SHA-2. Take a <strong>compression function</strong> $f$ that maps a chaining value and a message block to a new chaining value. Pad the message (with its length at the end), cut it into blocks $m_1, \dots, m_\ell$, and iterate:</p>
+
+$$h_0 = \mathit{IV}, \qquad h_i = f(h_{i-1}, m_i), \qquad H(m) = h_\ell.$$
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Merkle, Damgård)</span></span>
+  <p>If the compression function $f$ is collision resistant, so is the iterated hash $H$ (with length padding).</p>
+</div>
+
+<details class="proof">
+  <summary>Proof</summary>
+  <div>
+    <p>Suppose $H(m) = H(m')$ with $m \ne m'$. If their lengths differ, the last blocks differ (they encode the lengths), and $f(h_{\ell-1}, m_\ell) = f(h'_{\ell'-1}, m'_{\ell'})$ is already a collision of $f$. Otherwise walk back from the end: at the first step $i$ (from the end) where $(h_{i-1}, m_i) \ne (h'_{i-1}, m'_i)$ but $f$ of both is equal, we have a collision of $f$. Such a step exists because the inputs differ somewhere.</p>
+  </div>
+</details>
+
+<p>The construction has a quirk: $H(m)$ is the internal state after processing $m$, so anyone who knows $H(m)$ and the length of $m$, but not $m$ itself, can compute $H(m \,\|\, \mathit{pad} \,\|\, x)$ for any $x$. This <strong>length-extension attack</strong> breaks the naive authentication tag $H(k \,\|\, m)$, as Flickr's API learned in 2009, and is the reason for HMAC.</p>
+
+<h2 id="md5-sha1">The fall of MD5 and SHA-1</h2>
+
+<p>Ron Rivest designed <strong>MD5</strong> in 1992; the NSA designed <strong>SHA-1</strong> (160 bits) in 1995. In August 2004 the Chinese cryptographer Xiaoyun Wang and her team presented collisions for MD5 and several related hashes, computed in hours; a year later they showed that SHA-1 was much weaker than its 80-bit birthday bound. The consequences took years to play out:</p>
+
+<ul>
+  <li>2008: Marc Stevens, Alexander Sotirov and colleagues used an MD5 collision to create a rogue certificate authority trusted by every browser.</li>
+  <li>2012: the <strong>Flame</strong> malware, attributed to state actors, forged a Microsoft code-signing certificate with a new MD5 collision attack and spread through Windows Update.</li>
+  <li>2017: Google and CWI Amsterdam announced <strong>SHAttered</strong>, two different PDF files with the same SHA-1, after $2^{63.1}$ SHA-1 computations (about 6,500 CPU-years and 110 GPU-years).</li>
+  <li>2020: Gaëtan Leurent and Thomas Peyrin's “SHA-1 is a Shambles” produced a chosen-prefix collision for about \$45,000 of GPU time, enough to impersonate PGP keys.</li>
+</ul>
+
+<p>Git, which identified everything by SHA-1, added collision detection in 2017 and supports SHA-256 repositories since 2020. The desktop app keeps MD5 and SHA-1 for checking old checksums, marked as broken.</p>
+
+<h2 id="sha3">SHA-2, SHA-3 and BLAKE</h2>
+
+<p><strong>SHA-2</strong> (2001: SHA-224, SHA-256, SHA-384, SHA-512) is also Merkle–Damgård, with a much stronger compression function, and remains unbroken. But after Wang's attacks NIST wanted a backup built on different principles, and in 2007 opened another public competition. Sixty-four candidates were submitted; in 2012 NIST chose <strong>Keccak</strong>, by Guido Bertoni, Joan Daemen (co-designer of AES), Michaël Peeters and Gilles Van Assche, published as SHA-3 in FIPS 202 (2015).</p>
+
+<p>Keccak is a <strong>sponge</strong>. Its state of 1,600 bits is split into a <em>rate</em> of $r$ bits and a <em>capacity</em> of $c$ bits. In the absorbing phase each $r$-bit block of the message is XORed into the rate part and the whole state is permuted by a fixed permutation $f$; in the squeezing phase the output is read $r$ bits at a time from the rate part, permuting in between. The capacity is never touched directly by the input or the output.</p>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(sponge indifferentiability, Bertoni et al. 2008)</span></span>
+  <p>If $f$ is a random permutation, the sponge cannot be distinguished from a random oracle with fewer than about $2^{c/2}$ calls. SHA3-256 uses $c = 512$, so its generic security is $2^{256}$ against everything except the birthday bound of its 256-bit output, $2^{128}$.</p>
+</div>
+
+<p>Because the capacity is hidden, a sponge has no length extension. Keccak's structure also gives extendable-output functions (SHAKE128, SHAKE256), used inside the <a href="@ch:postquantum">post-quantum</a> standards. <strong>BLAKE2</strong> (2012), derived from the SHA-3 finalist BLAKE by Jean-Philippe Aumasson and colleagues, is faster than MD5 in software and as secure as SHA-3; <strong>BLAKE3</strong> (2020) organises the computation as a Merkle tree, so it hashes in parallel on every core.</p>
+
+<h2 id="hmac">HMAC: a hash with a key</h2>
+
+<p>A hash proves nothing about who made a message: anyone can recompute it. A <strong>message authentication code</strong> mixes in a secret key, so only those who know the key can produce or check the tag. Mihir Bellare, Ran Canetti and Hugo Krawczyk designed <strong>HMAC</strong> in 1996 to be safe with Merkle–Damgård hashes:</p>
+
+$$\mathrm{HMAC}_k(m) = H\big((k \oplus \mathit{opad}) \,\|\, H((k \oplus \mathit{ipad}) \,\|\, m)\big),$$
+
+<p>with two fixed constants $\mathit{ipad} = \texttt{0x36}\dots$ and $\mathit{opad} = \texttt{0x5c}\dots$. The outer hash hides the inner state, which defeats length extension, and the construction is provably a pseudorandom function if the compression function is. HMAC authenticates TLS records, JSON Web Tokens (HS256), AWS API requests and one-time passwords (TOTP). Verification must compare tags in constant time, or the time taken reveals how many bytes matched; the desktop app does.</p>
+
+<section class="references">
+  <h2 id="references">Further reading</h2>
+  <ol>
+    <li>Ralph Merkle, <em>Secrecy, Authentication and Public Key Systems</em>, PhD thesis, Stanford (1979); Ivan Damgård, “A Design Principle for Hash Functions”, CRYPTO 1989.</li>
+    <li>Xiaoyun Wang and Hongbo Yu, “How to Break MD5 and Other Hash Functions”, EUROCRYPT 2005.</li>
+    <li>Marc Stevens et al., “The first collision for full SHA-1”, CRYPTO 2017 (shattered.io).</li>
+    <li>Guido Bertoni, Joan Daemen, Michaël Peeters, Gilles Van Assche, “On the Indifferentiability of the Sponge Construction”, EUROCRYPT 2008.</li>
+    <li>Mihir Bellare, Ran Canetti, Hugo Krawczyk, “Keying Hash Functions for Message Authentication”, CRYPTO 1996.</li>
+  </ol>
+</section>

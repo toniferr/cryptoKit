@@ -1,0 +1,126 @@
+<!--meta
+{
+  "slug": "curvas-elipticas",
+  "title": "Curvas elípticas",
+  "chain": "ECC",
+  "headline": "La aritmética de las curvas: ECDH, ECDSA, Ed25519",
+  "dek": "Los puntos de una curva cúbica se pueden sumar con una regla: se traza la recta, se busca el tercer punto y se refleja. Sobre un cuerpo finito esta geometría se convierte en un grupo en el que los logaritmos son aún más difíciles que en los números de RSA, así que una clave de 256 bits hace el trabajo de una de 3.072. Es la criptografía que llevan dentro hoy todos los móviles, las passkeys y las conexiones TLS.",
+  "era": "1985 – 2013",
+  "people": ["Neal Koblitz", "Victor Miller", "Scott Vanstone", "Helmut Hasse", "John Pollard", "Daniel J. Bernstein", "Tanja Lange"],
+  "theorems": ["La ley de la cuerda y la tangente hace de $E$ un grupo abeliano", "Hasse: $|\\#E(\\mathbb{F}_p) - (p+1)| \\le 2\\sqrt{p}$", "Rho de Pollard: $\\approx \\sqrt{n}$ pasos", "Repetir un nonce de ECDSA revela la clave privada"]
+}
+-->
+
+<p>Diffie–Hellman y RSA necesitan números de miles de bits, porque hay algoritmos subexponenciales (la criba del cuerpo de números y sus parientes para el logaritmo discreto) que atacan la estructura multiplicativa de los enteros. En 1985 Neal Koblitz y Victor Miller propusieron, por separado, hacer la misma criptografía en otro grupo en el que no se conocía ningún atajo así: los puntos de una <strong>curva elíptica</strong> sobre un cuerpo finito. Cuarenta años después sigue sin conocerse, y la criptografía de curva elíptica (ECC) ha sustituido a RSA casi en todas partes.</p>
+
+<h2 id="group-law">Sumar puntos con una regla</h2>
+
+<p>Una curva elíptica, en la forma que usan los criptógrafos, es el conjunto de soluciones de</p>
+
+$$E : y^2 = x^3 + ax + b, \qquad 4a^3 + 27b^2 \ne 0,$$
+
+<p>junto con un punto extra $\mathcal{O}$, «en el infinito». La condición descarta las cúspides y los autocruces. La curva es simétrica respecto al eje $x$. Sus puntos se pueden sumar: se traza la recta que pasa por $P$ y $Q$; corta a la curva exactamente en un punto más, $R'$; su reflejo respecto al eje $x$ es $P + Q$. Para duplicar un punto se usa la tangente. Una recta vertical corta la curva en el infinito, así que $P + (-P) = \mathcal{O}$, donde $-P$ es el reflejo de $P$.</p>
+
+<figure class="demo" data-demo="curves/real">
+  <figcaption>La ley de la cuerda y la tangente sobre los números reales. Cambia la curva con $a$ y $b$ y mueve $P$ y $Q$ por ella. La recta que los une corta la curva en un tercer punto, $-(P+Q)$; su reflejo es $P + Q$. Cuando $P = Q$, la recta es la tangente. Con $a = -2$ y $b$ pequeño, la curva se parte en dos trozos, y la ley sigue funcionando.</figcaption>
+</figure>
+
+<p>En coordenadas, para $P = (x_1, y_1)$ y $Q = (x_2, y_2)$ con $P \ne -Q$, sea $\lambda$ la pendiente de la recta, $\lambda = (y_2 - y_1)/(x_2 - x_1)$, o $\lambda = (3x_1^2 + a)/(2y_1)$ para la tangente. Entonces</p>
+
+$$x_3 = \lambda^2 - x_1 - x_2, \qquad y_3 = \lambda(x_1 - x_3) - y_1.$$
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(la ley de grupo)</span></span>
+  <p>Con esta suma y $\mathcal{O}$ como elemento neutro, los puntos de $E$ forman un <strong>grupo abeliano</strong>. Las mismas fórmulas, calculadas en cualquier cuerpo $K$, hacen de $E(K)$, los puntos con coordenadas en $K$, un grupo.</p>
+</div>
+
+<details class="proof">
+  <summary>Sobre la demostración</summary>
+  <div>
+    <p>La conmutatividad es clara (la recta que pasa por $P$ y $Q$ es la que pasa por $Q$ y $P$), el neutro y los opuestos vienen de las rectas verticales, y el cierre de que una recta corta a una cúbica en tres puntos contados con multiplicidad. La asociatividad es lo difícil: se puede comprobar por fuerza bruta algebraica con las fórmulas, demostrar con elegancia con el teorema de Cayley–Bacharach sobre cúbicas que pasan por ocho puntos comunes, o mediante el teorema de Riemann–Roch, que identifica $E$ con su propio grupo de Picard.</p>
+  </div>
+</details>
+
+<h2 id="finite">Curvas sobre un cuerpo finito</h2>
+
+<p>La criptografía necesita aritmética exacta y finita, así que las coordenadas viven en $\mathbb{F}_p$, los enteros módulo un primo $p$. La «curva» se convierte en una nube de puntos sin forma visible, pero las fórmulas, y el grupo, son los mismos.</p>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(Hasse, 1933)</span></span>
+  <p>El número de puntos de $E$ sobre $\mathbb{F}_p$ (contando $\mathcal{O}$) cumple $|\#E(\mathbb{F}_p) - (p + 1)| \le 2\sqrt{p}$.</p>
+</div>
+
+<p>Así que una curva sobre un cuerpo primo de 256 bits tiene unos $2^{256}$ puntos; el algoritmo de Schoof (1985) los cuenta exactamente, y se eligen curvas cuyo número de puntos es un primo grande (o un múltiplo pequeño de uno), para que el grupo sea cíclico y no tenga subgrupos pequeños en los que esconderse.</p>
+
+<figure class="demo" data-demo="curves/finite">
+  <figcaption>La curva $y^2 = x^3 + 2x + 3$ sobre $\mathbb{F}_{97}$: todos sus puntos y los múltiplos $G, 2G, 3G, \dots$ de un generador $G$. Pulsa reproducir: los múltiplos saltan por la cuadrícula sin ningún patrón que se pueda seguir hacia atrás. Conociendo solo el punto final, recuperar $k$ es el problema del logaritmo discreto en curvas elípticas. Aquí un ordenador lo encuentra al instante probando todos los $k$; con números de 256 bits, ningún ordenador puede.</figcaption>
+</figure>
+
+<h2 id="ecdlp">El logaritmo discreto en una curva</h2>
+
+<p>Multiplicar un punto por un escalar, $kP = P + P + \dots + P$, es rápido con duplicar y sumar (la versión aditiva de elevar al cuadrado y multiplicar). Deshacerlo es el <strong>problema del logaritmo discreto en curvas elípticas</strong> (ECDLP): dados $P$ y $Q = kP$, encontrar $k$.</p>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(algoritmos genéricos, Pollard 1978; Shoup 1997)</span></span>
+  <p>En un grupo cíclico de orden primo $n$, el algoritmo rho de Pollard encuentra logaritmos discretos en unas $\sqrt{\pi n / 2}$ operaciones de grupo y memoria constante. Recíprocamente, cualquier algoritmo que use el grupo solo a través de sus operaciones (un algoritmo <em>genérico</em>) necesita unas $\sqrt{n}$.</p>
+</div>
+
+<p>El rho de Pollard es otra vez la paradoja del cumpleaños: un paseo pseudoaleatorio por el grupo acaba repitiendo un punto, y una repetición revela $k$. Para las buenas curvas elípticas no se conoce nada mejor que estos ataques genéricos. Así que la seguridad crece con la mitad del tamaño en bits del orden del grupo, y las claves son cortas:</p>
+
+<div class="compare-wrap"><table class="theory-table">
+  <thead><tr><th>Seguridad</th><th>Simétrica</th><th>RSA / DH en cuerpo finito</th><th>Curva elíptica</th></tr></thead>
+  <tbody>
+    <tr><td>112 bits</td><td>3DES</td><td>2.048 bits</td><td>224 bits</td></tr>
+    <tr><td>128 bits</td><td>AES-128</td><td>3.072 bits</td><td>256 bits</td></tr>
+    <tr><td>192 bits</td><td>AES-192</td><td>7.680 bits</td><td>384 bits</td></tr>
+    <tr><td>256 bits</td><td>AES-256</td><td>15.360 bits</td><td>512 bits</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="ecdh">ECDH y X25519</h2>
+
+<p>El Diffie–Hellman de curva elíptica es el protocolo del <a href="@ch:publickey#dh">capítulo 08</a> con el grupo nuevo: Alicia envía $aG$, Bob envía $bG$ y los dos calculan $abG$. En 2006 Daniel J. Bernstein publicó <strong>Curve25519</strong>, la curva $y^2 = x^3 + 486662x^2 + x$ sobre el primo $2^{255} - 19$, diseñada para que la implementación rápida y sencilla sea también la segura: cualquier cadena de 32 bytes es una clave pública válida, el cálculo (la escalera de Montgomery) es de tiempo constante y no hay casos especiales que olvidar. Su acuerdo de claves, <strong>X25519</strong>, es hoy el predeterminado de TLS 1.3, SSH, Signal y WireGuard. «X25519 + AES-GCM», en la aplicación de escritorio, genera un par de claves efímero para cada mensaje, acuerda un secreto con la clave pública del destinatario y cifra con AES-GCM: el patrón ECIES.</p>
+
+<h2 id="ecdsa">ECDSA y el nonce</h2>
+
+<p>El <strong>algoritmo de firma digital de curva elíptica</strong>, propuesto por Scott Vanstone en 1992 y estandarizado por ANSI (1999) y el NIST (2000), firma el hash $h$ de un mensaje con la clave privada $d$ (clave pública $Q = dG$) en una curva cuyo punto base $G$ tiene orden primo $n$:</p>
+
+<ol>
+  <li>elegir un nonce aleatorio $k \in [1, n-1]$ y tomar $r = (kG)_x \bmod n$;</li>
+  <li>tomar $s = k^{-1}(h + rd) \bmod n$; la firma es $(r, s)$.</li>
+</ol>
+
+<p>El verificador calcula $u_1 = h s^{-1}$, $u_2 = r s^{-1}$ y acepta si $(u_1 G + u_2 Q)_x \equiv r$. ECDSA sobre la curva P-256 del NIST firma la mayoría de los certificados TLS, las passkeys y las tarjetas bancarias. Su punto débil es el nonce.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposición <span class="th-name">(un nonce repetido filtra la clave)</span></span>
+  <p>Si se firman dos mensajes con hashes $h_1 \ne h_2$ con el mismo nonce $k$ (se nota porque $r$ es el mismo), entonces</p>
+  $$k = \frac{h_1 - h_2}{s_1 - s_2} \bmod n, \qquad d = \frac{s_1 k - h_1}{r} \bmod n.$$
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>$s_1 k = h_1 + rd$ y $s_2 k = h_2 + rd$. Restando, $(s_1 - s_2)k = h_1 - h_2$, que da $k$; después la primera ecuación da $d$. Incluso unos pocos bits sesgados de $k$ en muchas firmas bastan para recuperar $d$ con técnicas de retículos.</p>
+  </div>
+</details>
+
+<p>En 2010 el grupo fail0verflow mostró que Sony firmaba el software de la PlayStation 3 con el <em>mismo</em> $k$ siempre, recuperó la clave privada de Sony y pudo firmar cualquier cosa. En 2013 un fallo en el generador de números aleatorios de Android hizo que los monederos de Bitcoin repitieran nonces, y les robaron las monedas. La solución es no sacar nunca $k$ al azar: derivarlo de la clave y del mensaje (RFC 6979, 2013).</p>
+
+<h2 id="eddsa">Ed25519</h2>
+
+<p>Bernstein, Niels Duif, Tanja Lange, Peter Schwabe y Bo-Yin Yang diseñaron <strong>Ed25519</strong> (2011) sobre una versión en forma de Edwards de Curve25519, con fórmulas de suma completas (sin casos excepcionales) y un nonce derivado de forma determinista de un hash de la clave privada y del mensaje. Es rápido, sus claves ocupan 32 bytes y sus firmas 64, y no hay un nonce aleatorio que pueda salir mal. Lo usan SSH, Signal, Tor, Git y la firma de módulos del núcleo de Linux; lo estandarizan la RFC 8032 (2017) y FIPS 186-5 (2023).</p>
+
+<h2 id="trust">En qué curvas confiar</h2>
+
+<p>Las curvas P-256 y P-384 del NIST se generaron en 1999 a partir de semillas que nunca se explicaron. En 2013 los documentos de Snowden confirmaron que la NSA había puesto una puerta trasera en <strong>Dual_EC_DRBG</strong>, un generador de números aleatorios de curva elíptica estandarizado por el NIST en 2006: quien conociera la relación secreta entre sus dos puntos podía predecir su salida. No se ha encontrado ninguna debilidad en la propia P-256, pero el episodio convirtió los parámetros «rígidos» y explicables, como los de Curve25519, en un requisito de diseño (el proyecto SafeCurves de Bernstein y Lange). La aplicación de escritorio ofrece las dos familias: ECDSA P-256 por compatibilidad, Ed25519 y X25519 como primeras opciones. Todas ellas, igual que RSA, caen ante el <a href="@ch:postquantum">algoritmo de Shor</a>.</p>
+
+<section class="references">
+  <h2 id="references">Para saber más</h2>
+  <ol>
+    <li>Neal Koblitz, «Elliptic Curve Cryptosystems», <em>Mathematics of Computation</em> 48, 1987; Victor Miller, «Use of Elliptic Curves in Cryptography», CRYPTO 1985.</li>
+    <li>Joseph Silverman y John Tate, <em>Rational Points on Elliptic Curves</em> (1992; 2.ª ed. 2015).</li>
+    <li>Daniel J. Bernstein, «Curve25519: new Diffie-Hellman speed records», PKC 2006; Bernstein et al., «High-speed high-security signatures», CHES 2011.</li>
+    <li>fail0verflow, «Console Hacking 2010: PS3 Epic Fail», 27.º Chaos Communication Congress.</li>
+  </ol>
+</section>

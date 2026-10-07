@@ -1,0 +1,122 @@
+<!--meta
+{
+  "slug": "enigma",
+  "title": "Enigma",
+  "chain": "Enigma",
+  "headline": "La máquina que perdió una guerra",
+  "dek": "Un cifrado electromecánico con 159 trillones de configuraciones, usado por todos los ejércitos alemanes, roto primero por tres matemáticos polacos con la teoría de permutaciones y después, a escala industrial, en Bletchley Park. Su historia enseña que la parte más débil de un cifrado suele ser la forma de usarlo.",
+  "era": "1918 – 1945",
+  "people": ["Arthur Scherbius", "Marian Rejewski", "Jerzy Różycki", "Henryk Zygalski", "Gustave Bertrand", "Alan Turing", "Gordon Welchman", "Joan Clarke"],
+  "theorems": ["Enigma es una involución sin puntos fijos", "Las permutaciones conjugadas tienen la misma estructura de ciclos", "Espacio de claves $\\approx 1{,}59 \\times 10^{20}$"]
+}
+-->
+
+<p>Tras la Primera Guerra Mundial, los cifradores eran el cuello de botella de todos los ejércitos: cifrar a mano era lento y propenso a errores, y los cifrados lo bastante sencillos para usarlos bajo el fuego se podían romper. Varios inventores tuvieron la misma idea a la vez: cablear la sustitución dentro de un disco giratorio y dejar que la máquina cambiara de sustitución tras cada letra. Edward Hebern en Estados Unidos, Hugo Koch en los Países Bajos, Arvid Damm en Suecia y Arthur Scherbius en Alemania, que patentó su máquina en 1918 y la vendió con el nombre de <strong>Enigma</strong> a partir de 1923. La marina alemana la adoptó en 1926, el ejército de tierra en 1928 y la aviación después; en 1945 había decenas de miles en servicio.</p>
+
+<h2 id="machine">Cómo funciona Enigma</h2>
+
+<p>Al pulsar una tecla se cierra un circuito eléctrico que termina en una de 26 lámparas. Por el camino, la corriente atraviesa:</p>
+
+<ol>
+  <li>el <strong>clavijero</strong> (<em>Steckerbrett</em>), donde unos cables intercambian parejas de letras (diez parejas, por reglamento);</li>
+  <li>tres <strong>rotores</strong>, elegidos entre cinco y colocados en cualquier orden; cada rotor es un cableado fijo y revuelto de 26 contactos de una cara a 26 de la otra, y su <strong>anillo</strong> desplaza el cableado respecto a las letras del borde;</li>
+  <li>el <strong>reflector</strong> (<em>Umkehrwalze</em>), que conecta las letras por parejas y devuelve la corriente a través de los tres rotores por otro camino;</li>
+  <li>otra vez el clavijero, y una lámpara.</li>
+</ol>
+
+<p>Antes de que pase la corriente, el rotor de la derecha avanza un paso. Cuando pasa por su muesca arrastra también al rotor central; cuando el central llega a su propia muesca, arrastra al de la izquierda <em>y a sí mismo</em> en la siguiente pulsación: el famoso <strong>doble paso</strong>. Como los rotores se mueven, la misma letra se cifra de forma distinta cada vez, y la sustitución solo se repite tras $26 \times 25 \times 26 = 16\,900$ letras.</p>
+
+<figure class="demo" data-demo="enigma/machine">
+  <figcaption>Una Enigma I que funciona, con los mismos rotores, reflectores, muescas y doble paso que la de la Wehrmacht (y que la aplicación de escritorio). Escribe con el teclado o pulsa las teclas; gira los rotores con las flechas para fijar la posición inicial. El esquema dibuja la corriente de la última tecla: de ida por el clavijero y los rotores (de derecha a izquierda), rebotada en el reflector, y de vuelta por otro camino. Para descifrar, vuelve a la misma posición inicial y teclea el texto cifrado.</figcaption>
+</figure>
+
+<h2 id="involution">Un retrato matemático</h2>
+
+<p>Cada pulsación aplica una permutación de las 26 letras. Llamemos $P$ al clavijero, $R_1, R_2, R_3$ a los tres rotores en su posición actual (derecha, centro, izquierda) y $U$ al reflector. La corriente pasa por $P$, $R_1$, $R_2$, $R_3$, $U$ y vuelve, así que la permutación es</p>
+
+$$E = P^{-1} R_1^{-1} R_2^{-1} R_3^{-1}\, U\, R_3 R_2 R_1 P.$$
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(la simetría de Enigma y su defecto)</span></span>
+  <p>En cada posición, $E$ es una <strong>involución</strong> ($E^2 = \mathrm{id}$) <strong>sin puntos fijos</strong> ($E(x) \neq x$ para toda letra $x$). En particular, cifrar y descifrar son la misma operación, y ninguna letra se cifra nunca en sí misma.</p>
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>Sea $S = R_3 R_2 R_1 P$, de modo que $E = S^{-1} U S$. El reflector empareja letras, así que $U^2 = \mathrm{id}$ y $U(y) \neq y$ para toda $y$. Entonces $E^2 = S^{-1} U S S^{-1} U S = S^{-1} U^2 S = \mathrm{id}$. Y si $E(x) = x$, entonces $U(S(x)) = S(x)$, un punto fijo de $U$, que no existe.</p>
+  </div>
+</details>
+
+<p>La simetría era una comodidad: la misma máquina, con la misma configuración, cifraba y descifraba. La ausencia de puntos fijos fue un regalo para el enemigo, como muestra el ataque del crib más abajo.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposición <span class="th-name">(el espacio de claves de la Enigma del ejército)</span></span>
+  <p>Con tres rotores elegidos entre cinco, 26 posiciones iniciales cada uno y diez cables en el clavijero, el número de claves diarias es</p>
+  $$\underbrace{5 \cdot 4 \cdot 3}_{\text{orden de rotores}} \times \underbrace{26^3}_{\text{posiciones}} \times \underbrace{\frac{26!}{6!\; 10!\; 2^{10}}}_{\text{clavijero}} = 60 \times 17\,576 \times 150\,738\,274\,937\,250 \approx 1{,}59 \times 10^{20} \approx 2^{67}.$$
+</div>
+
+<details class="proof">
+  <summary>Contar el clavijero</summary>
+  <div>
+    <p>Hay que elegir qué 20 letras se conectan y cómo se emparejan, dejando 6 sueltas. Pongamos las 26 letras en cualquier orden ($26!$ formas), conectemos las 20 primeras por parejas consecutivas y dejemos sueltas las 6 últimas. Cada cableado se cuenta $6!$ veces (orden de las letras sueltas) $\times\, 10!$ (orden de las parejas) $\times\, 2^{10}$ (orden dentro de cada pareja).</p>
+  </div>
+</details>
+
+<p>Casi todo ese número viene del clavijero. La genialidad de Rejewski fue encontrar una magnitud que el clavijero no cambia.</p>
+
+<h2 id="rejewski">Rejewski: un teorema rompe Enigma</h2>
+
+<p>En 1932 la Oficina de Cifrado polaca encargó el problema a Marian Rejewski, un matemático de 27 años de Poznań, y después a Jerzy Różycki y Henryk Zygalski. El procedimiento alemán les ayudó: cada mensaje empezaba con una <strong>clave de mensaje</strong> de tres letras, elegida por el operador, cifrada <em>dos veces</em> con la configuración del día («para asegurarse de que llega»). Así, las letras 1 y 4 de cada mensaje eran cifrados de la misma letra, igual que la 2 y la 5, y la 3 y la 6. Llamando $A, B, \dots, F$ a las permutaciones de las seis primeras posiciones, los mensajes del día revelaban los productos $AD$, $BE$ y $CF$ (si $A(x) = y$ y $D(x) = z$, entonces $AD$ lleva $y$ a $z$, porque $A$ es una involución).</p>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(la conjugación conserva los ciclos)</span></span>
+  <p>Para permutaciones $\sigma$ y $\pi$, la permutación $\pi^{-1} \sigma \pi$ tiene exactamente la misma estructura de ciclos (el mismo número de ciclos de cada longitud) que $\sigma$.</p>
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>Si $(x_1\, x_2\, \dots\, x_k)$ es un ciclo de $\sigma$, entonces $(\pi^{-1}(x_1)\, \dots\, \pi^{-1}(x_k))$ es un ciclo de $\pi^{-1}\sigma\pi$: en efecto, $\pi^{-1}\sigma\pi(\pi^{-1}(x_i)) = \pi^{-1}(\sigma(x_i)) = \pi^{-1}(x_{i+1})$. Renombrar las letras con $\pi^{-1}$ lleva ciclos a ciclos de la misma longitud.</p>
+  </div>
+</details>
+
+<p>El clavijero solo entra en $AD$ por conjugación, así que la estructura de ciclos de $AD$, $BE$ y $CF$ depende solo del orden y la posición de los rotores: $6 \times 17\,576 = 105\,456$ posibilidades, un número lo bastante pequeño para catalogarlo. Los polacos construyeron una máquina, el <em>ciclómetro</em>, para calcular el catálogo, y desde 1933 leyeron el tráfico alemán con regularidad. Rejewski había reconstruido además el cableado de los rotores con la teoría de permutaciones, ayudado por manuales de uso y claves antiguas que un empleado alemán, Hans-Thilo Schmidt, vendió al espionaje francés (Gustave Bertrand).</p>
+
+<p>Los alemanes cambiaron los procedimientos y añadieron dos rotores en 1938, lo que multiplicaba el trabajo por diez. El 25 de julio de 1939, cinco semanas antes de la invasión de Polonia, los polacos se reunieron con sus aliados británicos y franceses en el bosque de Pyry, cerca de Varsovia, y se lo dieron todo: sus métodos, las hojas perforadas de Zygalski y dos réplicas de la Enigma.</p>
+
+<h2 id="bletchley">Bletchley Park y el crib</h2>
+
+<p>En Bletchley Park, el centro británico de descifrado, Alan Turing diseñó una máquina nueva, la <strong>bomba</strong> (1940), mejorada con el tablero diagonal de Gordon Welchman. No necesitaba la clave de mensaje duplicada, que los alemanes abandonaron en mayo de 1940. Necesitaba un <strong>crib</strong>: una conjetura sobre parte del texto en claro y su posición. Los mensajes militares estaban llenos de ellos: <em>WETTERBERICHT</em> (parte meteorológico), <em>KEINE BESONDEREN EREIGNISSE</em> (sin novedad), indicativos, grados, el mismo saludo cada mañana.</p>
+
+<p>El teorema anterior dice dónde puede ir un crib: como ninguna letra se cifra en sí misma, cualquier posición en la que una letra del crib coincida con la letra del texto cifrado que tiene debajo es imposible. Deslizar el crib por el texto cifrado elimina de golpe la mayoría de las posiciones; para cada superviviente, la bomba probaba todos los órdenes y posiciones de los rotores contra la cadena de parejas de letras que el crib implicaba.</p>
+
+<figure class="demo" data-demo="enigma/crib">
+  <figcaption>Arrastrar el crib. La primera fila es un texto cifrado interceptado (hecho con una configuración real de Enigma). Cada fila de debajo coloca el crib en un desplazamiento distinto; una letra en rojo significa que la letra del crib coincide con la del texto cifrado, cosa que Enigma no puede producir, así que ese desplazamiento queda descartado. Prueba otras palabras probables.</figcaption>
+</figure>
+
+<p>La Enigma naval, con cuatro rotores desde 1942 y procedimientos más estrictos, resistió más; Joan Clarke, Turing y Hugh Alexander la atacaron con el Banburismus, un método estadístico, y con libros de claves capturados a submarinos y barcos meteorológicos (el U-110 en mayo de 1941, el U-559 en octubre de 1942). La información, con el nombre clave <strong>Ultra</strong>, se distribuía con un cuidado extremo para que los alemanes no sospecharan. Los historiadores calculan que acortó la guerra en Europa hasta dos años.</p>
+
+<p class="note"><strong>No solo Enigma.</strong> El alto mando alemán usaba otra máquina, el cifrado de teletipo Lorenz SZ40/42. Bill Tutte reconstruyó su lógica en 1942 sin haber visto nunca una, y Tommy Flowers construyó <strong>Colossus</strong> (1944) para atacarlo: el primer ordenador digital electrónico programable.</p>
+
+<h2 id="lessons">Por qué cayó Enigma</h2>
+
+<ul>
+  <li><strong>Un defecto estructural</strong>: ninguna letra se cifra en sí misma, lo que convierte cada crib en un filtro.</li>
+  <li><strong>Procedimientos que repiten información</strong>: la clave de mensaje duplicada dio a Rejewski sus ecuaciones.</li>
+  <li><strong>Texto en claro previsible</strong>: partes meteorológicos, saludos de fórmula, «sin novedad».</li>
+  <li><strong>Atajos humanos</strong>: los operadores elegían claves de mensaje como AAA o las iniciales de su novia (los «cillies»).</li>
+  <li><strong>Exceso de confianza</strong>: un espacio de claves de $2^{67}$ parecía irrompible, y los alemanes nunca consideraron en serio que se estuviera leyendo la máquina.</li>
+</ul>
+
+<p>Todas estas lecciones reaparecen en la criptografía moderna. El capítulo siguiente plantea la pregunta opuesta: ¿existe un cifrado que no se pueda romper en absoluto?</p>
+
+<section class="references">
+  <h2 id="references">Para saber más</h2>
+  <ol>
+    <li>Marian Rejewski, «How Polish mathematicians deciphered the Enigma», <em>Annals of the History of Computing</em> 3(3), 1981.</li>
+    <li>Gordon Welchman, <em>The Hut Six Story</em> (1982).</li>
+    <li>Andrew Hodges, <em>Alan Turing: The Enigma</em> (1983; en español, <em>Alan Turing: el enigma</em>).</li>
+    <li>Las páginas de Tony Sale sobre códigos y cifrados y los archivos del Bletchley Park Trust.</li>
+  </ol>
+</section>

@@ -1,0 +1,126 @@
+<!--meta
+{
+  "slug": "clave-publica",
+  "title": "Criptografía de clave pública",
+  "chain": "RSA y DH",
+  "headline": "Secretos en público: Diffie–Hellman y RSA",
+  "dek": "Durante cuatro mil años, dos personas que querían comunicarse en secreto tenían que compartir antes una clave. En 1976 Whitfield Diffie y Martin Hellman mostraron cómo acordarla en público, y un año después Rivest, Shamir y Adleman construyeron un cifrado cuya clave de cifrado puede publicarse en un periódico. Los dos se apoyan en teoría de números que Fermat y Euler ya conocían en el siglo XVIII.",
+  "era": "1970 – 1998",
+  "people": ["Ralph Merkle", "Whitfield Diffie", "Martin Hellman", "Ron Rivest", "Adi Shamir", "Leonard Adleman", "James Ellis", "Clifford Cocks", "Malcolm Williamson"],
+  "theorems": ["Pequeño teorema de Fermat", "Teorema de Euler", "Corrección de RSA", "Teorema chino del resto", "Elevar al cuadrado y multiplicar"]
+}
+-->
+
+<p>Todos los cifrados vistos hasta ahora son <strong>simétricos</strong>: la misma clave cifra y descifra, así que las dos partes deben compartirla antes de poder decirse nada en secreto. Los ejércitos repartían los libros de claves con mensajeros; los bancos tenían responsables de claves que llevaban sobres lacrados. Con $n$ personas que quieren hablar todas en privado hacen falta $n(n-1)/2$ claves. En Internet, donde quieres hablar con una tienda de la que nunca habías oído hablar, es imposible. La salida llegó en tres pasos, entre 1974 y 1977, y cambió lo que es la criptografía.</p>
+
+<h2 id="merkle-puzzles">Los puzles de Merkle</h2>
+
+<p>En 1974 Ralph Merkle, estudiante de grado en Berkeley, propuso un proyecto para acordar una clave en público; su profesor lo rechazó. Su idea: Bob envía a Alicia un millón de <em>puzles</em>, cada uno un mensaje corto cifrado con una clave deliberadamente débil que cuesta un minuto romper. Cada puzle contiene un identificador aleatorio y una clave secreta. Alicia elige un puzle al azar, lo rompe y anuncia su identificador; ahora los dos comparten su clave. Un espía que no sabe qué puzle eligió Alicia tiene que romper, de media, medio millón. La ventaja solo es cuadrática (un minuto para Alicia, un año para el espía), pero fue la primera prueba de que se podía construir un secreto compartido en público. El artículo apareció, tras años de rechazos, en 1978.</p>
+
+<h2 id="dh">Diffie–Hellman</h2>
+
+<p>En noviembre de 1976 Whitfield Diffie y Martin Hellman publicaron <em>New Directions in Cryptography</em>, que empieza así: «Hoy estamos al borde de una revolución en la criptografía». Su acuerdo de claves usa aritmética módulo un primo.</p>
+
+<div class="definition">
+  <span class="th-title">Definición <span class="th-name">(aritmética modular)</span></span>
+  <p>Dos enteros son congruentes módulo $n$, $a \equiv b \pmod n$, si $n$ divide a $a - b$. Los restos $0, 1, \dots, n - 1$ con la suma y el producto módulo $n$ forman el anillo $\mathbb{Z}_n$. Si $p$ es primo, todo elemento no nulo tiene inverso multiplicativo, y los elementos no nulos forman un grupo $\mathbb{Z}_p^*$ que es <strong>cíclico</strong>: algún generador $g$ tiene potencias $g^1, g^2, \dots, g^{p-1}$ que los recorren todos.</p>
+</div>
+
+<p>Alicia y Bob acuerdan en público un primo grande $p$ y un generador $g$. Alicia elige un secreto $a$ y envía $A = g^a \bmod p$; Bob elige un secreto $b$ y envía $B = g^b \bmod p$. Entonces</p>
+
+$$B^a = (g^b)^a = g^{ab} = (g^a)^b = A^b \pmod p,$$
+
+<p>y los dos tienen $s = g^{ab} \bmod p$. Una espía ve $p$, $g$, $A$ y $B$. Para obtener $s$ parece necesitar $a$ a partir de $A = g^a$: el <strong>logaritmo discreto</strong>. La exponenciación módulo $p$ es rápida (ver más abajo «elevar al cuadrado y multiplicar»); su inversa, para primos de 2048 bits bien elegidos, está fuera del alcance de todos los algoritmos clásicos conocidos.</p>
+
+<figure class="demo" data-demo="publickey/dh">
+  <figcaption>Diffie–Hellman con números pequeños, junto a la habitual analogía de las pinturas. El color común y $g$, $p$ son públicos; cada parte mezcla un color secreto (un exponente secreto) y envía la mezcla; cada una mezcla su propio secreto con lo que ha recibido; las dos llegan al mismo color (al mismo número), mientras que la espía, que solo vio las mezclas, tendría que «desmezclarlas»: calcular un logaritmo discreto.</figcaption>
+</figure>
+
+<p>Diffie–Hellman protege frente a quien escucha, no frente a un <strong>intermediario</strong> activo que acuerda una clave con Alicia y otra con Bob. Para derrotarlo hay que autenticar los valores públicos, que es el trabajo de las firmas. Con ese añadido (y con curvas elípticas, <a href="@ch:curves#ecdh">capítulo 09</a>), Diffie–Hellman es como empieza cada conexión TLS 1.3. Diffie y Hellman recibieron por él el premio Turing en 2015.</p>
+
+<h2 id="gchq">Descubierto antes, en secreto</h2>
+
+<p>En 1997 la agencia británica de inteligencia de señales, el GCHQ, reveló que sus propios matemáticos habían llegado antes. James Ellis había mostrado en 1970 que el «cifrado no secreto» era posible en principio; en 1973 Clifford Cocks, un recluta de 22 años recién llegado, encontró en una tarde un esquema práctico, esencialmente RSA; en 1974 Malcolm Williamson encontró lo que equivale a Diffie–Hellman. Al ser material clasificado, nada de ello se usó ni se publicó, y el mundo aprendió la criptografía de clave pública de los académicos.</p>
+
+<h2 id="number-theory">La teoría de números detrás de RSA</h2>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(pequeño teorema de Fermat, 1640)</span></span>
+  <p>Si $p$ es primo y $p \nmid a$, entonces $a^{p-1} \equiv 1 \pmod p$.</p>
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>Los números $a, 2a, \dots, (p-1)a$ son no nulos y distintos dos a dos módulo $p$ (si $ia \equiv ja$ entonces $p \mid (i - j)a$, así que $i = j$), luego son $1, 2, \dots, p - 1$ en algún orden. Multiplicándolos todos: $a^{p-1}(p-1)! \equiv (p-1)! \pmod p$, y $(p-1)!$ es invertible módulo $p$.</p>
+  </div>
+</details>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(Euler, 1763)</span></span>
+  <p>Sea $\varphi(n)$ el número de enteros entre $1$ y $n$ coprimos con $n$. Si $\mathrm{mcd}(a, n) = 1$, entonces $a^{\varphi(n)} \equiv 1 \pmod n$. Para $n = pq$ con primos distintos $p, q$: $\varphi(n) = (p - 1)(q - 1)$.</p>
+</div>
+
+<p>La demostración es la misma que la de Fermat, aplicada a los $\varphi(n)$ restos invertibles; el teorema de Euler es el teorema de Lagrange para el grupo $\mathbb{Z}_n^*$.</p>
+
+<h2 id="rsa">RSA</h2>
+
+<p>En 1977 tres investigadores del MIT, Ron Rivest, Adi Shamir y Leonard Adleman, pasaron un año intentando construir un cifrado de clave pública (Rivest y Shamir proponían, Adleman rompía) hasta que, tras una cena de Pascua judía en abril, Rivest escribió el esquema:</p>
+
+<ol>
+  <li>Elegir dos primos grandes aleatorios $p$ y $q$, y tomar $n = pq$ y $\varphi(n) = (p-1)(q-1)$.</li>
+  <li>Elegir $e$ coprimo con $\varphi(n)$ (hoy casi siempre $e = 65537$) y calcular $d = e^{-1} \bmod \varphi(n)$ con el algoritmo de Euclides extendido.</li>
+  <li>La <strong>clave pública</strong> es $(n, e)$; la <strong>clave privada</strong> es $d$ (y $p$, $q$).</li>
+  <li>Cifrar un número $0 \le m &lt; n$ como $c = m^e \bmod n$; descifrar como $m = c^d \bmod n$.</li>
+</ol>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(corrección de RSA)</span></span>
+  <p>Para todo $m \in \{0, \dots, n - 1\}$: $(m^e)^d \equiv m \pmod n$.</p>
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>Como $ed \equiv 1 \pmod{\varphi(n)}$, escribimos $ed = 1 + t(p-1)(q-1)$. Módulo $p$: si $p \nmid m$, Fermat da $m^{ed} = m \cdot (m^{p-1})^{t(q-1)} \equiv m$; si $p \mid m$, los dos lados son $0$. Lo mismo ocurre módulo $q$. Así que $p$ y $q$ dividen a $m^{ed} - m$, y como son primos distintos, también lo divide $n = pq$ (es el <strong>teorema chino del resto</strong>: un resto módulo $pq$ queda determinado por sus restos módulo $p$ y módulo $q$).</p>
+  </div>
+</details>
+
+<p>Quien sepa factorizar $n$ calcula $\varphi(n)$ y después $d$, así que RSA es como mucho tan difícil como factorizar. Aquel agosto, la columna de Martin Gardner en <em>Scientific American</em> describió RSA y publicó un reto: un mensaje cifrado con un módulo de 129 cifras, RSA-129, con un premio de 100 dólares. Los autores calcularon que llevaría 40.000 billones de años. Se factorizó en 1994 gracias a 600 voluntarios coordinados por Internet; el mensaje decía «THE MAGIC WORDS ARE SQUEAMISH OSSIFRAGE».</p>
+
+<h3>Elevar al cuadrado y multiplicar</h3>
+
+<p>Calcular $m^d$ con un $d$ de 3.000 bits multiplicando repetidamente llevaría $2^{3000}$ pasos. En lugar de eso, se lee el exponente en binario y, para cada bit, se eleva al cuadrado el resultado acumulado y se multiplica por $m$ si el bit es 1: unos $\log_2 d$ cuadrados y como mucho otras tantas multiplicaciones, todas módulo $n$. Este algoritmo, que ya se conocía en la India hace más de dos mil años para calcular potencias, es lo que hace práctico RSA (y Diffie–Hellman).</p>
+
+<figure class="demo" data-demo="publickey/rsa">
+  <figcaption>RSA de juguete de principio a fin. Elige dos primos y $e$; la figura calcula $n$, $\varphi(n)$ y $d$, cifra cada carácter de tu mensaje como un número y lo descifra de vuelta. La nota bajo la tabla cuenta los pasos de elevar al cuadrado y multiplicar. Después pulsa el botón para romperlo: con primos tan pequeños, las divisiones sucesivas factorizan $n$ al instante y revelan $d$. Las claves reales usan primos de 1.536 bits o más.</figcaption>
+</figure>
+
+<h3>El RSA de libro de texto no es seguro</h3>
+
+<p>El esquema anterior, el «RSA de libro de texto», es determinista (el mismo $m$ da siempre el mismo $c$, así que un atacante puede comprobar conjeturas) y maleable ($c \cdot 2^e$ se descifra como $2m$). El RSA real cifra un mensaje con <strong>relleno</strong> aleatorio. El antiguo relleno de PKCS#1 v1.5 cayó en 1998 ante el ataque de Daniel Bleichenbacher, un oráculo de relleno como el de Vaudenay (<a href="@ch:modes#cbc">capítulo 05</a>), que reaparece una y otra vez en las implementaciones de TLS (ROBOT, 2017). <strong>OAEP</strong>, de Mihir Bellare y Phillip Rogaway (1994), añade aleatoriedad mediante una mezcla al estilo Feistel con un hash, y es demostrablemente seguro con hipótesis razonables; es lo que usa el RSA-OAEP de la aplicación de escritorio, con SHA-256 y claves de 3.072 bits. RSA cifra como mucho unos cientos de bytes, así que en la práctica cifra una clave simétrica: <strong>cifrado híbrido</strong>.</p>
+
+<h2 id="factoring">¿Qué tamaño debe tener la clave?</h2>
+
+<p>La factorización ha mejorado sin parar: la criba cuadrática (Carl Pomerance, 1981) y la <strong>criba general del cuerpo de números</strong> (años noventa), cuyo tiempo de ejecución es aproximadamente</p>
+
+$$\exp\!\left(\left(\tfrac{64}{9}\right)^{1/3} (\ln n)^{1/3}(\ln\ln n)^{2/3}\right),$$
+
+<p>subexponencial en el número de cifras. RSA-768 (232 cifras) se factorizó en 2009; RSA-250 (250 cifras, 829 bits), en 2020, con unos 2.700 años-núcleo de cálculo. Un módulo de 2.048 bits da unos 112 bits de seguridad; uno de 3.072 bits, unos 128. Un ordenador cuántico grande con el <strong>algoritmo de Shor</strong> factorizaría en tiempo polinómico y rompería RSA y Diffie–Hellman de cualquier tamaño; <a href="https://toniferr.github.io/math-of-quantum/es/shor/">Math of Quantum</a> explica cómo, y el <a href="@ch:postquantum">capítulo 10</a>, qué los sustituye.</p>
+
+<h2 id="signatures">Firmas digitales</h2>
+
+<p>Si se usa RSA al revés se obtiene una <strong>firma</strong>: el dueño de $d$ calcula $s = h^d \bmod n$ para el hash $h$ de un mensaje, y cualquiera puede comprobar que $s^e \equiv h \pmod n$ con la clave pública. Solo quien tiene $d$ pudo producir $s$, así que una firma da autenticidad, integridad y no repudio. Como en el cifrado, el hash debe rellenarse: <strong>RSA-PSS</strong> (Bellare y Rogaway, 1996) lo aleatoriza y tiene una demostración de seguridad ajustada; es uno de los algoritmos de firma de la aplicación de escritorio.</p>
+
+<p>Las firmas hacen utilizable el resto de la criptografía de clave pública. Un <strong>certificado</strong> es una clave pública firmada por una autoridad de certificación; tu navegador confía en unas decenas de autoridades, y ellas avalan las claves de millones de webs. Cuando empieza TLS, el certificado del servidor autentica su parte del Diffie–Hellman, lo que derrota al intermediario. Las actualizaciones de software, los pasaportes, el correo (S/MIME, PGP), los commits de Git y las criptomonedas se apoyan en firmas. El capítulo siguiente las hace, a ellas y a Diffie–Hellman, mucho más pequeñas.</p>
+
+<section class="references">
+  <h2 id="references">Para saber más</h2>
+  <ol>
+    <li>Whitfield Diffie y Martin Hellman, «New Directions in Cryptography», <em>IEEE Transactions on Information Theory</em> 22(6), 1976.</li>
+    <li>Ron Rivest, Adi Shamir, Leonard Adleman, «A Method for Obtaining Digital Signatures and Public-Key Cryptosystems», <em>Communications of the ACM</em> 21(2), 1978.</li>
+    <li>Ralph Merkle, «Secure Communications over Insecure Channels», <em>Communications of the ACM</em> 21(4), 1978.</li>
+    <li>James Ellis, «The History of Non-Secret Encryption» (escrito en 1987, publicado por el GCHQ en 1997).</li>
+    <li>Dan Boneh, «Twenty Years of Attacks on the RSA Cryptosystem», <em>Notices of the AMS</em> 46(2), 1999.</li>
+  </ol>
+</section>

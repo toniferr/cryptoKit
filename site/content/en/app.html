@@ -1,0 +1,92 @@
+<!--meta {"kicker": "Desktop toolkit · version {version}", "title": "The app", "dek": "cryptoKit is a free desktop application (and command-line tool) for encrypting, decrypting, hashing and signing with the 44 algorithms of this site, from Caesar and Enigma to AES-GCM, Argon2id, Ed25519 and post-quantum ML-KEM. Every algorithm carries a security badge and a link to the chapter that explains it."} -->
+
+<div class="download">
+  <a class="cta primary" href="{jar}">Download cryptoKit {version} (.jar)</a>
+  <a class="cta" href="{release}">All downloads and release notes</a>
+  <a class="cta" href="{repo}">Source code</a>
+</div>
+<p class="download-note">The jar needs <strong>Java 21 or newer</strong> (any distribution: Temurin, Oracle, Microsoft, Ubuntu's OpenJDK…). Double-click it, or run <code>java -jar cryptoKit-{version}.jar</code>. The release page also has portable packages for Windows, macOS and Linux that include their own Java.</p>
+
+<figure class="shots">
+  <img src="@img/app-aes-gcm-en.png" alt="cryptoKit in the light theme: AES-GCM selected, a random key in hex, a message encrypted to hexadecimal with a random nonce prepended." width="1170" height="750" loading="lazy">
+  <figcaption>AES-GCM in the light theme: the key generated with the dice, the nonce left empty so a random one is generated and prepended, and a note explaining it.</figcaption>
+</figure>
+
+<div class="shots-grid">
+  <figure class="shots"><img src="@img/app-enigma-en.png" alt="cryptoKit in the dark theme with the Enigma I simulator: rotors, ring settings, start positions and plugboard." width="1170" height="750" loading="lazy"><figcaption>Enigma I, dark theme.</figcaption></figure>
+  <figure class="shots"><img src="@img/app-ml-kem-es.png" alt="cryptoKit in Spanish: ML-KEM-768 with a generated key pair in PEM and a Base64 ciphertext." width="1170" height="750" loading="lazy"><figcaption>Post-quantum ML-KEM-768, in Spanish.</figcaption></figure>
+  <figure class="shots"><img src="@img/app-ed25519-es.png" alt="cryptoKit verifying an Ed25519 signature: a green banner says the signature is valid." width="1170" height="750" loading="lazy"><figcaption>An Ed25519 signature, verified.</figcaption></figure>
+</div>
+
+<h2 id="new">What's new in 2.0</h2>
+
+<p>Version 1.0 (2022) was a small Swing window with fifteen algorithms. Version 2 is a rewrite that keeps its spirit and its compatibility:</p>
+
+<ul>
+  <li><strong>44 algorithms in eight families</strong>, each with a security badge (recommended, legacy, broken, historical, encoding), a description and a <em>How it works</em> link to this site.</li>
+  <li><strong>New</strong>: classical ciphers (Caesar, Vigenère, Playfair, Enigma I), Base32, Base58 and Base64URL, BLAKE2b, BLAKE3 and RIPEMD-160, HMAC, password hashing (Argon2id, scrypt, bcrypt, PBKDF2), AES-CTR, ChaCha20-Poly1305, password-based AES-GCM with Argon2id, public-key encryption (RSA-OAEP, X25519 + AES-GCM, ML-KEM-768) and signatures (Ed25519, ECDSA P-256, RSA-PSS, ML-DSA-65).</li>
+  <li><strong>A modern interface</strong>: light and dark themes, English and Spanish, a searchable list, key and IV generators, key-pair generation, input and output in text, hex or Base64, loading and saving files, and a <em>use the result</em> button that sends a ciphertext back to be decrypted or a digest to be verified.</li>
+  <li><strong>Safer defaults</strong>: leave the IV or nonce empty and a random one is generated and prepended; authenticated modes reject tampered data; verifications compare in constant time; errors are explained instead of printed as results.</li>
+  <li><strong>A command-line tool</strong> in the same jar, for scripts.</li>
+  <li><strong>Tested</strong>: 89 automated tests with official vectors (NIST, RFC) and with ciphertexts produced by the real 1.0 jar.</li>
+</ul>
+
+<h2 id="algorithms">The 44 algorithms</h2>
+
+<div class="compare-wrap"><table class="alg-table">
+  <thead><tr><th>Family</th><th>Algorithms</th></tr></thead>
+  <tbody>
+    <tr><td>Classical ciphers</td><td><span class="sec edu">Caesar</span> <span class="sec edu">Vigenère</span> <span class="sec edu">Playfair</span> <span class="sec edu">Enigma I</span></td></tr>
+    <tr><td>Encodings</td><td><span class="sec enc">Hexadecimal</span> <span class="sec enc">Base32</span> <span class="sec enc">Base58</span> <span class="sec enc">Base64</span> <span class="sec enc">Base64URL</span></td></tr>
+    <tr><td>Hash functions</td><td><span class="sec ok">SHA-256</span> <span class="sec ok">SHA-512</span> <span class="sec ok">SHA3-256</span> <span class="sec ok">SHA3-512</span> <span class="sec ok">BLAKE2b-512</span> <span class="sec ok">BLAKE3</span> <span class="sec legacy">RIPEMD-160</span> <span class="sec broken">SHA-1</span> <span class="sec broken">MD5</span></td></tr>
+    <tr><td>Message authentication</td><td><span class="sec ok">HMAC-SHA256</span> <span class="sec ok">HMAC-SHA512</span> <span class="sec ok">HMAC-SHA3-256</span></td></tr>
+    <tr><td>Password hashing</td><td><span class="sec ok">Argon2id</span> <span class="sec ok">scrypt</span> <span class="sec ok">bcrypt</span> <span class="sec ok">PBKDF2-HMAC-SHA256</span></td></tr>
+    <tr><td>Symmetric encryption</td><td><span class="sec ok">AES-GCM</span> <span class="sec ok">ChaCha20-Poly1305</span> <span class="sec ok">AES-GCM + Argon2id</span> <span class="sec legacy">AES-CTR</span> <span class="sec legacy">AES-CBC</span> <span class="sec broken">AES-ECB</span> <span class="sec legacy">Triple DES-CBC</span> <span class="sec legacy">Blowfish-CBC</span> <span class="sec legacy">Blowfish-ECB</span> <span class="sec broken">DES-CBC</span> <span class="sec broken">DES-ECB</span> <span class="sec legacy">PBE AES-256 (Jasypt)</span></td></tr>
+    <tr><td>Public-key encryption</td><td><span class="sec ok">ML-KEM-768 + AES-GCM</span> <span class="sec ok">X25519 + AES-GCM</span> <span class="sec ok">RSA-OAEP</span></td></tr>
+    <tr><td>Digital signatures</td><td><span class="sec ok">ML-DSA-65</span> <span class="sec ok">Ed25519</span> <span class="sec ok">ECDSA P-256</span> <span class="sec ok">RSA-PSS</span></td></tr>
+  </tbody>
+</table></div>
+<p class="legend"><span class="sec ok">recommended</span> <span class="sec legacy">legacy</span> <span class="sec broken">broken</span> <span class="sec edu">historical</span> <span class="sec enc">encoding (not encryption)</span></p>
+
+<h2 id="cli">From the command line</h2>
+
+<p>The same jar is a command-line tool when it receives arguments. The text comes from the last argument or from standard input; options are the algorithm's parameters; verifications return exit status 1 when they fail.</p>
+
+<pre class="code"><code>java -jar cryptoKit-{version}.jar list
+java -jar cryptoKit-{version}.jar sha256 hash "hello"
+java -jar cryptoKit-{version}.jar aes-gcm encrypt --key=00112233445566778899aabbccddeeff --key-format=hex "attack at dawn"
+java -jar cryptoKit-{version}.jar argon2id hash "correct horse battery staple"
+java -jar cryptoKit-{version}.jar keygen ed25519 &gt; keys.pem
+java -jar cryptoKit-{version}.jar ed25519 sign --private=@keys.pem "I owe you 10 euros"
+java -jar cryptoKit-{version}.jar enigma encrypt --rotors="IV II V" --positions="B L A" "WETTERBERICHT"
+java -jar cryptoKit-{version}.jar info ml-kem-768</code></pre>
+
+<h2 id="compatibility">Compatible with version 1.0</h2>
+
+<p>Ciphertexts made with cryptoKit 1.0 still decrypt: DES, AES and Blowfish in ECB and CBC, AES-GCM and Jasypt PBE, with keys and IVs typed as text exactly as before (version 1 printed “(hexadecimal)” after the result; just leave it out). The test suite checks this against output of the real 1.0 jar. Version 1.0 itself is still available from <a href="https://github.com/toniferr/cryptoKit/releases/tag/1.0.0">its release page</a> and the repository's <code>legacy</code> branch.</p>
+
+<h2 id="security">Security notes</h2>
+
+<ul>
+  <li>The app is a tool for learning and for everyday tasks, not an audited product. Its algorithms come from the Java platform and from Bouncy Castle, both widely reviewed; the app composes them carefully, but has not been independently audited.</li>
+  <li>Keys typed as text (as in version 1) are weak unless they are long and random: prefer the dice, which generates random keys in hex, or use the password-based AES-GCM + Argon2id.</li>
+  <li>Nothing is sent over the network; nothing is stored except your theme, language and last algorithm.</li>
+</ul>
+
+<h2 id="build">Building from source</h2>
+
+<pre class="code"><code>git clone https://github.com/toniferr/cryptoKit.git
+cd cryptoKit
+mvn verify                      # compiles, runs the tests, builds target/cryptoKit-{version}.jar
+java -jar target/cryptoKit-{version}.jar</code></pre>
+
+<p>Requirements: JDK 21 or newer and Maven 3.8 or newer. The portal you are reading lives in the same repository, in <code>site/</code>, and is built with <code>python site/build.py</code>.</p>
+
+<h2 id="history">History of the project</h2>
+
+<ul>
+  <li><strong>2017</strong>: first version, an Eclipse project with symmetric ciphers, hashes and Base64 on Bouncy Castle 1.57.</li>
+  <li><strong>2020</strong>: Java 11, Maven, SHA-2 and SHA-3, AES-GCM and Blowfish, continuous integration and a wiki in Spanish.</li>
+  <li><strong>2022</strong>: version 1.0.0, a runnable jar with dependencies and password-based encryption with Jasypt.</li>
+  <li><strong>2026</strong>: version 2.0.0, rewritten from the core, with this portal.</li>
+</ul>

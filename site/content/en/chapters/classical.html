@@ -1,0 +1,132 @@
+<!--meta
+{
+  "slug": "classical-ciphers",
+  "title": "Classical ciphers",
+  "chain": "Substitution",
+  "headline": "Hiding letters: from Caesar to Vigenère",
+  "dek": "For two thousand years encryption meant replacing letters by other letters. The ciphers grew more clever, from Caesar's shift to Vigenère's keyword, and the breakers grew more patient, from al-Kindi counting letters in ninth-century Baghdad to Babbage and Kasiski measuring the distance between repetitions.",
+  "era": "c. 1900 BC – 1863",
+  "people": ["Julius Caesar", "al-Kindi", "Leon Battista Alberti", "Giovan Battista Bellaso", "Blaise de Vigenère", "Charles Wheatstone", "Charles Babbage", "Friedrich Kasiski", "William Friedman"],
+  "theorems": ["Key space of a substitution cipher: $26! \\approx 2^{88}$", "Frequency analysis", "Index of coincidence", "Kasiski examination"]
+}
+-->
+
+<p>The oldest known “encrypted” text is a tomb inscription in Menet Khufu, Egypt, from around 1900 BC, whose scribe used unusual hieroglyphs, probably to give the text dignity rather than to hide it. Real secrecy shows up a little later: a Mesopotamian clay tablet of about 1500 BC hides a recipe for pottery glaze by writing its words with rare signs, and Spartan generals wound a strip of leather around a staff of fixed thickness, the <strong>scytale</strong>, wrote along it and sent the strip: unwound, the letters were a jumble; wound on a staff of the same thickness, they lined up again. The scytale <em>transposes</em> letters, changing their order. Most of this chapter is about the other great family: ciphers that <em>substitute</em> letters.</p>
+
+<h2 id="caesar">Caesar's shift</h2>
+
+<p>Suetonius tells us that Julius Caesar wrote confidential letters “by so changing the order of the letters of the alphabet that not a word could be made out”, and that whoever wanted to read them had to “substitute the fourth letter of the alphabet, namely D, for A, and so with the others”. Number the letters $A = 0, B = 1, \dots, Z = 25$. Caesar's cipher with key $k$ is</p>
+
+$$E_k(x) = (x + k) \bmod 26, \qquad D_k(y) = (y - k) \bmod 26.$$
+
+<p>Caesar used $k = 3$; Augustus, his nephew, used $k = 1$. Hebrew scribes had their own variant, <strong>Atbash</strong>, which reverses the alphabet ($x \mapsto 25 - x$); it appears in the Book of Jeremiah. ROT13, the shift by 13 that hid joke punchlines on Usenet, is its own inverse because $13 + 13 = 26$.</p>
+
+<figure class="demo" data-demo="classical/caesar">
+  <figcaption>Caesar's cipher and how to break it. Change the shift: the ciphertext changes. Below, the attacker's view: the ciphertext decrypted with every other key. With only 25 candidates, the one that reads like the language is obvious, and the figure picks it automatically by comparing letter frequencies (the χ² score explained below).</figcaption>
+</figure>
+
+<p>The weakness is the size of the key space: 25 useful keys can be tried by hand in minutes. The lesson, still valid, is the first rule of cipher design.</p>
+
+<div class="theorem">
+  <span class="th-title">Principle <span class="th-name">(exhaustive search)</span></span>
+  <p>Any cipher can be attacked by trying every key and recognising the right plaintext. A cipher with $K$ keys is at most as strong as a search of $K$ trials; to be secure, $K$ must be beyond the attacker's means. Today that means at least $2^{128}$.</p>
+</div>
+
+<h2 id="substitution">Every permutation of the alphabet</h2>
+
+<p>The obvious fix is to allow any rearrangement of the alphabet, not just shifts: write the 26 letters in a scrambled order, often derived from a keyword, and replace each letter by the one under it. This <strong>monoalphabetic substitution</strong> was the workhorse of diplomacy for a millennium.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposition <span class="th-name">(the key space of substitution)</span></span>
+  <p>The keys of a monoalphabetic substitution are the permutations of 26 letters, so there are</p>
+  $$26! = 403\,291\,461\,126\,605\,635\,584\,000\,000 \approx 4 \times 10^{26} \approx 2^{88.4}$$
+  <p>of them: more than the keys of DES ($2^{56}$), and far too many to try one by one, even today.</p>
+</div>
+
+<p>And yet substitution ciphers fall in minutes to a person with a pencil. A large key space is <em>necessary</em> but not <em>sufficient</em>: the cipher must also not leak structure. Monoalphabetic substitution leaks the most important structure of all.</p>
+
+<h2 id="frequency">Al-Kindi counts letters</h2>
+
+<p>In ninth-century Baghdad, at the House of Wisdom, the philosopher Abu Yusuf Yaqub ibn Ishaq al-Kindi wrote <em>A Manuscript on Deciphering Cryptographic Messages</em>, rediscovered in an Istanbul archive in 1987. In it he describes, for the first time, <strong>frequency analysis</strong>:</p>
+
+<blockquote>One way to solve an encrypted message, if we know its language, is to find a different plaintext of the same language long enough to fill one sheet or so, and then we count the occurrences of each letter. […] Then we look at the cipher text we want to solve and we also classify its symbols.<cite>al-Kindi, c. 850</cite></blockquote>
+
+<p>Letters do not occur equally often. In English, E makes up about 12.7% of letters, T 9.1%, A 8.2%, while J, Q, X and Z together barely reach 0.5%; in Spanish, E (13.7%) and A (12.5%) lead. A substitution cipher renames letters but keeps their counts: the most frequent symbol of a long ciphertext is almost surely E. To measure how much a candidate decryption “looks like” the language, compare the observed counts $O_i$ with the expected ones $E_i = N p_i$:</p>
+
+$$\chi^2 = \sum_{i=0}^{25} \frac{(O_i - E_i)^2}{E_i}.$$
+
+<p>A small $\chi^2$ means the text has the letter statistics of the language. This single number breaks any shift cipher automatically: decrypt with all 26 shifts and keep the one with the smallest $\chi^2$.</p>
+
+<figure class="demo" data-demo="classical/frequency">
+  <figcaption>Frequency analysis. The dark bars are the letter frequencies of a ciphertext encrypted with a secret shift; the light bars are those of the language. Slide the shift until the two profiles line up (the χ² score drops sharply): the plaintext appears below. The secret shift is chosen at random each time you load the page.</figcaption>
+</figure>
+
+<p>For a general substitution the attacker matches the most frequent symbols first, then uses pairs (TH, HE, IN in English; DE, EN, EL in Spanish), doubled letters and short words to fix the rest. Edgar Allan Poe made a cult of it in <em>The Gold-Bug</em> (1843), and Arthur Conan Doyle gave Sherlock Holmes a substitution of dancing men to break in 1903. In real life, frequency analysis sent Mary, Queen of Scots, to the scaffold in 1587: Thomas Phelippes broke the nomenclator she used to correspond with the Babington plotters.</p>
+
+<h2 id="vigenere">The indecipherable cipher</h2>
+
+<p>The defence against counting is to make each plaintext letter go to <em>many</em> different ciphertext letters. Leon Battista Alberti, the Renaissance architect, built a cipher disk in 1467 and suggested turning it every few words. Johannes Trithemius tabulated all 26 shifts in his <em>tabula recta</em> (<em>Polygraphia</em>, 1518). In 1553 Giovan Battista Bellaso added the decisive idea: choose the shift of each letter from a <strong>keyword</strong> that repeats. Blaise de Vigenère described a stronger variant in 1586, and history gave his name to Bellaso's cipher. With a keyword of length $L$, $k_0 k_1 \dots k_{L-1}$:</p>
+
+$$c_i = (p_i + k_{i \bmod L}) \bmod 26, \qquad p_i = (c_i - k_{i \bmod L}) \bmod 26.$$
+
+<p>With the keyword LEMON, ATTACKATDAWN becomes LXFOPVEFRNHR: the two Ts of ATTACK become X and F; the four As become L, O, E and N. The letter counts are flattened, and the cipher earned the name <em>le chiffre indéchiffrable</em>. It kept it for three hundred years; as late as 1917 <em>Scientific American</em> called it “impossible of translation”. It had been broken sixty years earlier.</p>
+
+<h2 id="breaking-vigenere">Breaking Vigenère: Babbage, Kasiski, Friedman</h2>
+
+<p>The weakness is the repetition of the keyword. If we knew its length $L$, we could split the ciphertext into $L$ columns (letters $0, L, 2L, \dots$; letters $1, L+1, \dots$), and each column would be a simple Caesar cipher, broken by frequency analysis. Charles Babbage found the length around 1854 but never published; the Prussian officer Friedrich Kasiski published the method in 1863:</p>
+
+<div class="theorem">
+  <span class="th-title">Method <span class="th-name">(Kasiski examination)</span></span>
+  <p>When the same plaintext fragment falls on the same position of the keyword, it is encrypted identically. So the distances between repeated fragments of the ciphertext tend to be multiples of $L$, and their greatest common divisor is usually $L$ or a small multiple of it.</p>
+</div>
+
+<p>In 1922 William Friedman, the founder of American cryptanalysis, replaced the search for repetitions with a statistic that uses every letter of the text.</p>
+
+<div class="definition">
+  <span class="th-title">Definition <span class="th-name">(index of coincidence)</span></span>
+  <p>The index of coincidence of a text of $N$ letters, with $n_i$ occurrences of letter $i$, is the probability that two letters drawn at random from it are equal:</p>
+  $$\mathrm{IC} = \sum_{i=0}^{25} \frac{n_i (n_i - 1)}{N (N - 1)}.$$
+</div>
+
+<div class="theorem">
+  <span class="th-title">Proposition <span class="th-name">(Friedman)</span></span>
+  <p>If a text's letters have probabilities $p_i$, then $\mathrm{IC} \to \sum_i p_i^2$ as $N$ grows. For uniformly random letters this is $26 \cdot (1/26)^2 = 1/26 \approx 0.038$; for English it is about $0.066$ and for Spanish about $0.072$. The IC is unchanged by any substitution, because a substitution only renames the letters.</p>
+</div>
+
+<details class="proof">
+  <summary>Why the IC does not change under substitution</summary>
+  <div>
+    <p>$\sum_i n_i(n_i - 1)$ depends only on the multiset of counts $\{n_i\}$, not on which letter has which count. A substitution is a bijection of the alphabet, so it permutes the counts and leaves the sum unchanged. In a Vigenère column built with the right $L$, every letter was shifted by the same amount: the column is a substitution of plain language, so its IC is the language's. With a wrong $L$, the column mixes several shifts, its letter distribution is flatter, and its IC drops towards $1/26$.</p>
+  </div>
+</details>
+
+<p>So the attack is mechanical: for each candidate length $L = 1, 2, 3, \dots$, cut the ciphertext into $L$ columns and average their IC. The first $L$ whose average jumps to the language's value is the key length. Then each column is a Caesar cipher, and the $\chi^2$ of the previous section recovers each letter of the keyword.</p>
+
+<figure class="demo" data-demo="classical/vigenere">
+  <figcaption>Breaking Vigenère from the ciphertext alone. Change the text or the keyword. The bars are the average index of coincidence of the columns for each candidate key length: they jump at the true length (and at its multiples). The figure then breaks each column as a Caesar cipher with χ² and prints the key it recovered. Short texts or very long keywords defeat it: each column needs enough letters for its statistics to show.</figcaption>
+</figure>
+
+<h2 id="playfair">Playfair and the digraphs</h2>
+
+<p>Another way to flatten frequencies is to encrypt <em>pairs</em> of letters: there are $26^2 = 676$ pairs, and their frequencies are far flatter than those of single letters. Charles Wheatstone invented such a cipher in 1854; his friend Lord Playfair promoted it so well that it carries his name. The key is a 5×5 square holding the letters of a keyword followed by the rest of the alphabet (I and J share a cell). The plaintext is split into pairs, with an X between doubled letters; each pair is replaced by the other two corners of its rectangle in the square, or by the letters to its right (same row) or below (same column). The British army used it in the Boer War and the First World War, for tactical messages that only had to stay secret for a few hours; it is still breakable by hand, using the frequencies of pairs. The desktop app includes it with Wikipedia's classic example.</p>
+
+<h2 id="lessons">What the classics teach</h2>
+
+<ul>
+  <li><strong>The key space must be huge</strong>, or exhaustive search wins (Caesar).</li>
+  <li><strong>A huge key space is not enough</strong>: the ciphertext must not leak the statistics of the plaintext (substitution and al-Kindi).</li>
+  <li><strong>Anything that repeats is a foothold</strong>: a repeating key turns one hard cipher into several easy ones (Vigenère and Kasiski).</li>
+  <li><strong>Statistics beat secrecy</strong>: Friedman's IC needs no guess about the plaintext at all.</li>
+</ul>
+
+<p>The next step was mechanical: a key that never repeats in practice, produced by a machine. That machine was <a href="@ch:enigma">Enigma</a>.</p>
+
+<section class="references">
+  <h2 id="references">Further reading</h2>
+  <ol>
+    <li>David Kahn, <em>The Codebreakers</em> (1967; revised 1996). The classic history, from Egypt to the computer age.</li>
+    <li>Simon Singh, <em>The Code Book</em> (1999). Chapters 1–2 cover Mary Stuart, frequency analysis and Babbage.</li>
+    <li>Ibrahim A. Al-Kadi, “Origins of cryptology: the Arab contributions”, <em>Cryptologia</em> 16(2), 1992.</li>
+    <li>William F. Friedman, <em>The Index of Coincidence and Its Applications in Cryptography</em> (1922).</li>
+  </ol>
+</section>

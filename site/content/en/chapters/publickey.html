@@ -1,0 +1,126 @@
+<!--meta
+{
+  "slug": "public-key",
+  "title": "Public-key cryptography",
+  "chain": "RSA & DH",
+  "headline": "Secrets in public: Diffie–Hellman and RSA",
+  "dek": "For four thousand years, two people who wanted to communicate secretly had to share a key first. In 1976 Whitfield Diffie and Martin Hellman showed how to agree on one in public, and a year later Rivest, Shamir and Adleman built a cipher whose encryption key can be printed in a newspaper. Both rest on number theory that Fermat and Euler knew in the eighteenth century.",
+  "era": "1970 – 1998",
+  "people": ["Ralph Merkle", "Whitfield Diffie", "Martin Hellman", "Ron Rivest", "Adi Shamir", "Leonard Adleman", "James Ellis", "Clifford Cocks", "Malcolm Williamson"],
+  "theorems": ["Fermat's little theorem", "Euler's theorem", "Correctness of RSA", "Chinese remainder theorem", "Square-and-multiply"]
+}
+-->
+
+<p>Every cipher so far is <strong>symmetric</strong>: the same key encrypts and decrypts, so the two sides must share it before they can say anything secret. Armies distributed codebooks by courier; banks had key officers carrying sealed envelopes. With $n$ people who all want to talk privately, $n(n-1)/2$ keys are needed. On the Internet, where you want to talk to a shop you have never heard of, it is impossible. The way out came in three steps, between 1974 and 1977, and it changed what cryptography is.</p>
+
+<h2 id="merkle-puzzles">Merkle's puzzles</h2>
+
+<p>In 1974 Ralph Merkle, an undergraduate at Berkeley, proposed a project to agree on a key in public; his professor rejected it. His idea: Bob sends Alice a million <em>puzzles</em>, each a short message encrypted with a deliberately weak key that takes a minute to break. Each puzzle contains a random identifier and a secret key. Alice picks one puzzle at random, breaks it, and announces its identifier; both now share its key. An eavesdropper who does not know which puzzle Alice chose must break, on average, half a million of them. The advantage is only quadratic (a minute for Alice, a year for the eavesdropper), but it was the first proof that a shared secret could be built in public. The paper appeared, after years of rejections, in 1978.</p>
+
+<h2 id="dh">Diffie–Hellman</h2>
+
+<p>In November 1976 Whitfield Diffie and Martin Hellman published <em>New Directions in Cryptography</em>, which begins: “We stand today on the brink of a revolution in cryptography.” Their key agreement uses arithmetic modulo a prime.</p>
+
+<div class="definition">
+  <span class="th-title">Definition <span class="th-name">(modular arithmetic)</span></span>
+  <p>Two integers are congruent modulo $n$, $a \equiv b \pmod n$, if $n$ divides $a - b$. The remainders $0, 1, \dots, n - 1$ with addition and multiplication modulo $n$ form the ring $\mathbb{Z}_n$. If $p$ is prime, every non-zero element has a multiplicative inverse, and the non-zero elements form a group $\mathbb{Z}_p^*$ that is <strong>cyclic</strong>: some generator $g$ has powers $g^1, g^2, \dots, g^{p-1}$ that run through all of them.</p>
+</div>
+
+<p>Alice and Bob agree in public on a large prime $p$ and a generator $g$. Alice chooses a secret $a$ and sends $A = g^a \bmod p$; Bob chooses a secret $b$ and sends $B = g^b \bmod p$. Then</p>
+
+$$B^a = (g^b)^a = g^{ab} = (g^a)^b = A^b \pmod p,$$
+
+<p>and both hold $s = g^{ab} \bmod p$. An eavesdropper sees $p$, $g$, $A$ and $B$. To get $s$ she seems to need $a$ from $A = g^a$: the <strong>discrete logarithm</strong>. Exponentiation modulo $p$ is fast (see square-and-multiply below); its inverse, for well-chosen 2048-bit primes, is out of reach of every known classical algorithm.</p>
+
+<figure class="demo" data-demo="publickey/dh">
+  <figcaption>Diffie–Hellman with small numbers, next to the usual paint analogy. The common colour and $g$, $p$ are public; each side mixes in a secret colour (a secret exponent) and sends the mixture; each mixes its own secret into what it received; both arrive at the same colour (the same number), while the eavesdropper, who only saw the mixtures, would have to “unmix” them: compute a discrete logarithm.</figcaption>
+</figure>
+
+<p>Diffie–Hellman protects against eavesdroppers, not against an active <strong>man in the middle</strong> who agrees one key with Alice and another with Bob. To defeat her, the public values must be authenticated, which is the job of signatures. With that addition (and with elliptic curves, <a href="@ch:curves#ecdh">chapter 09</a>), Diffie–Hellman is how every TLS 1.3 connection starts. Diffie and Hellman received the Turing Award for it in 2015.</p>
+
+<h2 id="gchq">Discovered in secret, first</h2>
+
+<p>In 1997 the British signals agency GCHQ revealed that its own mathematicians had got there first. James Ellis had shown in 1970 that “non-secret encryption” was possible in principle; in 1973 Clifford Cocks, a 22-year-old recent recruit, found a practical scheme in an evening, essentially RSA; in 1974 Malcolm Williamson found what amounts to Diffie–Hellman. Classified, none of it was used or published, and the world learned public-key cryptography from the academics.</p>
+
+<h2 id="number-theory">The number theory behind RSA</h2>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Fermat's little theorem, 1640)</span></span>
+  <p>If $p$ is prime and $p \nmid a$, then $a^{p-1} \equiv 1 \pmod p$.</p>
+</div>
+
+<details class="proof">
+  <summary>Proof</summary>
+  <div>
+    <p>The numbers $a, 2a, \dots, (p-1)a$ are non-zero and pairwise different modulo $p$ (if $ia \equiv ja$ then $p \mid (i - j)a$, so $i = j$), so they are $1, 2, \dots, p - 1$ in some order. Multiplying them all: $a^{p-1}(p-1)! \equiv (p-1)! \pmod p$, and $(p-1)!$ is invertible modulo $p$.</p>
+  </div>
+</details>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Euler, 1763)</span></span>
+  <p>Let $\varphi(n)$ be the number of integers in $1, \dots, n$ coprime with $n$. If $\gcd(a, n) = 1$, then $a^{\varphi(n)} \equiv 1 \pmod n$. For $n = pq$ with distinct primes $p, q$: $\varphi(n) = (p - 1)(q - 1)$.</p>
+</div>
+
+<p>The proof is the same as Fermat's, applied to the $\varphi(n)$ invertible residues; Euler's theorem is Lagrange's theorem for the group $\mathbb{Z}_n^*$.</p>
+
+<h2 id="rsa">RSA</h2>
+
+<p>In 1977 three researchers at MIT, Ron Rivest, Adi Shamir and Leonard Adleman, spent a year trying to build a public-key cipher (Rivest and Shamir proposing, Adleman breaking) until, after a Passover evening in April, Rivest wrote down the scheme:</p>
+
+<ol>
+  <li>Choose two large random primes $p$ and $q$, and let $n = pq$ and $\varphi(n) = (p-1)(q-1)$.</li>
+  <li>Choose $e$ coprime with $\varphi(n)$ (today almost always $e = 65537$) and compute $d = e^{-1} \bmod \varphi(n)$ with the extended Euclidean algorithm.</li>
+  <li>The <strong>public key</strong> is $(n, e)$; the <strong>private key</strong> is $d$ (and $p$, $q$).</li>
+  <li>Encrypt a number $0 \le m &lt; n$ as $c = m^e \bmod n$; decrypt as $m = c^d \bmod n$.</li>
+</ol>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(correctness of RSA)</span></span>
+  <p>For every $m \in \{0, \dots, n - 1\}$: $(m^e)^d \equiv m \pmod n$.</p>
+</div>
+
+<details class="proof">
+  <summary>Proof</summary>
+  <div>
+    <p>Since $ed \equiv 1 \pmod{\varphi(n)}$, write $ed = 1 + t(p-1)(q-1)$. Modulo $p$: if $p \nmid m$, Fermat gives $m^{ed} = m \cdot (m^{p-1})^{t(q-1)} \equiv m$; if $p \mid m$, both sides are $0$. The same holds modulo $q$. So $p$ and $q$ both divide $m^{ed} - m$, and since they are distinct primes, so does $n = pq$ (this is the <strong>Chinese remainder theorem</strong>: a residue modulo $pq$ is determined by its residues modulo $p$ and modulo $q$).</p>
+  </div>
+</details>
+
+<p>Anyone who can factor $n$ computes $\varphi(n)$ and then $d$, so RSA is at most as hard as factoring. That August, Martin Gardner's column in <em>Scientific American</em> described RSA and printed a challenge: a message encrypted with a 129-digit modulus, RSA-129, with a \$100 prize. The authors estimated it would take 40 quadrillion years. It was factored in 1994 by 600 volunteers coordinated over the Internet; the message read “THE MAGIC WORDS ARE SQUEAMISH OSSIFRAGE”.</p>
+
+<h3>Square-and-multiply</h3>
+
+<p>Computing $m^d$ with $d$ of 3,000 bits by repeated multiplication would take $2^{3000}$ steps. Instead, read the exponent in binary and, for each bit, square the running result and multiply by $m$ if the bit is 1: about $\log_2 d$ squarings and at most as many multiplications, all modulo $n$. This algorithm, known in India over two thousand years ago for computing powers, is what makes RSA (and Diffie–Hellman) practical.</p>
+
+<figure class="demo" data-demo="publickey/rsa">
+  <figcaption>Toy RSA from start to finish. Pick two primes and $e$; the figure computes $n$, $\varphi(n)$ and $d$, encrypts each character of your message as a number, and decrypts it back. The note under the table counts the steps of square-and-multiply. Then press the button to break it: with such small primes, trial division factors $n$ instantly and reveals $d$. Real keys use primes of 1,536 bits or more.</figcaption>
+</figure>
+
+<h3>Textbook RSA is not secure</h3>
+
+<p>The scheme above, “textbook RSA”, is deterministic (the same $m$ always gives the same $c$, so an attacker can test guesses) and malleable ($c \cdot 2^e$ decrypts to $2m$). Real RSA encrypts a randomly <strong>padded</strong> message. The old padding of PKCS#1 v1.5 fell to Daniel Bleichenbacher's attack in 1998, a padding oracle like Vaudenay's (<a href="@ch:modes#cbc">chapter 05</a>), which keeps resurfacing in TLS implementations (ROBOT, 2017). <strong>OAEP</strong>, by Mihir Bellare and Phillip Rogaway (1994), adds randomness through a Feistel-like mixing with a hash, and is provably secure under reasonable assumptions; it is what the desktop app's RSA-OAEP uses, with SHA-256 and 3,072-bit keys. RSA encrypts at most a few hundred bytes, so in practice it encrypts a symmetric key: <strong>hybrid encryption</strong>.</p>
+
+<h2 id="factoring">How big must the key be?</h2>
+
+<p>Factoring has improved steadily: the quadratic sieve (Carl Pomerance, 1981) and the <strong>general number field sieve</strong> (1990s), whose running time is about</p>
+
+$$\exp\!\left(\left(\tfrac{64}{9}\right)^{1/3} (\ln n)^{1/3}(\ln\ln n)^{2/3}\right),$$
+
+<p>sub-exponential in the number of digits. RSA-768 (232 digits) was factored in 2009; RSA-250 (250 digits, 829 bits) in 2020, with about 2,700 core-years. A 2,048-bit modulus gives about 112 bits of security, 3,072 bits about 128. A large quantum computer running <strong>Shor's algorithm</strong> would factor in polynomial time and break RSA and Diffie–Hellman at any size; <a href="https://toniferr.github.io/math-of-quantum/shor/">Math of Quantum</a> explains how, and <a href="@ch:postquantum">chapter 10</a> what replaces them.</p>
+
+<h2 id="signatures">Digital signatures</h2>
+
+<p>Run RSA backwards and you get a <strong>signature</strong>: the owner of $d$ computes $s = h^d \bmod n$ for the hash $h$ of a message, and anyone can check that $s^e \equiv h \pmod n$ with the public key. Only the holder of $d$ could have produced $s$, so a signature gives authenticity, integrity and non-repudiation. As with encryption, the hash must be padded: <strong>RSA-PSS</strong> (Bellare and Rogaway, 1996) randomises it and has a tight security proof; it is one of the desktop app's signature algorithms.</p>
+
+<p>Signatures make the rest of public-key cryptography usable. A <strong>certificate</strong> is a public key signed by a certificate authority; your browser trusts a few dozen authorities, and they vouch for the keys of millions of websites. When TLS starts, the server's certificate authenticates its Diffie–Hellman share, which defeats the man in the middle. Software updates, passports, e-mail (S/MIME, PGP), Git commits and cryptocurrencies all rest on signatures. The next chapter makes them, and Diffie–Hellman, much smaller.</p>
+
+<section class="references">
+  <h2 id="references">Further reading</h2>
+  <ol>
+    <li>Whitfield Diffie and Martin Hellman, “New Directions in Cryptography”, <em>IEEE Transactions on Information Theory</em> 22(6), 1976.</li>
+    <li>Ron Rivest, Adi Shamir, Leonard Adleman, “A Method for Obtaining Digital Signatures and Public-Key Cryptosystems”, <em>Communications of the ACM</em> 21(2), 1978.</li>
+    <li>Ralph Merkle, “Secure Communications over Insecure Channels”, <em>Communications of the ACM</em> 21(4), 1978.</li>
+    <li>James Ellis, “The History of Non-Secret Encryption” (written 1987, published by GCHQ in 1997).</li>
+    <li>Dan Boneh, “Twenty Years of Attacks on the RSA Cryptosystem”, <em>Notices of the AMS</em> 46(2), 1999.</li>
+  </ol>
+</section>

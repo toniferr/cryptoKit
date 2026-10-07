@@ -1,0 +1,134 @@
+<!--meta
+{
+  "slug": "poscuantica",
+  "title": "Criptografía poscuántica",
+  "chain": "Poscuántica",
+  "headline": "Después de Shor: retículos, ML-KEM y ML-DSA",
+  "dek": "Un ordenador cuántico grande rompería RSA, Diffie–Hellman y todas las curvas elípticas de esta web. Todavía no existe, pero el tráfico cifrado que se graba hoy podría leerse cuando exista. Por eso en 2024, tras un concurso público de ocho años, el NIST estandarizó sustitutos basados en retículos y en hashes, y ha empezado la migración de todo Internet.",
+  "era": "1994 – 2026",
+  "people": ["Peter Shor", "Lov Grover", "Robert McEliece", "Miklós Ajtai", "László Babai", "Oded Regev", "Chris Peikert", "Vadim Lyubashevsky", "Léo Ducas", "Wouter Castryck", "Thomas Decru"],
+  "theorems": ["Shor: factorización y logaritmos discretos en tiempo polinómico", "Grover: búsqueda en $\\sqrt{N}$, y no mejor", "Aprender con errores es tan difícil como los problemas de retículos en el peor caso (Regev)", "Corrección del cifrado de Regev"]
+}
+-->
+
+<p>En 1994 Peter Shor, en los Bell Labs, mostró que un ordenador cuántico podría factorizar enteros y calcular logaritmos discretos en tiempo polinómico. Todos los sistemas de clave pública de uso común (RSA, Diffie–Hellman en cuerpos finitos y en curvas elípticas, ECDSA, Ed25519) se apoyan en uno de esos dos problemas. La máquina necesaria no existe todavía: los procesadores cuánticos actuales tienen cientos o unos pocos miles de cúbits ruidosos, y romper RSA-2048 necesita del orden de un millón, funcionando con corrección de errores durante días. Pero la criptografía tiene que planificar a décadas vista, y un adversario puede <strong>recolectar ahora y descifrar después</strong>: grabar hoy el tráfico cifrado y leerlo cuando exista la máquina. Los secretos que deban durar diez años ya están en riesgo.</p>
+
+<h2 id="shor">Lo que rompe un ordenador cuántico</h2>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(Shor, 1994)</span></span>
+  <p>Un ordenador cuántico puede factorizar un entero de $n$ bits, y calcular logaritmos discretos en cualquier grupo con una operación eficiente (incluidas las curvas elípticas), en tiempo polinómico en $n$, aproximadamente $O(n^3)$ puertas.</p>
+</div>
+
+<p>La idea clave es convertir el problema en encontrar el <strong>periodo</strong> de una función como $x \mapsto a^x \bmod N$, y encontrar periodos con la transformada cuántica de Fourier. La web hermana <a href="https://toniferr.github.io/math-of-quantum/es/shor/">Math of Quantum</a> desarrolla el algoritmo completo. Las estimaciones de recursos no paran de bajar: en 2019 Craig Gidney y Martin Ekerå calcularon 20 millones de cúbits ruidosos durante ocho horas; en 2025 Gidney lo bajó a menos de un millón de cúbits en menos de una semana.</p>
+
+<h2 id="grover">Lo que apenas toca</h2>
+
+<p>La criptografía simétrica está mucho menos expuesta.</p>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(Grover 1996; Bennett, Bernstein, Brassard, Vazirani 1997)</span></span>
+  <p>Un ordenador cuántico puede encontrar un elemento marcado entre $N$ con unas $\frac{\pi}{4}\sqrt{N}$ consultas, y ningún algoritmo cuántico puede hacerlo con asintóticamente menos.</p>
+</div>
+
+<p>Así que una búsqueda de clave en un cifrado de $k$ bits baja de $2^k$ a unos $2^{k/2}$, y solo en teoría: las iteraciones de Grover son secuenciales y no se pueden repartir entre muchas máquinas sin perder la ventaja. Basta con doblar el tamaño de las claves: AES-256 y SHA-384 o SHA-512 se consideran seguros frente a ataques cuánticos. Las colisiones de las funciones hash ganan todavía menos.</p>
+
+<h2 id="families">Matemáticas que resisten</h2>
+
+<p>Los sustitutos deben usar problemas para los que no se conozca ningún algoritmo cuántico. Varias familias llevaban décadas estudiándose:</p>
+
+<ul>
+  <li><strong>Códigos</strong>. El criptosistema de Robert McEliece (1978) esconde un mensaje como una palabra de un código corrector de errores secreto más errores deliberados; descodificar un código lineal de aspecto aleatorio es difícil. Nunca se ha roto, pero sus claves públicas rondan el megabyte.</li>
+  <li><strong>Firmas basadas en hashes</strong>. Las firmas de un solo uso de Leslie Lamport (1979), combinadas en árboles de Merkle, solo dependen de la seguridad de una función hash. SPHINCS+ (hoy SLH-DSA) es la opción conservadora: firmas grandes y lentas, hipótesis mínimas.</li>
+  <li><strong>Sistemas multivariantes</strong> de ecuaciones cuadráticas e <strong>isogenias</strong> entre curvas elípticas. SIKE, un esquema de isogenias en la ronda final del concurso, lo rompieron en julio de 2022 Wouter Castryck y Thomas Decru en una hora con un portátil, usando un teorema de 1997 de Ernst Kani: un recordatorio de por qué los candidatos se atacan en público durante años.</li>
+  <li><strong>Retículos</strong>, que ganaron.</li>
+</ul>
+
+<p>El NIST abrió su concurso en 2016 y recibió 82 propuestas. En 2022 eligió CRYSTALS-Kyber para el establecimiento de claves y CRYSTALS-Dilithium, Falcon y SPHINCS+ para las firmas. En agosto de 2024 se publicaron los tres primeros estándares: <strong>FIPS 203 (ML-KEM)</strong>, <strong>FIPS 204 (ML-DSA)</strong> y <strong>FIPS 205 (SLH-DSA)</strong>; en marzo de 2025 el NIST añadió HQC, basado en códigos, como KEM de reserva.</p>
+
+<h2 id="lattices">Retículos</h2>
+
+<div class="definition">
+  <span class="th-title">Definición <span class="th-name">(retículo)</span></span>
+  <p>Dados unos vectores linealmente independientes $b_1, \dots, b_n \in \mathbb{R}^n$ (una <strong>base</strong>), el retículo que generan es el conjunto de todas sus combinaciones enteras, $\mathcal{L} = \{\, x_1 b_1 + \dots + x_n b_n : x_i \in \mathbb{Z} \,\}$: una malla regular de puntos.</p>
+</div>
+
+<p>El mismo retículo tiene infinitas bases: multiplicar una base por una matriz entera de determinante $\pm 1$ da otra. Algunas bases son <strong>buenas</strong> (vectores cortos y casi ortogonales) y otras <strong>malas</strong> (largos y casi paralelos). Se cree que dos problemas son difíciles en dimensión alta, para ordenadores clásicos y cuánticos por igual:</p>
+
+<ul>
+  <li><strong>Problema del vector más corto</strong> (SVP): encontrar un vector no nulo de $\mathcal{L}$ de longitud mínima.</li>
+  <li><strong>Problema del vector más cercano</strong> (CVP): dado un punto $t$, encontrar el punto del retículo más cercano a él.</li>
+</ul>
+
+<p>Con una buena base, el CVP es fácil en la práctica: se escribe $t$ en la base y se redondea cada coordenada (el redondeo de László Babai, 1986). Con una mala base, el redondeo cae lejos. Esa asimetría es una trampilla: la buena base es la clave privada y una mala base del mismo retículo, la pública (la idea GGH de Goldreich, Goldwasser y Halevi, 1997). Miklós Ajtai demostró en 1996 algo inusual en criptografía: ciertos problemas aleatorios de retículos son tan difíciles como el <em>peor caso</em> del SVP aproximado.</p>
+
+<figure class="demo" data-demo="postquantum/lattice">
+  <figcaption>El mismo retículo bidimensional con dos bases. Haz clic para colocar un punto objetivo. Con la buena base, el redondeo de Babai encuentra el punto del retículo más cercano; con la mala (el mismo retículo, vectores largos y casi paralelos), el redondeo cae en un punto lejano. En dos dimensiones se ve la respuesta correcta; en las 768 dimensiones de ML-KEM, nadie puede verla.</figcaption>
+</figure>
+
+<h2 id="lwe">Aprender con errores</h2>
+
+<p>En 2005 Oded Regev introdujo el problema sobre el que se construyen ML-KEM y ML-DSA.</p>
+
+<div class="definition">
+  <span class="th-title">Definición <span class="th-name">(LWE)</span></span>
+  <p>Fijemos un módulo $q$, una dimensión $n$ y un secreto $s \in \mathbb{Z}_q^n$. Una muestra LWE es una pareja $(a, \langle a, s \rangle + e)$, con $a$ uniforme en $\mathbb{Z}_q^n$ y $e$ un pequeño error aleatorio. El problema es recuperar $s$ (o solo distinguir esas muestras de parejas uniformemente aleatorias) a partir de muchas de ellas. En forma matricial: dados $A$ y $b = As + e \bmod q$, encontrar $s$.</p>
+</div>
+
+<p>Sin el error, $b = As$ es un sistema lineal que se resuelve por eliminación gaussiana. El pequeño error lo hace, por lo que sabemos, inabordable: es un caso de CVP en un retículo construido a partir de $A$.</p>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(Regev, 2005)</span></span>
+  <p>Con parámetros adecuados (errores gaussianos de tamaño $\alpha q \ge 2\sqrt n$), resolver LWE en el caso medio es al menos tan difícil como resolver el SVP aproximado y problemas de retículos relacionados en el <strong>peor caso</strong>, mediante una reducción cuántica.</p>
+</div>
+
+<p>El cifrado de clave pública de un bit de Regev es lo bastante corto para escribirlo aquí. La clave pública es $(A, b = As + e)$ con $m$ filas. Para cifrar un bit $\mu$, se elige un subconjunto aleatorio $S$ de las filas y se envía</p>
+
+$$u = \sum_{i \in S} a_i, \qquad v = \sum_{i \in S} b_i + \mu \left\lfloor \tfrac{q}{2} \right\rfloor \pmod q.$$
+
+<p>Para descifrar, se calcula $v - \langle u, s \rangle$ y se devuelve 0 si está más cerca de 0 que de $q/2$, y 1 en caso contrario.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposición <span class="th-name">(corrección)</span></span>
+  <p>$v - \langle u, s \rangle = \mu \lfloor q/2 \rfloor + \sum_{i \in S} e_i \pmod q$. Así que el descifrado es correcto siempre que $\left|\sum_{i \in S} e_i\right| &lt; q/4$.</p>
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>$\sum_{i\in S} b_i = \sum_{i \in S} (\langle a_i, s\rangle + e_i) = \langle u, s \rangle + \sum_{i \in S} e_i$, así que al restar $\langle u, s\rangle$ queda el término del mensaje más el error acumulado. Si el error se mantiene por debajo de $q/4$ en valor absoluto, el resultado cae en el lado correcto de la circunferencia $\mathbb{Z}_q$.</p>
+  </div>
+</details>
+
+<figure class="demo" data-demo="postquantum/lwe">
+  <figcaption>Un cifrado LWE de juguete (dimensión 8, 24 muestras, $q = 401$) que cifra tu mensaje bit a bit. Cada punto es un bit descifrado colocado en la circunferencia $\mathbb{Z}_q$ en el valor $v - \langle u, s \rangle$: los bits 0 se agrupan cerca de 0 y los bits 1 cerca de $q/2$. Sube el ruido: los grupos se dispersan, cruzan la frontera de $q/4$ y los bits empiezan a invertirse. Los parámetros reales mantienen la probabilidad de un fallo de descifrado por debajo de $2^{-138}$.</figcaption>
+</figure>
+
+<p>Regev recibió el premio Gödel en 2018 por este trabajo. El LWE simple tiene claves grandes ($n \times m$ números). Los estándares usan <strong>LWE modular</strong>, en el que las entradas de $A$, $s$ y $e$ son polinomios de $\mathbb{Z}_q[x]/(x^{256}+1)$, que se multiplican deprisa con la transformada teórico-numérica: las mismas reducciones de seguridad, con claves de alrededor de un kilobyte.</p>
+
+<h2 id="mlkem">ML-KEM</h2>
+
+<p>ML-KEM (antes CRYSTALS-Kyber, de Roberto Avanzi, Joppe Bos, Léo Ducas, Eike Kiltz y otros) es un <strong>mecanismo de encapsulado de claves</strong>: en lugar de cifrar un mensaje, produce un secreto aleatorio nuevo de 32 bytes junto con un texto cifrado («encapsulado») que solo la clave privada puede abrir. Después el secreto sirve de clave a un cifrado simétrico. Una transformación de Fujisaki–Okamoto convierte el cifrado LWE básico en un KEM seguro frente a ataques de texto cifrado elegido. ML-KEM-768, el nivel recomendado (comparable a AES-192), tiene una clave pública de 1.184 bytes y un texto cifrado de 1.088 bytes, y es más rápido que X25519.</p>
+
+<p>El despliegue fue rápido, e <strong>híbrido</strong>: ML-KEM combinado con X25519, para que la conexión sea segura si cualquiera de los dos resiste. Chrome y Cloudflare activaron X25519+Kyber en 2023–2024; Signal añadió PQXDH en 2023 y el iMessage de Apple, PQ3, en 2024; OpenSSH 10 (2025) convirtió <code>mlkem768x25519</code> en su intercambio de claves por defecto. En 2025 más de un tercio del tráfico web humano que veía Cloudflare ya era poscuántico. «ML-KEM-768 + AES-GCM», en la aplicación de escritorio, encapsula una clave con ML-KEM y cifra con AES-256-GCM, con claves FIPS 203 reales.</p>
+
+<h2 id="mldsa">ML-DSA</h2>
+
+<p>ML-DSA (antes CRYSTALS-Dilithium) firma con retículos modulares mediante la técnica «Fiat–Shamir con abortos» de Vadim Lyubashevsky: el firmante prueba que conoce un secreto corto, y vuelve a empezar cada vez que la firma pudiera filtrar información sobre él. ML-DSA-65 tiene una clave pública de 1.952 bytes y firmas de 3.309 bytes, unas cincuenta veces las de Ed25519, que es el principal coste de la migración: las cadenas de certificados crecen mucho. FN-DSA (Falcon) da firmas más pequeñas con una aritmética de coma flotante más delicada; SLH-DSA da la seguridad más conservadora a costa de firmas de 8 a 50 KB.</p>
+
+<h2 id="migration">La migración</h2>
+
+<p>El conjunto CNSA 2.0 de la NSA estadounidense (2022) exige algoritmos poscuánticos en los sistemas de seguridad nacional entre 2025 y 2033. El plan de transición del NIST (IR 8547, 2024) desaconseja RSA y las curvas elípticas de 112 bits de seguridad en 2030 y los prohíbe por completo en 2035. La lección de DES, MD5 y SHA-1 es que las migraciones duran una década o más; esta ha empezado pronto, y es la primera vez que la comunidad criptográfica sustituye sus algoritmos de clave pública <em>antes</em> de que estén rotos.</p>
+
+<p>La historia que empezó con el desplazamiento de tres letras de César termina, por ahora, aquí: con un secreto escondido en un retículo de 768 dimensiones detrás de un poco de ruido. La <a href="@timeline">página de historia</a> lo pone todo en una línea, y <a href="@app">la app</a> te deja probarlo, de César a ML-KEM, con tus propios datos.</p>
+
+<section class="references">
+  <h2 id="references">Para saber más</h2>
+  <ol>
+    <li>Peter Shor, «Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer», <em>SIAM Journal on Computing</em> 26(5), 1997.</li>
+    <li>Oded Regev, «On Lattices, Learning with Errors, Random Linear Codes, and Cryptography», STOC 2005 (<em>Journal of the ACM</em> 56(6), 2009).</li>
+    <li>Chris Peikert, «A Decade of Lattice Cryptography», <em>Foundations and Trends in Theoretical Computer Science</em> 10(4), 2016.</li>
+    <li>NIST, FIPS 203 (ML-KEM), FIPS 204 (ML-DSA) y FIPS 205 (SLH-DSA), agosto de 2024; NIST IR 8547 (2024).</li>
+    <li>Wouter Castryck y Thomas Decru, «An efficient key recovery attack on SIDH», EUROCRYPT 2023.</li>
+  </ol>
+</section>

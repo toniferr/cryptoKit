@@ -1,0 +1,116 @@
+<!--meta
+{
+  "slug": "secreto-perfecto",
+  "title": "Secreto perfecto",
+  "chain": "Shannon",
+  "headline": "Irrompible, demostrado: la libreta de un solo uso",
+  "dek": "Existe un cifrado que ninguna potencia de cálculo puede romper, y Claude Shannon lo demostró en 1949. También demostró su precio: una clave verdaderamente aleatoria tan larga como todo lo que vayas a enviar, usada una sola vez. Si se reutiliza, como hicieron los soviéticos, el mensaje se derrama.",
+  "era": "1882 – 1949",
+  "people": ["Frank Miller", "Gilbert Vernam", "Joseph Mauborgne", "Claude Shannon", "Meredith Gardner"],
+  "theorems": ["La libreta de un solo uso tiene secreto perfecto", "Cota de Shannon: $|\\mathcal{K}| \\ge |\\mathcal{M}|$", "Distancia de unicidad", "Confusión y difusión"]
+}
+-->
+
+<p>Todos los cifrados de los dos capítulos anteriores cayeron porque el texto cifrado llevaba alguna huella del texto en claro: las frecuencias de las letras, una clave que se repite, una letra que nunca se cifra en sí misma. ¿Hay un cifrado cuyo texto cifrado no lleve <em>ninguna</em> huella? En 1882 un banquero californiano, Frank Miller, publicó un código telegráfico que sumaba al mensaje una lista de números aleatorios y tiraba la lista tras usarla. Nadie se dio cuenta. En 1917 Gilbert Vernam, ingeniero de AT&amp;T, construyó la versión eléctrica: los códigos de cinco bits de un teletipo combinados, bit a bit, con los de una cinta perforada de clave. El capitán del ejército Joseph Mauborgne añadió las dos condiciones que lo hacen perfecto: la cinta debe ser <strong>aleatoria</strong> y <strong>no debe reutilizarse nunca</strong>. El resultado es la <strong>libreta de un solo uso</strong> (<em>one-time pad</em>).</p>
+
+<h2 id="otp">La libreta de un solo uso</h2>
+
+<p>Con bits, la combinación es el o exclusivo, $\oplus$: $0 \oplus 0 = 1 \oplus 1 = 0$ y $0 \oplus 1 = 1 \oplus 0 = 1$. Es su propio inverso, $(m \oplus k) \oplus k = m$, así que cifrar y descifrar son la misma operación:</p>
+
+$$c = m \oplus k, \qquad m = c \oplus k, \qquad k \text{ uniformemente aleatoria, } |k| = |m|, \text{ usada una vez.}$$
+
+<p>Con letras, la misma idea es un Vigenère con una clave aleatoria tan larga como el mensaje: una clave que no se repite nunca no deja a Kasiski ni a Friedman nada que medir.</p>
+
+<figure class="demo" data-demo="secrecy/otp">
+  <figcaption>La libreta de un solo uso con bytes. Arriba: tu mensaje XOR una libreta aleatoria da el texto cifrado. Abajo: escribe cualquier otro mensaje de la misma longitud y la figura muestra la libreta que convertiría el mismo texto cifrado en él. Esa libreta es exactamente igual de probable que la verdadera, así que el texto cifrado por sí solo no puede distinguir entre los dos mensajes. Eso es el secreto perfecto.</figcaption>
+</figure>
+
+<h2 id="shannon">La definición de Shannon</h2>
+
+<p>Durante la guerra Claude Shannon, en los Bell Labs, trabajó en el teléfono seguro SIGSALY y escribió un informe clasificado sobre la teoría del secreto, publicado en 1949 como <em>Communication Theory of Secrecy Systems</em>. Convirtió la criptografía en una rama de las matemáticas. Modelemos el mensaje $M$, la clave $K$ y el texto cifrado $C$ como variables aleatorias.</p>
+
+<div class="definition">
+  <span class="th-title">Definición <span class="th-name">(secreto perfecto)</span></span>
+  <p>Un cifrado tiene secreto perfecto si ver el texto cifrado no cambia lo que un adversario cree sobre el mensaje: para todo mensaje $m$ y todo texto cifrado $c$ con $\Pr[C = c] &gt; 0$,</p>
+  $$\Pr[M = m \mid C = c] = \Pr[M = m].$$
+</div>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(la libreta de un solo uso tiene secreto perfecto)</span></span>
+  <p>Si la clave $K$ es uniforme en $\{0,1\}^n$ e independiente de $M$, entonces $C = M \oplus K$ es uniforme en $\{0,1\}^n$ e independiente de $M$.</p>
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>Para cualesquiera $m$ y $c$, $C = c$ dado $M = m$ ocurre exactamente cuando $K = m \oplus c$, que tiene probabilidad $2^{-n}$ sea cual sea $m$. Así que $\Pr[C = c \mid M = m] = 2^{-n} = \Pr[C = c]$, y por la regla de Bayes $\Pr[M = m \mid C = c] = \Pr[C = c \mid M = m]\Pr[M = m] / \Pr[C = c] = \Pr[M = m]$.</p>
+  </div>
+</details>
+
+<p>Ningún ordenador, ni ahora ni nunca, cuántico o no, puede hacer nada mejor que adivinar. La demostración no depende de ninguna hipótesis sobre la potencia del atacante: es seguridad <strong>teórica de la información</strong>. Pero tiene un precio.</p>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(Shannon, 1949)</span></span>
+  <p>En todo cifrado con secreto perfecto hay al menos tantas claves como mensajes posibles: $|\mathcal{K}| \ge |\mathcal{M}|$. En particular, para enviar $n$ bits aleatorios con secreto perfecto hacen falta $n$ bits de clave.</p>
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>Fijemos un texto cifrado $c$ que pueda darse. Cada clave descifra $c$ en exactamente un mensaje, así que dado $c$ hay como mucho $|\mathcal{K}|$ mensajes posibles. Si $|\mathcal{K}| &lt; |\mathcal{M}|$, algún mensaje $m$ con $\Pr[M = m] &gt; 0$ es imposible dado $c$: $\Pr[M = m \mid C = c] = 0 \ne \Pr[M = m]$.</p>
+  </div>
+</details>
+
+<p>Por eso la libreta de un solo uso es rara. La clave debe generarse de verdad al azar, llevarse al otro extremo de antemano con un mensajero de confianza, guardarse a salvo y destruirse tras usarla. Se usó donde el coste merecía la pena: la línea directa Washington–Moscú de 1963 funcionaba con cintas de un solo uso, igual que los mensajes de radio de los espías, leídos de diminutas libretas de cifras aleatorias.</p>
+
+<h2 id="venona">La libreta de dos usos</h2>
+
+<p>La libreta no debe reutilizarse nunca, y el motivo es una línea de álgebra:</p>
+
+$$c_1 \oplus c_2 = (m_1 \oplus k) \oplus (m_2 \oplus k) = m_1 \oplus m_2.$$
+
+<p>La clave se cancela, y lo que queda es la combinación de dos textos en lenguaje natural, que está llena de redundancia. Basta adivinar una palabra probable de un mensaje (un <strong>crib</strong>), combinarla con $m_1 \oplus m_2$ en cada posición, y donde la conjetura es correcta aparece un fragmento legible del otro mensaje. Cada fragmento sugiere una conjetura más larga.</p>
+
+<figure class="demo" data-demo="secrecy/twotime">
+  <figcaption>Romper una libreta reutilizada. Se cifraron dos mensajes con la misma libreta aleatoria; el atacante solo tiene c₁ y c₂. Su XOR no depende de la libreta. Arrastra una palabra supuesta a lo largo de él: en los desplazamientos correctos asoma el otro mensaje (las filas resaltadas son legibles). Prueba palabras cortas y comunes, y luego conjeturas más largas.</figcaption>
+</figure>
+
+<p>Ocurrió. Con las prisas de la guerra, la fábrica soviética de libretas imprimió algunas páginas dos veces en 1942. A partir de 1943 el Servicio de Inteligencia de Señales del ejército estadounidense (primero Gene Grabeel, después el lingüista Meredith Gardner) explotó los duplicados en el proyecto <strong>Venona</strong>, que acabó leyendo parte de unos 3.000 mensajes y desenmascaró a espías soviéticos en el Proyecto Manhattan, entre ellos Klaus Fuchs. El mismo error reaparece en los sistemas modernos cada vez que un cifrado de flujo o el <a href="@ch:modes#ctr">modo CTR</a> reutilizan un nonce: en 2017 el ataque KRACK obligaba a los dispositivos wifi a reinstalar una clave y repetir sus nonces.</p>
+
+<h2 id="entropy">Entropía y distancia de unicidad</h2>
+
+<p>Shannon midió también cuánto revela un texto cifrado cuando la clave es más corta que el mensaje. La herramienta es la <strong>entropía</strong> que acababa de definir para la comunicación: para una variable aleatoria con probabilidades $p_i$,</p>
+
+$$H(X) = -\sum_i p_i \log_2 p_i \quad \text{bits},$$
+
+<p>el número medio de bits necesarios para describirla. Una letra uniformemente aleatoria lleva $\log_2 26 \approx 4{,}7$ bits, pero un idioma natural lleva solo entre $1$ y $1{,}5$ bits por letra, porque es muy previsible: el resto, unos $3{,}2$ bits por letra, es <strong>redundancia</strong> $D$. Cada letra del texto cifrado da por tanto al atacante unos $D$ bits de información sobre la clave.</p>
+
+<div class="theorem">
+  <span class="th-title">Estimación <span class="th-name">(distancia de unicidad, Shannon)</span></span>
+  <p>Para un cifrado cuyas claves son uniformemente aleatorias, la longitud de texto cifrado a partir de la cual solo una clave da un texto con sentido es de aproximadamente</p>
+  $$U \approx \frac{H(K)}{D}.$$
+  <p>Para la sustitución monoalfabética, $H(K) = \log_2 26! \approx 88{,}4$ bits y $D \approx 3{,}2$, así que $U \approx 28$ letras: cualquier texto cifrado por sustitución más largo tiene, en principio, una única solución.</p>
+</div>
+
+<p>Para una libreta de un solo uso, $H(K)$ crece con el mensaje y $U$ es infinita; para una clave AES de 128 bits, un par de bloques de texto ya determinan la clave en principio. Determinarla, no encontrarla: encontrarla seguiría costando $2^{128}$ intentos. Esa diferencia es toda la criptografía moderna.</p>
+
+<h2 id="computational">Del secreto perfecto a la seguridad computacional</h2>
+
+<p>Como el secreto perfecto exige claves imposibles de manejar, los cifrados prácticos aspiran a algo más débil: que romperlos sea <strong>inviable</strong> para un atacante con recursos limitados, aunque en principio sea posible. Shannon dio los dos principios de diseño que siguen todos los cifrados en bloque del capítulo siguiente:</p>
+
+<ul>
+  <li><strong>Confusión</strong>: hacer la relación entre la clave y el texto cifrado tan compleja como sea posible, para que la estadística del texto cifrado no diga nada sencillo sobre la clave (sustituciones no lineales).</li>
+  <li><strong>Difusión</strong>: repartir la influencia de cada bit del texto en claro sobre muchos bits del texto cifrado, para disipar la redundancia del idioma (permutaciones y mezclas).</li>
+</ul>
+
+<p>En 1982 Shafi Goldwasser y Silvio Micali dieron la definición moderna, la <strong>seguridad semántica</strong>: todo lo que un adversario eficiente pueda calcular sobre el mensaje a partir del texto cifrado podría calcularlo sin él. Es la definición de Shannon con «todo adversario» sustituido por «todo adversario eficiente», y está en la base de todas las demostraciones de seguridad desde entonces.</p>
+
+<section class="references">
+  <h2 id="references">Para saber más</h2>
+  <ol>
+    <li>Claude E. Shannon, «Communication Theory of Secrecy Systems», <em>Bell System Technical Journal</em> 28(4), 1949.</li>
+    <li>Steven M. Bellovin, «Frank Miller: Inventor of the One-Time Pad», <em>Cryptologia</em> 35(3), 2011.</li>
+    <li>Robert L. Benson, <em>The Venona Story</em>, NSA Center for Cryptologic History (2001).</li>
+    <li>Shafi Goldwasser y Silvio Micali, «Probabilistic Encryption», <em>Journal of Computer and System Sciences</em> 28, 1984.</li>
+  </ol>
+</section>

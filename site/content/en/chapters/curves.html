@@ -1,0 +1,126 @@
+<!--meta
+{
+  "slug": "elliptic-curves",
+  "title": "Elliptic curves",
+  "chain": "ECC",
+  "headline": "The arithmetic of curves: ECDH, ECDSA, Ed25519",
+  "dek": "Points on a cubic curve can be added with a ruler: draw the line, find the third point, reflect it. Over a finite field this geometry becomes a group in which logarithms are even harder than in RSA's numbers, so a 256-bit key does the work of a 3,072-bit one. It is the cryptography inside every phone, passkey and TLS connection today.",
+  "era": "1985 – 2013",
+  "people": ["Neal Koblitz", "Victor Miller", "Scott Vanstone", "Helmut Hasse", "John Pollard", "Daniel J. Bernstein", "Tanja Lange"],
+  "theorems": ["The chord-and-tangent law makes $E$ an abelian group", "Hasse: $|\\#E(\\mathbb{F}_p) - (p+1)| \\le 2\\sqrt{p}$", "Pollard's rho: $\\approx \\sqrt{n}$ steps", "Reusing an ECDSA nonce reveals the private key"]
+}
+-->
+
+<p>Diffie–Hellman and RSA need numbers of thousands of bits, because sub-exponential algorithms (the number field sieve and its cousins for discrete logarithms) attack the multiplicative structure of the integers. In 1985 Neal Koblitz and Victor Miller, independently, proposed doing the same cryptography in a different group, where no such shortcut was known: the points of an <strong>elliptic curve</strong> over a finite field. Forty years later there is still none, and elliptic-curve cryptography (ECC) has replaced RSA almost everywhere.</p>
+
+<h2 id="group-law">Adding points with a ruler</h2>
+
+<p>An elliptic curve, in the form cryptographers use, is the set of solutions of</p>
+
+$$E : y^2 = x^3 + ax + b, \qquad 4a^3 + 27b^2 \ne 0,$$
+
+<p>together with one extra point $\mathcal{O}$, “at infinity”. The condition rules out cusps and self-crossings. The curve is symmetric about the $x$-axis. Points can be added: draw the line through $P$ and $Q$; it meets the curve in exactly one more point $R'$; reflect it across the $x$-axis to get $P + Q$. To double a point, use the tangent. A vertical line meets the curve at infinity, so $P + (-P) = \mathcal{O}$, where $-P$ is the reflection of $P$.</p>
+
+<figure class="demo" data-demo="curves/real">
+  <figcaption>The chord-and-tangent law over the real numbers. Change the curve with $a$ and $b$ and move $P$ and $Q$ along it. The line through them cuts the curve at a third point $-(P+Q)$; its reflection is $P + Q$. When $P = Q$ the line is the tangent. With $a = -2$ and $b$ small, the curve splits into two pieces, and the law still works.</figcaption>
+</figure>
+
+<p>In coordinates, for $P = (x_1, y_1)$ and $Q = (x_2, y_2)$ with $P \ne -Q$, let $\lambda$ be the slope of the line, $\lambda = (y_2 - y_1)/(x_2 - x_1)$, or $\lambda = (3x_1^2 + a)/(2y_1)$ for the tangent. Then</p>
+
+$$x_3 = \lambda^2 - x_1 - x_2, \qquad y_3 = \lambda(x_1 - x_3) - y_1.$$
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(the group law)</span></span>
+  <p>With this addition and $\mathcal{O}$ as identity, the points of $E$ form an <strong>abelian group</strong>. The same formulas, computed in any field $K$, make $E(K)$, the points with coordinates in $K$, a group.</p>
+</div>
+
+<details class="proof">
+  <summary>About the proof</summary>
+  <div>
+    <p>Commutativity is clear (the line through $P$ and $Q$ is the line through $Q$ and $P$), the identity and inverses come from vertical lines, and closure from the fact that a line meets a cubic in three points counted with multiplicity. Associativity is the hard part: it can be checked by brute-force algebra on the formulas, or proved elegantly with the Cayley–Bacharach theorem on cubics through eight common points, or via the Riemann–Roch theorem, which identifies $E$ with its own Picard group.</p>
+  </div>
+</details>
+
+<h2 id="finite">Curves over a finite field</h2>
+
+<p>Cryptography needs exact, finite arithmetic, so the coordinates live in $\mathbb{F}_p$, the integers modulo a prime $p$. The “curve” becomes a scatter of points with no visible shape, but the formulas, and the group, are the same.</p>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Hasse, 1933)</span></span>
+  <p>The number of points of $E$ over $\mathbb{F}_p$ (counting $\mathcal{O}$) satisfies $|\#E(\mathbb{F}_p) - (p + 1)| \le 2\sqrt{p}$.</p>
+</div>
+
+<p>So a curve over a 256-bit prime field has about $2^{256}$ points; Schoof's algorithm (1985) counts them exactly, and curves are chosen whose number of points is a large prime (or a small multiple of one), so that the group is cyclic and has no small subgroups to hide in.</p>
+
+<figure class="demo" data-demo="curves/finite">
+  <figcaption>The curve $y^2 = x^3 + 2x + 3$ over $\mathbb{F}_{97}$: every point of it, and the multiples $G, 2G, 3G, \dots$ of a generator $G$. Press play: the multiples jump around the grid with no pattern you could follow backwards. Given only the final point, recovering $k$ is the elliptic-curve discrete logarithm problem. Here a computer finds it instantly by trying all $k$; with 256-bit numbers, no computer can.</figcaption>
+</figure>
+
+<h2 id="ecdlp">The discrete logarithm on a curve</h2>
+
+<p>Multiplying a point by a scalar, $kP = P + P + \dots + P$, is fast by double-and-add (the additive version of square-and-multiply). Undoing it is the <strong>elliptic-curve discrete logarithm problem</strong> (ECDLP): given $P$ and $Q = kP$, find $k$.</p>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(generic algorithms, Pollard 1978; Shoup 1997)</span></span>
+  <p>In a cyclic group of prime order $n$, Pollard's rho algorithm finds discrete logarithms in about $\sqrt{\pi n / 2}$ group operations and constant memory. Conversely, any algorithm that uses the group only through its operations (a <em>generic</em> algorithm) needs about $\sqrt{n}$ of them.</p>
+</div>
+
+<p>Pollard's rho is the birthday paradox again: a pseudorandom walk on the group eventually repeats a point, and a repetition reveals $k$. For good elliptic curves, nothing better than these generic attacks is known. So security grows with half the bit size of the group order, and the keys are short:</p>
+
+<div class="compare-wrap"><table class="theory-table">
+  <thead><tr><th>Security</th><th>Symmetric</th><th>RSA / finite-field DH</th><th>Elliptic curve</th></tr></thead>
+  <tbody>
+    <tr><td>112 bits</td><td>3DES</td><td>2,048 bits</td><td>224 bits</td></tr>
+    <tr><td>128 bits</td><td>AES-128</td><td>3,072 bits</td><td>256 bits</td></tr>
+    <tr><td>192 bits</td><td>AES-192</td><td>7,680 bits</td><td>384 bits</td></tr>
+    <tr><td>256 bits</td><td>AES-256</td><td>15,360 bits</td><td>512 bits</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="ecdh">ECDH and X25519</h2>
+
+<p>Elliptic-curve Diffie–Hellman is the protocol of <a href="@ch:publickey#dh">chapter 08</a> with the new group: Alice sends $aG$, Bob sends $bG$, both compute $abG$. In 2006 Daniel J. Bernstein published <strong>Curve25519</strong>, the curve $y^2 = x^3 + 486662x^2 + x$ over the prime $2^{255} - 19$, designed so that the fast, simple implementation is also the safe one: every 32-byte string is a valid public key, the computation (the Montgomery ladder) runs in constant time, and there are no special cases to forget. Its key agreement, <strong>X25519</strong>, is now the default of TLS 1.3, SSH, Signal and WireGuard. The desktop app's “X25519 + AES-GCM” makes a fresh ephemeral key pair for every message, agrees a secret with the recipient's public key and encrypts with AES-GCM: the ECIES pattern.</p>
+
+<h2 id="ecdsa">ECDSA and the nonce</h2>
+
+<p>The <strong>Elliptic Curve Digital Signature Algorithm</strong>, proposed by Scott Vanstone in 1992 and standardised by ANSI (1999) and NIST (2000), signs the hash $h$ of a message with the private key $d$ (public key $Q = dG$) on a curve whose base point $G$ has prime order $n$:</p>
+
+<ol>
+  <li>choose a random nonce $k \in [1, n-1]$ and let $r = (kG)_x \bmod n$;</li>
+  <li>let $s = k^{-1}(h + rd) \bmod n$; the signature is $(r, s)$.</li>
+</ol>
+
+<p>The verifier computes $u_1 = h s^{-1}$, $u_2 = r s^{-1}$ and accepts if $(u_1 G + u_2 Q)_x \equiv r$. ECDSA over the NIST curve P-256 signs most TLS certificates, passkeys and bank cards. Its weak point is the nonce.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposition <span class="th-name">(a reused nonce leaks the key)</span></span>
+  <p>If two messages with hashes $h_1 \ne h_2$ are signed with the same nonce $k$ (visible because $r$ is the same), then</p>
+  $$k = \frac{h_1 - h_2}{s_1 - s_2} \bmod n, \qquad d = \frac{s_1 k - h_1}{r} \bmod n.$$
+</div>
+
+<details class="proof">
+  <summary>Proof</summary>
+  <div>
+    <p>$s_1 k = h_1 + rd$ and $s_2 k = h_2 + rd$. Subtracting, $(s_1 - s_2)k = h_1 - h_2$, which gives $k$; then the first equation gives $d$. Even a few biased bits of $k$ across many signatures are enough to recover $d$ with lattice techniques.</p>
+  </div>
+</details>
+
+<p>In 2010 the fail0verflow group showed that Sony signed PlayStation 3 software with the <em>same</em> $k$ every time, recovered Sony's private key, and could sign anything. In 2013 a bug in Android's random number generator made Bitcoin wallets reuse nonces, and their coins were stolen. The fix is to never draw $k$ at random: derive it from the key and the message (RFC 6979, 2013).</p>
+
+<h2 id="eddsa">Ed25519</h2>
+
+<p>Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang designed <strong>Ed25519</strong> (2011) on an Edwards-form version of Curve25519, with complete addition formulas (no exceptional cases) and a nonce derived deterministically from a hash of the private key and the message. It is fast, its keys are 32 bytes and its signatures 64, and there is no random nonce to get wrong. SSH, Signal, Tor, Git and the Linux kernel's module signing use it; RFC 8032 (2017) and FIPS 186-5 (2023) standardise it.</p>
+
+<h2 id="trust">Which curves to trust</h2>
+
+<p>The NIST curves P-256 and P-384 were generated in 1999 from seeds that were never explained. In 2013 the Snowden documents confirmed that the NSA had backdoored <strong>Dual_EC_DRBG</strong>, an elliptic-curve random number generator standardised by NIST in 2006: whoever knew the secret relation between its two points could predict its output. No weakness has been found in P-256 itself, but the episode made “rigid”, explainable parameters, like Curve25519's, a design requirement (Bernstein and Lange's SafeCurves project). The desktop app offers both families: ECDSA P-256 for compatibility, Ed25519 and X25519 as first choices. All of them, like RSA, fall to <a href="@ch:postquantum">Shor's algorithm</a>.</p>
+
+<section class="references">
+  <h2 id="references">Further reading</h2>
+  <ol>
+    <li>Neal Koblitz, “Elliptic Curve Cryptosystems”, <em>Mathematics of Computation</em> 48, 1987; Victor Miller, “Use of Elliptic Curves in Cryptography”, CRYPTO 1985.</li>
+    <li>Joseph Silverman and John Tate, <em>Rational Points on Elliptic Curves</em> (1992; 2nd ed. 2015).</li>
+    <li>Daniel J. Bernstein, “Curve25519: new Diffie-Hellman speed records”, PKC 2006; Bernstein et al., “High-speed high-security signatures”, CHES 2011.</li>
+    <li>fail0verflow, “Console Hacking 2010: PS3 Epic Fail”, 27th Chaos Communication Congress.</li>
+  </ol>
+</section>

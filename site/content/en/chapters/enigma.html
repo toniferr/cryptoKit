@@ -1,0 +1,122 @@
+<!--meta
+{
+  "slug": "enigma",
+  "title": "Enigma",
+  "chain": "Enigma",
+  "headline": "The machine that lost a war",
+  "dek": "An electromechanical cipher with 159 quintillion settings, used by every branch of the German armed forces, broken first by three Polish mathematicians with permutation theory and then, on an industrial scale, at Bletchley Park. Its story shows that the weakest part of a cipher is often the way it is used.",
+  "era": "1918 – 1945",
+  "people": ["Arthur Scherbius", "Marian Rejewski", "Jerzy Różycki", "Henryk Zygalski", "Gustave Bertrand", "Alan Turing", "Gordon Welchman", "Joan Clarke"],
+  "theorems": ["Enigma is an involution with no fixed points", "Conjugate permutations have the same cycle structure", "Key space $\\approx 1.59 \\times 10^{20}$"]
+}
+-->
+
+<p>After the First World War, cipher clerks were the bottleneck of every army: encrypting by hand was slow and error-prone, and the ciphers simple enough to use under fire were breakable. Several inventors had the same idea at the same time: wire the substitution into a rotating disc, and let the machine change the substitution after every letter. Edward Hebern in the United States, Hugo Koch in the Netherlands, Arvid Damm in Sweden, and Arthur Scherbius in Germany, who patented his machine in 1918 and sold it under the name <strong>Enigma</strong> from 1923. The German navy adopted it in 1926, the army in 1928 and the air force later; by 1945 tens of thousands of machines were in service.</p>
+
+<h2 id="machine">How Enigma works</h2>
+
+<p>Pressing a key closes an electrical circuit that ends in one of 26 lamps. On its way the current passes through:</p>
+
+<ol>
+  <li>the <strong>plugboard</strong> (<em>Steckerbrett</em>), where cables swap pairs of letters (ten pairs, by regulation);</li>
+  <li>three <strong>rotors</strong>, chosen from five and placed in any order; each rotor is a fixed scrambled wiring of 26 contacts on one face to 26 on the other, and its <strong>ring setting</strong> shifts the wiring relative to the letters on its rim;</li>
+  <li>the <strong>reflector</strong> (<em>Umkehrwalze</em>), which connects the letters in pairs and sends the current back through the three rotors by a different path;</li>
+  <li>the plugboard again, and a lamp.</li>
+</ol>
+
+<p>Before the current flows, the right rotor turns one step. When it passes its notch, it also turns the middle rotor; when the middle rotor reaches its own notch, it turns the left rotor <em>and itself</em> on the next key press: the famous <strong>double step</strong>. Because the rotors move, the same letter is encrypted differently every time, and the substitution repeats only after $26 \times 25 \times 26 = 16\,900$ letters.</p>
+
+<figure class="demo" data-demo="enigma/machine">
+  <figcaption>A working Enigma I, with the same rotors, reflectors, notches and double step as the Wehrmacht's (and as the desktop app). Type on the keyboard or click the keys; turn the rotors with the arrows to set the start position. The diagram traces the current of the last key: forward through the plugboard and the rotors (right to left), bounced by the reflector, and back by another path. To decrypt, return to the same start position and type the ciphertext.</figcaption>
+</figure>
+
+<h2 id="involution">A mathematical portrait</h2>
+
+<p>Each key press applies a permutation of the 26 letters. Write $P$ for the plugboard, $R_1, R_2, R_3$ for the three rotors in their current positions (right, middle, left) and $U$ for the reflector. The current goes through $P$, $R_1$, $R_2$, $R_3$, $U$ and back, so the permutation is</p>
+
+$$E = P^{-1} R_1^{-1} R_2^{-1} R_3^{-1}\, U\, R_3 R_2 R_1 P.$$
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Enigma's symmetry and its flaw)</span></span>
+  <p>At every position, $E$ is an <strong>involution</strong> ($E^2 = \mathrm{id}$) with <strong>no fixed points</strong> ($E(x) \neq x$ for every letter $x$). In particular encryption and decryption are the same operation, and no letter is ever encrypted to itself.</p>
+</div>
+
+<details class="proof">
+  <summary>Proof</summary>
+  <div>
+    <p>Write $S = R_3 R_2 R_1 P$, so $E = S^{-1} U S$. The reflector pairs letters, so $U^2 = \mathrm{id}$ and $U(y) \neq y$ for every $y$. Then $E^2 = S^{-1} U S S^{-1} U S = S^{-1} U^2 S = \mathrm{id}$. And if $E(x) = x$ then $U(S(x)) = S(x)$, a fixed point of $U$, which does not exist.</p>
+  </div>
+</details>
+
+<p>The symmetry was a convenience: the same machine, with the same settings, both encrypted and decrypted. The lack of fixed points was a gift to the enemy, as the crib attack below shows.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposition <span class="th-name">(the Army Enigma's key space)</span></span>
+  <p>With three rotors chosen from five, 26 start positions each and ten plugboard cables, the number of daily keys is</p>
+  $$\underbrace{5 \cdot 4 \cdot 3}_{\text{rotor order}} \times \underbrace{26^3}_{\text{positions}} \times \underbrace{\frac{26!}{6!\; 10!\; 2^{10}}}_{\text{plugboard}} = 60 \times 17\,576 \times 150\,738\,274\,937\,250 \approx 1.59 \times 10^{20} \approx 2^{67}.$$
+</div>
+
+<details class="proof">
+  <summary>Counting the plugboard</summary>
+  <div>
+    <p>Choose which 20 letters are plugged and how they pair up, leaving 6 unplugged. Line up the 26 letters in any order ($26!$ ways), plug the first 20 in consecutive pairs and leave the last 6 alone. Each wiring is counted $6!$ times (order of the unplugged letters) $\times\, 10!$ (order of the pairs) $\times\, 2^{10}$ (order inside each pair).</p>
+  </div>
+</details>
+
+<p>Almost all of that number comes from the plugboard. Rejewski's genius was to find a quantity that the plugboard does not change.</p>
+
+<h2 id="rejewski">Rejewski: a theorem breaks Enigma</h2>
+
+<p>In 1932 the Polish Cipher Bureau gave the problem to Marian Rejewski, a 27-year-old mathematician from Poznań, and later to Jerzy Różycki and Henryk Zygalski. The German procedure helped them: each message began with a three-letter <strong>message key</strong>, chosen by the operator, encrypted <em>twice</em> at the day's setting (“to make sure it arrives”). So letters 1 and 4 of every message were encryptions of the same letter, and so were 2 and 5, and 3 and 6. Calling $A, B, \dots, F$ the permutations at the first six positions, the day's messages revealed the products $AD$, $BE$, $CF$ (if $A(x) = y$ and $D(x) = z$, then $AD$ sends $y$ to $z$, since $A$ is an involution).</p>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(conjugation preserves cycles)</span></span>
+  <p>For permutations $\sigma$ and $\pi$, the permutation $\pi^{-1} \sigma \pi$ has exactly the same cycle structure (the same number of cycles of each length) as $\sigma$.</p>
+</div>
+
+<details class="proof">
+  <summary>Proof</summary>
+  <div>
+    <p>If $(x_1\, x_2\, \dots\, x_k)$ is a cycle of $\sigma$, then $(\pi^{-1}(x_1)\, \dots\, \pi^{-1}(x_k))$ is a cycle of $\pi^{-1}\sigma\pi$: indeed $\pi^{-1}\sigma\pi(\pi^{-1}(x_i)) = \pi^{-1}(\sigma(x_i)) = \pi^{-1}(x_{i+1})$. Relabelling the letters by $\pi^{-1}$ maps cycles to cycles of the same length.</p>
+  </div>
+</details>
+
+<p>The plugboard enters $AD$ only by conjugation, so the cycle structure of $AD$, $BE$ and $CF$ depends only on the rotor order and positions: $6 \times 17\,576 = 105\,456$ possibilities, a number small enough to catalogue. The Poles built a machine, the <em>cyclometer</em>, to compute the catalogue, and from 1933 they read German traffic routinely. Rejewski had also reconstructed the wiring of the rotors, using the theory of permutations together with operating manuals and old keys sold to French intelligence (Gustave Bertrand) by a German clerk, Hans-Thilo Schmidt.</p>
+
+<p>The Germans changed procedures and added two rotors in 1938, multiplying the work by ten. On 25 July 1939, five weeks before the invasion of Poland, the Poles met their British and French allies in the Pyry forest near Warsaw and gave them everything: their methods, Zygalski's perforated sheets and two reconstructed Enigma machines.</p>
+
+<h2 id="bletchley">Bletchley Park and the crib</h2>
+
+<p>At Bletchley Park, the British code-breaking centre, Alan Turing designed a new machine, the <strong>bombe</strong> (1940), improved by Gordon Welchman's diagonal board. It did not need the doubled message key, which the Germans dropped in May 1940. It needed a <strong>crib</strong>: a guess of some plaintext and its position. Military messages were full of them: <em>WETTERBERICHT</em> (weather report), <em>KEINE BESONDEREN EREIGNISSE</em> (nothing to report), call signs, ranks, the same greeting every morning.</p>
+
+<p>The theorem above tells where a crib can go: since no letter encrypts to itself, any position where a crib letter coincides with the ciphertext letter below it is impossible. Sliding the crib along the ciphertext eliminates most positions at once; for each survivor, the bombe tested all rotor orders and positions against the chain of letter pairs the crib implied.</p>
+
+<figure class="demo" data-demo="enigma/crib">
+  <figcaption>Crib dragging. The first row is an intercepted ciphertext (made with a real Enigma setting). Each row below places the crib at a different offset; a red letter means the crib's letter equals the ciphertext's letter there, which Enigma cannot produce, so that offset is ruled out. Try other likely words.</figcaption>
+</figure>
+
+<p>Navy Enigma, with four rotors from 1942 and stricter procedures, resisted longer; Joan Clarke, Turing and Hugh Alexander attacked it with Banburismus, a statistical method, and with codebooks captured from U-boats and weather ships (U-110 in May 1941, U-559 in October 1942). The intelligence, codenamed <strong>Ultra</strong>, was distributed with extreme care so that the Germans would not suspect. Historians estimate that it shortened the war in Europe by up to two years.</p>
+
+<p class="note"><strong>Not only Enigma.</strong> The German high command used a different machine, the Lorenz SZ40/42 teleprinter cipher. Bill Tutte reconstructed its logic in 1942 without ever seeing one, and Tommy Flowers built <strong>Colossus</strong> (1944) to attack it: the first programmable electronic digital computer.</p>
+
+<h2 id="lessons">Why Enigma fell</h2>
+
+<ul>
+  <li><strong>A structural flaw</strong>: no letter encrypts to itself, which turns every crib into a filter.</li>
+  <li><strong>Procedures that repeat information</strong>: the doubled message key gave Rejewski his equations.</li>
+  <li><strong>Predictable plaintext</strong>: weather reports, formulaic greetings, “nothing to report”.</li>
+  <li><strong>Human shortcuts</strong>: operators chose message keys like AAA or their girlfriend's initials (the “cillies”).</li>
+  <li><strong>Overconfidence</strong>: a key space of $2^{67}$ looked unbreakable, and the Germans never seriously considered that the machine was being read.</li>
+</ul>
+
+<p>Every one of these lessons reappears in modern cryptography. The next chapter asks the opposite question: is there a cipher that cannot be broken at all?</p>
+
+<section class="references">
+  <h2 id="references">Further reading</h2>
+  <ol>
+    <li>Marian Rejewski, “How Polish mathematicians deciphered the Enigma”, <em>Annals of the History of Computing</em> 3(3), 1981.</li>
+    <li>Gordon Welchman, <em>The Hut Six Story</em> (1982).</li>
+    <li>Andrew Hodges, <em>Alan Turing: The Enigma</em> (1983).</li>
+    <li>Tony Sale's Codes and Ciphers pages and the Bletchley Park Trust archives.</li>
+  </ol>
+</section>

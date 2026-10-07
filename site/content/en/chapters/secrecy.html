@@ -1,0 +1,116 @@
+<!--meta
+{
+  "slug": "perfect-secrecy",
+  "title": "Perfect secrecy",
+  "chain": "Shannon",
+  "headline": "Unbreakable, provably: the one-time pad",
+  "dek": "There is a cipher that no amount of computing power can break, and Claude Shannon proved it in 1949. He also proved its price: a truly random key as long as everything you will ever send, used only once. Reuse it, as the Soviets did, and the message pours out.",
+  "era": "1882 – 1949",
+  "people": ["Frank Miller", "Gilbert Vernam", "Joseph Mauborgne", "Claude Shannon", "Meredith Gardner"],
+  "theorems": ["The one-time pad is perfectly secret", "Shannon's bound: $|\\mathcal{K}| \\ge |\\mathcal{M}|$", "Unicity distance", "Confusion and diffusion"]
+}
+-->
+
+<p>Every cipher of the last two chapters fell because the ciphertext carried some trace of the plaintext: letter frequencies, a repeating key, a letter that never encrypts to itself. Is there a cipher whose ciphertext carries <em>no</em> trace at all? In 1882 a Californian banker, Frank Miller, published a telegraph code that added a list of random numbers to the message and threw the list away after use. Nobody noticed. In 1917 Gilbert Vernam, an engineer at AT&amp;T, built the electrical version: the five-bit codes of a teleprinter combined, bit by bit, with the codes of a punched key tape. Army captain Joseph Mauborgne added the two conditions that make it perfect: the tape must be <strong>random</strong>, and it must <strong>never be reused</strong>. The result is the <strong>one-time pad</strong>.</p>
+
+<h2 id="otp">The one-time pad</h2>
+
+<p>On bits, the combination is the exclusive or, $\oplus$: $0 \oplus 0 = 1 \oplus 1 = 0$ and $0 \oplus 1 = 1 \oplus 0 = 1$. It is its own inverse, $(m \oplus k) \oplus k = m$, so encryption and decryption are the same operation:</p>
+
+$$c = m \oplus k, \qquad m = c \oplus k, \qquad k \text{ uniformly random, } |k| = |m|, \text{ used once.}$$
+
+<p>On letters, the same idea is Vigenère with a random key as long as the message: a key that never repeats leaves Kasiski and Friedman nothing to measure.</p>
+
+<figure class="demo" data-demo="secrecy/otp">
+  <figcaption>The one-time pad on bytes. Top: your message XOR a random pad gives the ciphertext. Bottom: type any other message of the same length; the figure shows the pad that would turn the same ciphertext into it. That pad is exactly as likely as the real one, so the ciphertext alone cannot tell the two messages apart. This is perfect secrecy.</figcaption>
+</figure>
+
+<h2 id="shannon">Shannon's definition</h2>
+
+<p>During the war Claude Shannon, at Bell Labs, worked on the SIGSALY secure telephone and wrote a classified report on the theory of secrecy, published in 1949 as <em>Communication Theory of Secrecy Systems</em>. It made cryptography a branch of mathematics. Model the message $M$, the key $K$ and the ciphertext $C$ as random variables.</p>
+
+<div class="definition">
+  <span class="th-title">Definition <span class="th-name">(perfect secrecy)</span></span>
+  <p>A cipher is perfectly secret if seeing the ciphertext does not change what an adversary believes about the message: for every message $m$ and every ciphertext $c$ with $\Pr[C = c] &gt; 0$,</p>
+  $$\Pr[M = m \mid C = c] = \Pr[M = m].$$
+</div>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(the one-time pad is perfectly secret)</span></span>
+  <p>If the key $K$ is uniform over $\{0,1\}^n$ and independent of $M$, then $C = M \oplus K$ is uniform over $\{0,1\}^n$ and independent of $M$.</p>
+</div>
+
+<details class="proof">
+  <summary>Proof</summary>
+  <div>
+    <p>For any $m$ and $c$, $C = c$ given $M = m$ happens exactly when $K = m \oplus c$, which has probability $2^{-n}$ whatever $m$ is. So $\Pr[C = c \mid M = m] = 2^{-n} = \Pr[C = c]$, and by Bayes' rule $\Pr[M = m \mid C = c] = \Pr[C = c \mid M = m]\Pr[M = m] / \Pr[C = c] = \Pr[M = m]$.</p>
+  </div>
+</details>
+
+<p>No computer, now or ever, quantum or not, can do better than guess. The proof does not depend on any assumption about the attacker's power; this is <strong>information-theoretic</strong> security. But it has a price.</p>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Shannon, 1949)</span></span>
+  <p>In any perfectly secret cipher there are at least as many keys as possible messages: $|\mathcal{K}| \ge |\mathcal{M}|$. In particular, to send $n$ random bits with perfect secrecy you need $n$ bits of key.</p>
+</div>
+
+<details class="proof">
+  <summary>Proof</summary>
+  <div>
+    <p>Fix a ciphertext $c$ that can occur. Each key decrypts $c$ to exactly one message, so at most $|\mathcal{K}|$ messages are possible given $c$. If $|\mathcal{K}| &lt; |\mathcal{M}|$, some message $m$ with $\Pr[M = m] &gt; 0$ is impossible given $c$: $\Pr[M = m \mid C = c] = 0 \ne \Pr[M = m]$.</p>
+  </div>
+</details>
+
+<p>That is why the one-time pad is rare. The key must be generated truly at random, carried to the other side in advance by a trusted courier, stored safely, and destroyed after use. It was used where the cost was worth it: the Washington–Moscow hotline of 1963 ran on one-time tapes, as did spies' radio messages, read from tiny pads of random digits.</p>
+
+<h2 id="venona">The two-time pad</h2>
+
+<p>The pad must never be reused, and the reason is one line of algebra:</p>
+
+$$c_1 \oplus c_2 = (m_1 \oplus k) \oplus (m_2 \oplus k) = m_1 \oplus m_2.$$
+
+<p>The key cancels, and what remains is the combination of two natural-language texts, which is full of redundancy. Guess a likely word in one message (a <strong>crib</strong>), XOR it into $m_1 \oplus m_2$ at every position, and where the guess is right a readable fragment of the other message appears. Each fragment suggests a longer guess.</p>
+
+<figure class="demo" data-demo="secrecy/twotime">
+  <figcaption>Breaking a reused pad. Two messages were encrypted with the same random pad; the attacker only has c₁ and c₂. Their XOR does not depend on the pad. Drag a guessed word along it: at the right offsets the other message shows through (highlighted rows are readable). Try short common words, then longer guesses.</figcaption>
+</figure>
+
+<p>This happened. Under wartime pressure the Soviet pad factory printed some pages twice in 1942. Starting in 1943, the US Army's Signal Intelligence Service (Gene Grabeel first, then the linguist Meredith Gardner) exploited the duplicates in the <strong>Venona</strong> project, eventually reading parts of about 3,000 messages and exposing Soviet spies in the Manhattan Project, among them Klaus Fuchs. The same mistake reappears in modern systems whenever a stream cipher or <a href="@ch:modes#ctr">CTR mode</a> reuses a nonce: in 2017 the KRACK attack forced Wi-Fi devices to reinstall a key and reuse their nonces.</p>
+
+<h2 id="entropy">Entropy and the unicity distance</h2>
+
+<p>Shannon also measured how much a ciphertext reveals when the key is shorter than the message. The tool is the <strong>entropy</strong> he had just defined for communication: for a random variable with probabilities $p_i$,</p>
+
+$$H(X) = -\sum_i p_i \log_2 p_i \quad \text{bits},$$
+
+<p>the average number of bits needed to describe it. A uniformly random letter carries $\log_2 26 \approx 4.7$ bits, but English carries only about $1.0$ to $1.5$ bits per letter, because it is highly predictable: the rest, about $3.2$ bits per letter, is <strong>redundancy</strong> $D$. Each ciphertext letter therefore gives the attacker about $D$ bits of information about the key.</p>
+
+<div class="theorem">
+  <span class="th-title">Estimate <span class="th-name">(unicity distance, Shannon)</span></span>
+  <p>For a cipher whose keys are uniformly random, the length of ciphertext beyond which only one key gives a meaningful plaintext is about</p>
+  $$U \approx \frac{H(K)}{D}.$$
+  <p>For monoalphabetic substitution, $H(K) = \log_2 26! \approx 88.4$ bits and $D \approx 3.2$, so $U \approx 28$ letters: any longer substitution ciphertext has, in principle, a unique solution.</p>
+</div>
+
+<p>For a one-time pad $H(K)$ grows with the message and $U$ is infinite; for a 128-bit AES key, a couple of blocks of English already determine the key in principle. Determine it, not find it: finding it would still take $2^{128}$ trials. That difference is the whole of modern cryptography.</p>
+
+<h2 id="computational">From perfect to computational security</h2>
+
+<p>Since perfect secrecy needs impractical keys, practical ciphers aim at something weaker: being <strong>infeasible</strong> to break for an attacker with bounded resources, even though breaking them is possible in principle. Shannon gave the two design principles that every block cipher of the next chapter follows:</p>
+
+<ul>
+  <li><strong>Confusion</strong>: make the relation between the key and the ciphertext as complex as possible, so that statistics of the ciphertext say nothing simple about the key (non-linear substitutions).</li>
+  <li><strong>Diffusion</strong>: spread the influence of each plaintext bit over many ciphertext bits, so that the redundancy of the language is dissipated (permutations and mixing).</li>
+</ul>
+
+<p>In 1982 Shafi Goldwasser and Silvio Micali gave the modern definition, <strong>semantic security</strong>: whatever an efficient adversary can compute about the message from the ciphertext, it could compute without it. It is Shannon's definition with “every adversary” replaced by “every efficient adversary”, and it underlies every security proof since.</p>
+
+<section class="references">
+  <h2 id="references">Further reading</h2>
+  <ol>
+    <li>Claude E. Shannon, “Communication Theory of Secrecy Systems”, <em>Bell System Technical Journal</em> 28(4), 1949.</li>
+    <li>Steven M. Bellovin, “Frank Miller: Inventor of the One-Time Pad”, <em>Cryptologia</em> 35(3), 2011.</li>
+    <li>Robert L. Benson, <em>The Venona Story</em>, NSA Center for Cryptologic History (2001).</li>
+    <li>Shafi Goldwasser and Silvio Micali, “Probabilistic Encryption”, <em>Journal of Computer and System Sciences</em> 28, 1984.</li>
+  </ol>
+</section>

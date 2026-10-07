@@ -1,0 +1,114 @@
+<!--meta
+{
+  "slug": "modes-of-operation",
+  "title": "Modes of operation",
+  "chain": "Modes",
+  "headline": "One block is not enough: ECB, CBC, CTR, GCM",
+  "dek": "AES encrypts sixteen bytes. Everything else (how to chain blocks, where the randomness goes, how to detect tampering) is the job of the mode of operation, and that is where most real-world breaks happen: patterns that show through, padding oracles, reused nonces, ciphertexts an attacker can edit.",
+  "era": "1976 – 2018",
+  "people": ["William Ehrsam", "Carl Meyer", "Whitfield Diffie", "Martin Hellman", "Serge Vaudenay", "Phillip Rogaway", "David McGrew", "John Viega", "Daniel J. Bernstein"],
+  "theorems": ["Deterministic encryption leaks equality", "Nonce reuse in CTR is a two-time pad", "Encrypt-then-MAC is secure (Bellare–Namprempre)", "GHASH is a polynomial over $\\mathrm{GF}(2^{128})$"]
+}
+-->
+
+<p>A block cipher is a beautiful object with a small job: it maps 16 bytes to 16 bytes under a key. Real messages are longer, have arbitrary lengths, and are sent many times under the same key. A <strong>mode of operation</strong> turns the block cipher into a cipher for messages. Choosing it badly can undo all the work of the <a href="@ch:block">previous chapter</a>: the strongest AES in a weak mode is a weak cipher.</p>
+
+<h2 id="ecb">ECB: the codebook</h2>
+
+<p>The naive mode, <strong>electronic codebook</strong>, cuts the message into blocks and encrypts each one on its own: $c_i = E_k(m_i)$. It is a gigantic codebook with $2^{128}$ entries, and it has the flaw of every codebook: <strong>equal plaintext blocks give equal ciphertext blocks</strong>. Whatever repeats in the plaintext repeats in the ciphertext.</p>
+
+<figure class="demo" data-demo="modes/penguin">
+  <figcaption>The “ECB penguin”, with a padlock instead of Tux. The picture is stored as one byte per pixel, so its flat areas are runs of identical 16-byte blocks. Encrypted with real AES in ECB mode, every identical block becomes the same ciphertext block, and the shape survives. CBC and CTR, with the same key, turn it into noise.</figcaption>
+</figure>
+
+<div class="theorem">
+  <span class="th-title">Proposition <span class="th-name">(deterministic encryption leaks equality)</span></span>
+  <p>No deterministic encryption scheme, in which the same message under the same key always gives the same ciphertext, can be semantically secure against an adversary who sees several ciphertexts: encrypting the same message twice is visible. Secure encryption must be <strong>randomised</strong> (a fresh random IV) or <strong>stateful</strong> (a counter, a nonce that never repeats).</p>
+</div>
+
+<p>ECB still appears in the wild. In 2013 a leak of 153 million Adobe passwords, encrypted with triple DES in ECB mode, let researchers find the most common passwords by counting identical ciphertexts and reading the users' password hints next to them. The desktop app offers ECB for compatibility with cryptoKit 1.0 and marks it in red.</p>
+
+<h2 id="cbc">CBC: chaining with an IV</h2>
+
+<p><strong>Cipher block chaining</strong>, patented by Ehrsam, Meyer, Smith and Tuchman at IBM in 1976 and standardised with DES in 1980, XORs each plaintext block with the previous ciphertext block before encrypting it; the first block is XORed with an <strong>initialisation vector</strong>:</p>
+
+$$c_0 = \mathit{IV}, \qquad c_i = E_k(m_i \oplus c_{i-1}), \qquad m_i = D_k(c_i) \oplus c_{i-1}.$$
+
+<p>Equal plaintext blocks now give different ciphertext blocks, because what goes into $E_k$ is different each time. The IV must be <strong>unpredictable</strong>: TLS 1.0 used the last ciphertext block of the previous message as the next IV, and in 2011 the BEAST attack used that predictability to decrypt cookies. The IV is not secret; it travels in front of the ciphertext, which is what the desktop app does when you leave the IV field empty.</p>
+
+<h3>Padding</h3>
+
+<p>CBC encrypts whole blocks, so the message is <strong>padded</strong>. The standard scheme, PKCS#7, adds $n$ bytes of value $n$, from 1 to 16; a message that already fills its last block gets a whole extra block of sixteen 16s, so that the padding can always be removed unambiguously.</p>
+
+<figure class="demo" data-demo="modes/padding">
+  <figcaption>PKCS#7 padding. The message is cut into 16-byte blocks; the highlighted bytes are the padding. Type a message of exactly 16 characters to see the extra block.</figcaption>
+</figure>
+
+<p>Padding became a weapon. In 2002 Serge Vaudenay showed that if a server reveals whether the padding of a decrypted message is valid (by an error message, or just by taking longer), an attacker can decrypt any ciphertext, one byte at a time, by sending modified versions: a <strong>padding oracle</strong>. Variants broke ASP.NET in 2010, TLS in 2013 (Lucky Thirteen) and SSL 3.0 in 2014 (POODLE). CBC is not broken, but it is very easy to use insecurely.</p>
+
+<h2 id="ctr">CTR: a block cipher becomes a stream cipher</h2>
+
+<p><strong>Counter mode</strong>, proposed by Diffie and Hellman in 1979, encrypts successive values of a counter and XORs the results with the message:</p>
+
+$$c_i = m_i \oplus E_k(\mathit{nonce} \,\|\, i).$$
+
+<p>It needs no padding, it is parallel (every block can be computed independently, on every core) and it only uses the encryption direction of the cipher. It is a <strong>stream cipher</strong>: a pseudorandom keystream XORed with the data, the computational version of the <a href="@ch:secrecy#otp">one-time pad</a>. And it inherits the one rule of the one-time pad.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposition <span class="th-name">(nonce reuse)</span></span>
+  <p>If two messages are encrypted in CTR mode with the same key and the same nonce, then $c_1 \oplus c_2 = m_1 \oplus m_2$: the keystream cancels, and the attacker is back to the <a href="@ch:secrecy#venona">two-time pad</a>.</p>
+</div>
+
+<h2 id="malleability">Encryption is not integrity</h2>
+
+<p>CTR has a second property that surprises many people: it is <strong>malleable</strong>. Flipping a bit of the ciphertext flips exactly the same bit of the decrypted plaintext. An attacker who knows (or guesses) part of a message can change it into anything of the same length without knowing the key: $c' = c \oplus (m \oplus m')$ decrypts to $m'$. CBC is malleable too, in a slightly messier way.</p>
+
+<figure class="demo" data-demo="modes/malleable">
+  <figcaption>Editing a ciphertext without the key. A payment order is encrypted with AES; the attacker knows its format and wants to change the amount and the beneficiary. In CTR mode the forged ciphertext decrypts to exactly the attacker's text. In GCM (real AES-GCM from your browser's WebCrypto), the same edit is detected: the authentication tag no longer matches and decryption fails.</figcaption>
+</figure>
+
+<p>So confidentiality is not enough: real systems need <strong>authenticated encryption</strong>. One way is to add a <a href="@ch:hashing#hmac">message authentication code</a>. The order matters.</p>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Bellare and Namprempre, 2000)</span></span>
+  <p>If the encryption scheme is secure against chosen-plaintext attacks and the MAC is strongly unforgeable, then <strong>encrypt-then-MAC</strong> (encrypt, then authenticate the ciphertext) gives authenticated encryption, secure against chosen-ciphertext attacks. MAC-then-encrypt and encrypt-and-MAC do not in general.</p>
+</div>
+
+<p>SSH used encrypt-and-MAC, TLS used MAC-then-encrypt (hence the padding oracles), IPsec used encrypt-then-MAC. Rather than leaving the composition to each protocol, cryptographers designed modes that do both at once: AEAD, authenticated encryption with associated data.</p>
+
+<h2 id="gcm">GCM: counter mode with a polynomial</h2>
+
+<p><strong>Galois/Counter Mode</strong>, by David McGrew and John Viega (2004, NIST SP 800-38D in 2007), encrypts with CTR and authenticates with <strong>GHASH</strong>, a polynomial evaluated in the field $\mathrm{GF}(2^{128})$. With the hash key $H = E_k(0^{128})$ and the ciphertext blocks (and associated data) $X_1, \dots, X_n$,</p>
+
+$$\mathrm{GHASH}_H(X) = X_1 H^n \oplus X_2 H^{n-1} \oplus \dots \oplus X_n H,$$
+
+<p>and the 16-byte tag is $T = \mathrm{GHASH}_H(X) \oplus E_k(J_0)$, where $J_0$ is derived from the nonce. Two different messages give two different polynomials, and a polynomial of degree $n$ has at most $n$ roots, so a forgery succeeds with probability at most about $n / 2^{128}$. <strong>Associated data</strong> (a header, a packet number, a database row id) is authenticated but not encrypted: it cannot be changed without being detected.</p>
+
+<p>GCM is fast (processors have carry-less multiplication instructions for GHASH), parallel, and the default of TLS 1.3. It is also unforgiving: if a nonce is ever reused, the attacker can solve for $H$ (Antoine Joux's “forbidden attack”, 2006) and forge any message. A 2016 Internet scan found 184 HTTPS servers repeating GCM nonces. With 96-bit random nonces, NIST limits a key to $2^{32}$ messages. The desktop app generates a random nonce unless you type one, and warns you if you do.</p>
+
+<h2 id="chacha">ChaCha20-Poly1305</h2>
+
+<p>Not every processor has AES instructions; phones in the early 2010s did not, and software AES is slow and leaks through cache timing. Daniel J. Bernstein's <strong>ChaCha20</strong> (2008) is a stream cipher built only from 32-bit additions, rotations and XORs (“ARX”), fast and naturally constant-time in software; <strong>Poly1305</strong> (2005) is a one-time authenticator that evaluates a polynomial modulo the prime $2^{130} - 5$. Together, as standardised in RFC 7539 (2015) and RFC 8439, they form an AEAD used by TLS 1.3, SSH, WireGuard and Google's QUIC. Both AES-GCM and ChaCha20-Poly1305 are marked as recommended in the desktop app.</p>
+
+<h2 id="choosing">Which mode?</h2>
+
+<div class="compare-wrap"><table class="theory-table">
+  <thead><tr><th>Mode</th><th>What it gives</th><th>What to watch</th></tr></thead>
+  <tbody>
+    <tr><td>ECB</td><td>nothing beyond one block</td><td>never for data: patterns show</td></tr>
+    <tr><td>CBC</td><td>confidentiality</td><td>unpredictable IV; padding oracles; add a MAC</td></tr>
+    <tr><td>CTR</td><td>confidentiality, parallel</td><td>never reuse a nonce; malleable; add a MAC</td></tr>
+    <tr><td>GCM</td><td>authenticated encryption</td><td>never reuse a nonce</td></tr>
+    <tr><td>ChaCha20-Poly1305</td><td>authenticated encryption</td><td>never reuse a nonce</td></tr>
+  </tbody>
+</table></div>
+
+<section class="references">
+  <h2 id="references">Further reading</h2>
+  <ol>
+    <li>Serge Vaudenay, “Security Flaws Induced by CBC Padding”, EUROCRYPT 2002.</li>
+    <li>Mihir Bellare and Chanathip Namprempre, “Authenticated Encryption: Relations among Notions and Analysis of the Generic Composition Paradigm”, ASIACRYPT 2000.</li>
+    <li>David McGrew and John Viega, “The Galois/Counter Mode of Operation (GCM)” (2004); NIST SP 800-38D (2007).</li>
+    <li>Yoav Nir and Adam Langley, RFC 8439, <em>ChaCha20 and Poly1305 for IETF Protocols</em> (2018).</li>
+  </ol>
+</section>

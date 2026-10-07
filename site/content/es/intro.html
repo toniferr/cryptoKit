@@ -1,0 +1,56 @@
+<!--meta {"kicker": "Empieza aquí", "title": "Introducción", "dek": "La criptografía es la ciencia de guardar secretos en presencia de adversarios. Empezó como un oficio de sacerdotes, generales y diplomáticos, fue un arma en dos guerras mundiales y hoy es matemática que funciona, sin que nadie lo note, cada vez que abres una web, pagas con tarjeta o desbloqueas el móvil. Esta web sigue esa historia desde los primeros cifrados de sustitución hasta los algoritmos poscuánticos estandarizados en 2024."} -->
+
+<h2 id="what-for">Para qué sirve la criptografía</h2>
+
+<p>Esconder un mensaje es solo una de sus tareas. La criptografía moderna protege cuatro cosas distintas, y cada capítulo de esta web construye las herramientas para una o varias de ellas:</p>
+
+<ul>
+  <li><strong>Confidencialidad</strong>: solo el destinatario entiende el mensaje. Es lo que hacen los cifrados, desde el de <a href="@ch:classical">César</a> hasta <a href="@ch:block">AES</a>.</li>
+  <li><strong>Integridad</strong>: nadie puede cambiar el mensaje sin que se note. Lo consiguen las <a href="@ch:hashing">funciones hash</a> y los códigos de autenticación de mensajes, y también los <a href="@ch:modes#gcm">modos autenticados</a> de los cifrados en bloque.</li>
+  <li><strong>Autenticidad</strong>: el mensaje viene de verdad de quien dice. Una clave secreta compartida la da; una <a href="@ch:publickey#signatures">firma digital</a> la da a cualquiera que tenga la clave pública.</li>
+  <li><strong>No repudio</strong>: el autor no puede negar después haber firmado. Solo lo dan las firmas de clave pública, porque solo una persona tiene la clave privada.</li>
+</ul>
+
+<p>Que dos personas que nunca se han visto acuerden un secreto por un canal que todo el mundo escucha parece imposible. Hasta 1976 todo el mundo lo creía. La <a href="@ch:publickey">revolución de la clave pública</a> es la bisagra de esta historia: antes, la criptografía consistía en mantener secretas las claves; después, también en claves que se pueden publicar.</p>
+
+<h2 id="vocabulary">Un poco de vocabulario</h2>
+
+<dl class="glossary">
+  <dt>Texto en claro y texto cifrado</dt><dd>El mensaje antes y después de cifrarlo. El cifrado $E_k$ y el descifrado $D_k$ dependen de una <strong>clave</strong> $k$, y $D_k(E_k(m)) = m$ para todo mensaje $m$.</dd>
+  <dt>Cifrado y código</dt><dd>Un cifrado transforma letras o bits según una regla; un código sustituye palabras enteras por palabras clave de un libro («ÁGUILA» por «atacad»). Para leer un código hay que capturar el libro; un cifrado hay que romperlo.</dd>
+  <dt>Criptoanálisis</dt><dd>El arte de romper cifrados: recuperar el texto en claro o la clave sin que te la den. Cada capítulo tiene sus ataques, porque cada diseño es la respuesta a un ataque.</dd>
+  <dt>Simétrica y asimétrica</dt><dd>En la criptografía simétrica las dos partes comparten la misma clave secreta; en la asimétrica (de clave pública) hay un par: una clave pública para cifrar o verificar y una privada para descifrar o firmar.</dd>
+  <dt>Codificar, cifrar y resumir</dt><dd>Tres cosas distintas que se confunden a menudo. <strong>Codificar</strong> (hexadecimal, Base64) solo cambia cómo se escriben los bytes: no hay clave y cualquiera lo deshace. <strong>Cifrar</strong> necesita una clave para deshacerse. <strong>Resumir</strong> (hash) no se puede deshacer: produce una huella de tamaño fijo de cualquier entrada.</dd>
+</dl>
+
+<h2 id="kerckhoffs">El enemigo conoce el sistema</h2>
+
+<p>En 1883 el lingüista neerlandés Auguste Kerckhoffs publicó seis reglas para los cifrados militares. La segunda es el principio fundacional de la criptografía moderna:</p>
+
+<blockquote>El sistema no debe requerir secreto, y debe poder caer en manos del enemigo sin inconveniente.<cite>Auguste Kerckhoffs, «La cryptographie militaire» (1883)</cite></blockquote>
+
+<p>Todo el secreto debe residir en la <strong>clave</strong>, que es pequeña y fácil de cambiar. El diseño del cifrado debe ser público, porque los diseños se filtran (se capturan máquinas, se desensamblan programas, los empleados cambian de trabajo) y porque solo merece confianza un diseño que muchos han atacado en público. Claude Shannon lo dijo más crudamente en 1949: <em>«el enemigo conoce el sistema»</em>. Todos los estándares modernos (DES, AES, SHA-3, ML-KEM) se publicaron íntegros y se eligieron tras años de ataques públicos; los esquemas que dependían de un diseño secreto, del CSS de los DVD a los cifrados de la telefonía GSM, cayeron poco después de que su secreto saliera a la luz.</p>
+
+<h2 id="encodings">Bits, bytes y codificaciones</h2>
+
+<p>Los cifrados clásicos trabajan con letras. Los modernos trabajan con <strong>bytes</strong>, grupos de ocho bits, así que el primer paso es siempre convertir el texto en bytes. Hoy se hace con <strong>UTF-8</strong>: las letras sin acento ocupan un byte, una letra acentuada o la ñ dos, un emoji cuatro. El texto cifrado también son bytes, normalmente no imprimibles, así que para mostrarlo, copiarlo o mandarlo por correo se escribe con un alfabeto imprimible: el <strong>hexadecimal</strong> usa dos caracteres (0–9, a–f) por byte; <strong>Base64</strong> reagrupa los bits de seis en seis y escribe cada grupo con uno de 64 caracteres, así que ocupa un tercio más que los bytes en lugar del doble.</p>
+
+<figure class="demo" data-demo="intro/encodings">
+  <figcaption>De caracteres a bytes y de vuelta a caracteres. Escribe lo que quieras: UTF-8 lo convierte en bytes; el hexadecimal escribe cada byte con dos dígitos; Base64 corta los mismos bits en grupos de seis y añade «=» cuando el último grupo de tres bytes está incompleto. Nada de esto es cifrar: no hay clave.</figcaption>
+</figure>
+
+<p>La aplicación de escritorio pone estas codificaciones en su propia familia, en gris, precisamente para insistir en ello: <em>Base64 no es cifrado</em>. Muchos sistemas reales se han «protegido» con él.</p>
+
+<h2 id="journey">El viaje</h2>
+
+<p>Los capítulos siguen la historia, que aquí coincide con la lógica de la materia: cada cifrado nuevo responde al ataque que rompió el anterior.</p>
+
+<!--chain-->
+
+<h2 id="how-to-read">Cómo leer esta web</h2>
+
+<p>En orden, como un libro corto, o saltando al capítulo que te pique la curiosidad: cada uno se sostiene solo y enlaza hacia atrás cuando lo necesita. Los resultados se enuncian como <strong>teoremas</strong>, con demostraciones breves que puedes desplegar, y cada capítulo tiene figuras interactivas que ejecutan los algoritmos reales en tu navegador: el AES del capítulo 04 es el AES-128 completo, comprobado con los vectores de prueba oficiales, y la Enigma del capítulo 02 tiene el mismo cableado que las máquinas de Bletchley Park. Nada de lo que escribes se envía a ninguna parte.</p>
+
+<p>La <a href="@timeline">página de historia</a> pone cuatro mil años de acontecimientos en una sola línea, y <a href="@app">la app</a> es el propio cryptoKit: una aplicación de escritorio libre (Java) con los 44 algoritmos de los que se habla aquí, para cifrar, descifrar, resumir y firmar tus propios datos, cada uno con un enlace al capítulo que lo explica.</p>
+
+<p class="note"><strong>Una advertencia.</strong> Entender cómo funciona un cifrado no es lo mismo que saber construir con él un sistema seguro. Las figuras de esta web están escritas para leerse, no para resistir ataques de canal lateral. Para datos reales, usa bibliotecas y protocolos bien revisados, como aquellos sobre los que está construida la aplicación de escritorio.</p>

@@ -1,0 +1,56 @@
+<!--meta {"kicker": "Start here", "title": "Introduction", "dek": "Cryptography is the science of keeping secrets in the presence of adversaries. It began as a craft of priests, generals and diplomats, became a weapon in two world wars, and is now mathematics that runs, unnoticed, every time you open a web page, pay with a card or unlock a phone. This site follows that story from the first substitution ciphers to the post-quantum algorithms standardised in 2024."} -->
+
+<h2 id="what-for">What cryptography is for</h2>
+
+<p>Hiding a message is only one of its jobs. Modern cryptography protects four different things, and each chapter of this site builds the tools for one or more of them:</p>
+
+<ul>
+  <li><strong>Confidentiality</strong>: only the intended reader can understand the message. This is what ciphers do, from <a href="@ch:classical">Caesar's</a> to <a href="@ch:block">AES</a>.</li>
+  <li><strong>Integrity</strong>: nobody can change the message without being noticed. <a href="@ch:hashing">Hash functions</a> and message authentication codes do this, and so do the <a href="@ch:modes#gcm">authenticated modes</a> of block ciphers.</li>
+  <li><strong>Authenticity</strong>: the message really comes from who it says. A shared secret key gives it; a <a href="@ch:publickey#signatures">digital signature</a> gives it to anyone who holds the public key.</li>
+  <li><strong>Non-repudiation</strong>: the author cannot later deny having signed. Only public-key signatures give this, because only one person holds the private key.</li>
+</ul>
+
+<p>Two people who have never met agreeing on a secret over a channel that everybody can hear sounds impossible. Until 1976 everybody thought it was. The <a href="@ch:publickey">public-key revolution</a> is the hinge of this story: before it, cryptography was about keeping keys secret; after it, it is also about keys that can be published.</p>
+
+<h2 id="vocabulary">A small vocabulary</h2>
+
+<dl class="glossary">
+  <dt>Plaintext and ciphertext</dt><dd>The message before and after encryption. Encryption $E_k$ and decryption $D_k$ depend on a <strong>key</strong> $k$, and $D_k(E_k(m)) = m$ for every message $m$.</dd>
+  <dt>Cipher and code</dt><dd>A cipher transforms letters or bits by a rule; a code replaces whole words by code words from a book (“EAGLE” for “attack”). Codes need the book to be captured to be read; ciphers need to be broken.</dd>
+  <dt>Cryptanalysis</dt><dd>The art of breaking ciphers: recovering plaintext or keys without being given the key. Every chapter has its attacks, because every design is a reply to an attack.</dd>
+  <dt>Symmetric and asymmetric</dt><dd>In symmetric cryptography both sides share the same secret key; in asymmetric (public-key) cryptography there is a pair: a public key for encrypting or verifying, and a private key for decrypting or signing.</dd>
+  <dt>Encoding, encryption and hashing</dt><dd>Three different things that are often confused. <strong>Encoding</strong> (hexadecimal, Base64) only changes how bytes are written: no key, anyone can undo it. <strong>Encryption</strong> needs a key to undo. <strong>Hashing</strong> cannot be undone at all: it makes a fixed-size fingerprint of any input.</dd>
+</dl>
+
+<h2 id="kerckhoffs">The enemy knows the system</h2>
+
+<p>In 1883 the Dutch linguist Auguste Kerckhoffs published six rules for military ciphers. The second one is the founding principle of modern cryptography:</p>
+
+<blockquote>The system must not require secrecy, and it must be able to fall into the hands of the enemy without inconvenience.<cite>Auguste Kerckhoffs, “La cryptographie militaire” (1883)</cite></blockquote>
+
+<p>All the secrecy must live in the <strong>key</strong>, which is small and easy to change. The design of the cipher should be public, because designs leak (machines are captured, programs are disassembled, employees change jobs) and because only a design that has been attacked in public by many people deserves trust. Claude Shannon put it more bluntly in 1949: <em>“the enemy knows the system”</em>. Every modern standard (DES, AES, SHA-3, ML-KEM) was published in full and chosen after years of public attack; schemes that relied on a secret design, from the DVD's CSS to the GSM phone ciphers, were broken soon after their secret came out.</p>
+
+<h2 id="encodings">Bits, bytes and encodings</h2>
+
+<p>Classical ciphers work on letters. Modern ones work on <strong>bytes</strong>, groups of eight bits, so the first step is always to turn text into bytes. Today that is done with <strong>UTF-8</strong>: the letters of English take one byte each, an accented letter two, an emoji four. The ciphertext is bytes too, usually not printable, so to show it, copy it or put it in an e-mail we write it with a printable alphabet: <strong>hexadecimal</strong> uses two characters (0–9, a–f) per byte; <strong>Base64</strong> regroups the bits in sixes and writes each six with one of 64 characters, so it is a third longer than the bytes instead of twice as long.</p>
+
+<figure class="demo" data-demo="intro/encodings">
+  <figcaption>From characters to bytes and back to characters. Type anything: UTF-8 turns it into bytes; hexadecimal writes each byte as two digits; Base64 cuts the same bits into groups of six and adds “=” when the last group of three bytes is incomplete. None of this is encryption: there is no key.</figcaption>
+</figure>
+
+<p>The desktop app keeps these encodings in their own family, coloured grey, precisely to make the point: <em>Base64 is not encryption</em>. Plenty of real systems have been “protected” with it.</p>
+
+<h2 id="journey">The journey</h2>
+
+<p>The chapters follow history, which here coincides with the logic of the subject: each new cipher answers the attack that broke the previous one.</p>
+
+<!--chain-->
+
+<h2 id="how-to-read">How to read this site</h2>
+
+<p>In order, like a short book, or jump to the chapter you are curious about: each one stands on its own and links back where it needs to. Results are stated as <strong>theorems</strong>, with short proofs you can unfold, and every chapter has interactive figures that run the real algorithms in your browser: the AES of chapter 04 is the full AES-128, checked against the official test vectors, and the Enigma of chapter 02 has the same wiring as the machines at Bletchley Park. Nothing you type is sent anywhere.</p>
+
+<p>The <a href="@timeline">history page</a> puts four thousand years of events on one line, and <a href="@app">the app</a> is cryptoKit itself: a free desktop toolkit (Java) with the 44 algorithms discussed here, for encrypting, decrypting, hashing and signing your own data, each one with a link back to the chapter that explains it.</p>
+
+<p class="note"><strong>A warning.</strong> Understanding how a cipher works is not the same as being able to build a secure system with it. The figures here are written to be read, not to resist side-channel attacks. For real data, use well-reviewed libraries and protocols, such as the ones the desktop app is built on.</p>

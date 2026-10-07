@@ -1,0 +1,132 @@
+<!--meta
+{
+  "slug": "cifrados-clasicos",
+  "title": "Cifrados clásicos",
+  "chain": "Sustitución",
+  "headline": "Esconder letras: de César a Vigenère",
+  "dek": "Durante dos mil años cifrar consistió en cambiar unas letras por otras. Los cifrados se volvieron más ingeniosos, del desplazamiento de César a la palabra clave de Vigenère, y quienes los rompían, más pacientes: de al-Kindi contando letras en el Bagdad del siglo IX a Babbage y Kasiski midiendo la distancia entre repeticiones.",
+  "era": "h. 1900 a. C. – 1863",
+  "people": ["Julio César", "al-Kindi", "Leon Battista Alberti", "Giovan Battista Bellaso", "Blaise de Vigenère", "Charles Wheatstone", "Charles Babbage", "Friedrich Kasiski", "William Friedman"],
+  "theorems": ["Espacio de claves de una sustitución: $26! \\approx 2^{88}$", "Análisis de frecuencias", "Índice de coincidencia", "Examen de Kasiski"]
+}
+-->
+
+<p>El texto «cifrado» más antiguo que se conoce es una inscripción funeraria de Menet Jufu, en Egipto, de hacia el 1900 a. C., cuyo escriba usó jeroglíficos poco habituales, probablemente para dar solemnidad al texto más que para ocultarlo. El secreto de verdad aparece algo después: una tablilla mesopotámica de hacia el 1500 a. C. esconde una receta de esmalte para cerámica escribiendo sus palabras con signos raros, y los generales espartanos enrollaban una tira de cuero alrededor de un bastón de grosor fijo, la <strong>escítala</strong>, escribían a lo largo y enviaban la tira: desenrollada, las letras eran un revoltijo; enrollada en un bastón del mismo grosor, volvían a alinearse. La escítala <em>transpone</em> letras, cambia su orden. Este capítulo trata sobre todo de la otra gran familia: los cifrados que <em>sustituyen</em> letras.</p>
+
+<h2 id="caesar">El desplazamiento de César</h2>
+
+<p>Suetonio cuenta que Julio César escribía las cartas confidenciales «cambiando el orden de las letras del alfabeto de modo que no se pudiera entender ni una palabra», y que quien quisiera leerlas debía «sustituir la cuarta letra del alfabeto, es decir la D, por la A, y así con las demás». Numeremos las letras $A = 0, B = 1, \dots, Z = 25$ (el alfabeto latino de 26 letras, sin la Ñ). El cifrado de César con clave $k$ es</p>
+
+$$E_k(x) = (x + k) \bmod 26, \qquad D_k(y) = (y - k) \bmod 26.$$
+
+<p>César usaba $k = 3$; Augusto, su sobrino, $k = 1$. Los escribas hebreos tenían su propia variante, el <strong>atbash</strong>, que invierte el alfabeto ($x \mapsto 25 - x$); aparece en el libro de Jeremías. ROT13, el desplazamiento de 13 con el que se escondían los finales de los chistes en Usenet, es su propio inverso porque $13 + 13 = 26$.</p>
+
+<figure class="demo" data-demo="classical/caesar">
+  <figcaption>El cifrado de César y cómo romperlo. Cambia el desplazamiento y cambia el texto cifrado. Debajo, lo que ve el atacante: el texto cifrado descifrado con todas las demás claves. Con solo 25 candidatos, el que se lee como el idioma salta a la vista, y la figura lo elige sola comparando frecuencias de letras (con el χ² que se explica más abajo).</figcaption>
+</figure>
+
+<p>Su debilidad es el tamaño del espacio de claves: 25 claves útiles se prueban a mano en minutos. La lección, que sigue vigente, es la primera regla del diseño de cifrados.</p>
+
+<div class="theorem">
+  <span class="th-title">Principio <span class="th-name">(búsqueda exhaustiva)</span></span>
+  <p>Cualquier cifrado puede atacarse probando todas las claves y reconociendo el texto en claro correcto. Un cifrado con $K$ claves es como mucho tan fuerte como una búsqueda de $K$ intentos; para ser seguro, $K$ tiene que estar fuera del alcance del atacante. Hoy eso significa al menos $2^{128}$.</p>
+</div>
+
+<h2 id="substitution">Todas las permutaciones del alfabeto</h2>
+
+<p>El arreglo evidente es permitir cualquier reordenación del alfabeto, no solo desplazamientos: escribir las 26 letras en un orden revuelto, a menudo derivado de una palabra clave, y sustituir cada letra por la que tiene debajo. Esta <strong>sustitución monoalfabética</strong> fue el caballo de batalla de la diplomacia durante un milenio.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposición <span class="th-name">(el espacio de claves de la sustitución)</span></span>
+  <p>Las claves de una sustitución monoalfabética son las permutaciones de 26 letras, así que hay</p>
+  $$26! = 403\,291\,461\,126\,605\,635\,584\,000\,000 \approx 4 \times 10^{26} \approx 2^{88.4}$$
+  <p>Más que las claves de DES ($2^{56}$), y demasiadas para probarlas una a una, incluso hoy.</p>
+</div>
+
+<p>Y sin embargo, una sustitución cae en minutos ante alguien con un lápiz. Un espacio de claves enorme es <em>necesario</em> pero no <em>suficiente</em>: además, el cifrado no debe dejar escapar estructura. Y la sustitución monoalfabética deja escapar la estructura más importante de todas.</p>
+
+<h2 id="frequency">Al-Kindi cuenta letras</h2>
+
+<p>En el Bagdad del siglo IX, en la Casa de la Sabiduría, el filósofo Abu Yusuf Yaqub ibn Ishaq al-Kindi escribió el <em>Manuscrito para descifrar mensajes criptográficos</em>, redescubierto en un archivo de Estambul en 1987. En él describe, por primera vez, el <strong>análisis de frecuencias</strong>:</p>
+
+<blockquote>Una manera de resolver un mensaje cifrado, si conocemos su lengua, es encontrar un texto distinto en esa lengua lo bastante largo para llenar una hoja, y contar cuántas veces aparece cada letra. […] Después miramos el texto cifrado que queremos resolver y clasificamos también sus símbolos.<cite>al-Kindi, h. 850</cite></blockquote>
+
+<p>Las letras no aparecen con la misma frecuencia. En español, la E supone casi el 13,7 % de las letras y la A el 12,5 %, mientras que K y W apenas aparecen; en inglés manda la E (12,7 %), seguida de la T y la A. Una sustitución cambia el nombre de las letras pero conserva sus recuentos: el símbolo más frecuente de un texto cifrado largo es casi seguro la E. Para medir cuánto «se parece» al idioma un descifrado candidato, se comparan los recuentos observados $O_i$ con los esperados $E_i = N p_i$:</p>
+
+$$\chi^2 = \sum_{i=0}^{25} \frac{(O_i - E_i)^2}{E_i}.$$
+
+<p>Un $\chi^2$ pequeño indica que el texto tiene la estadística de letras del idioma. Este único número rompe automáticamente cualquier cifrado por desplazamiento: se descifra con los 26 desplazamientos y se queda el de menor $\chi^2$.</p>
+
+<figure class="demo" data-demo="classical/frequency">
+  <figcaption>Análisis de frecuencias. Las barras oscuras son las frecuencias de las letras de un texto cifrado con un desplazamiento secreto; las claras, las del idioma. Mueve el desplazamiento hasta que los dos perfiles encajen (el χ² cae en picado): debajo aparece el texto en claro. El desplazamiento secreto se elige al azar cada vez que cargas la página.</figcaption>
+</figure>
+
+<p>Con una sustitución general, el atacante empareja primero los símbolos más frecuentes y luego usa las parejas de letras (DE, EN, EL, LA en español; TH, HE, IN en inglés), las letras dobles y las palabras cortas para fijar el resto. Edgar Allan Poe lo convirtió en culto con <em>El escarabajo de oro</em> (1843), y Arthur Conan Doyle hizo que Sherlock Holmes rompiera una sustitución de monigotes danzantes en 1903. En la vida real, el análisis de frecuencias llevó al cadalso a María Estuardo, reina de Escocia, en 1587: Thomas Phelippes rompió el nomenclátor que usaba para escribirse con los conspiradores de Babington.</p>
+
+<h2 id="vigenere">El cifrado indescifrable</h2>
+
+<p>La defensa contra el recuento es hacer que cada letra del texto en claro vaya a <em>muchas</em> letras distintas del cifrado. Leon Battista Alberti, el arquitecto renacentista, construyó un disco de cifrado en 1467 y propuso girarlo cada pocas palabras. Johannes Trithemius tabuló los 26 desplazamientos en su <em>tabula recta</em> (<em>Polygraphia</em>, 1518). En 1553 Giovan Battista Bellaso añadió la idea decisiva: elegir el desplazamiento de cada letra a partir de una <strong>palabra clave</strong> que se repite. Blaise de Vigenère describió una variante más fuerte en 1586, y la historia le dio su nombre al cifrado de Bellaso. Con una palabra clave de longitud $L$, $k_0 k_1 \dots k_{L-1}$:</p>
+
+$$c_i = (p_i + k_{i \bmod L}) \bmod 26, \qquad p_i = (c_i - k_{i \bmod L}) \bmod 26.$$
+
+<p>Con la palabra clave LEMON, ATTACKATDAWN se convierte en LXFOPVEFRNHR: las dos T de ATTACK se vuelven X y F; las cuatro A, L, O, E y N. Los recuentos de letras se aplanan, y el cifrado se ganó el nombre de <em>le chiffre indéchiffrable</em>. Lo conservó trescientos años; todavía en 1917 <em>Scientific American</em> lo calificaba de «imposible de traducir». Llevaba sesenta años roto.</p>
+
+<h2 id="breaking-vigenere">Romper Vigenère: Babbage, Kasiski, Friedman</h2>
+
+<p>La debilidad es que la palabra clave se repite. Si conociéramos su longitud $L$, podríamos partir el texto cifrado en $L$ columnas (las letras $0, L, 2L, \dots$; las letras $1, L+1, \dots$), y cada columna sería un simple César, que cae con un análisis de frecuencias. Charles Babbage encontró la longitud hacia 1854, pero no lo publicó; el oficial prusiano Friedrich Kasiski publicó el método en 1863:</p>
+
+<div class="theorem">
+  <span class="th-title">Método <span class="th-name">(examen de Kasiski)</span></span>
+  <p>Cuando el mismo fragmento del texto en claro cae en la misma posición de la palabra clave, se cifra igual. Así que las distancias entre fragmentos repetidos del texto cifrado tienden a ser múltiplos de $L$, y su máximo común divisor suele ser $L$ o un múltiplo pequeño.</p>
+</div>
+
+<p>En 1922 William Friedman, fundador del criptoanálisis estadounidense, sustituyó la búsqueda de repeticiones por un estadístico que usa todas las letras del texto.</p>
+
+<div class="definition">
+  <span class="th-title">Definición <span class="th-name">(índice de coincidencia)</span></span>
+  <p>El índice de coincidencia de un texto de $N$ letras, con $n_i$ apariciones de la letra $i$, es la probabilidad de que dos letras tomadas al azar de él sean iguales:</p>
+  $$\mathrm{IC} = \sum_{i=0}^{25} \frac{n_i (n_i - 1)}{N (N - 1)}.$$
+</div>
+
+<div class="theorem">
+  <span class="th-title">Proposición <span class="th-name">(Friedman)</span></span>
+  <p>Si las letras de un texto tienen probabilidades $p_i$, entonces $\mathrm{IC} \to \sum_i p_i^2$ cuando $N$ crece. Para letras uniformemente aleatorias es $26 \cdot (1/26)^2 = 1/26 \approx 0{,}038$; para el inglés, unos $0{,}066$, y para el español, unos $0{,}072$. El IC no cambia con ninguna sustitución, porque una sustitución solo cambia el nombre de las letras.</p>
+</div>
+
+<details class="proof">
+  <summary>Por qué el IC no cambia con una sustitución</summary>
+  <div>
+    <p>$\sum_i n_i(n_i - 1)$ solo depende del multiconjunto de recuentos $\{n_i\}$, no de qué letra tiene qué recuento. Una sustitución es una biyección del alfabeto, así que permuta los recuentos y deja la suma igual. En una columna de Vigenère construida con la $L$ correcta, todas las letras se desplazaron lo mismo: la columna es una sustitución del idioma, y su IC es el del idioma. Con una $L$ equivocada, la columna mezcla varios desplazamientos, su distribución de letras es más plana y su IC baja hacia $1/26$.</p>
+  </div>
+</details>
+
+<p>El ataque es, por tanto, mecánico: para cada longitud candidata $L = 1, 2, 3, \dots$, se corta el texto cifrado en $L$ columnas y se promedia su IC. La primera $L$ cuyo promedio salta al valor del idioma es la longitud de la clave. Después, cada columna es un César, y el $\chi^2$ del apartado anterior recupera cada letra de la palabra clave.</p>
+
+<figure class="demo" data-demo="classical/vigenere">
+  <figcaption>Romper Vigenère a partir solo del texto cifrado. Cambia el texto o la palabra clave. Las barras son el índice de coincidencia medio de las columnas para cada longitud de clave candidata: se disparan en la longitud verdadera (y en sus múltiplos). Luego la figura rompe cada columna como un César con χ² y escribe la clave que ha recuperado. Los textos cortos o las claves muy largas la derrotan: cada columna necesita letras suficientes para que se note su estadística.</figcaption>
+</figure>
+
+<h2 id="playfair">Playfair y los digramas</h2>
+
+<p>Otra forma de aplanar las frecuencias es cifrar <em>parejas</em> de letras: hay $26^2 = 676$ parejas, y sus frecuencias son mucho más planas que las de las letras sueltas. Charles Wheatstone inventó un cifrado así en 1854; su amigo lord Playfair lo promovió tan bien que lleva su nombre. La clave es un cuadrado de 5×5 con las letras de una palabra clave seguidas del resto del alfabeto (la I y la J comparten casilla). El texto en claro se parte en parejas, con una X entre letras dobles; cada pareja se sustituye por las otras dos esquinas de su rectángulo en el cuadrado, o por las letras de su derecha (misma fila) o de debajo (misma columna). El ejército británico lo usó en la guerra de los bóers y en la Primera Guerra Mundial, para mensajes tácticos que solo tenían que ser secretos unas horas; se sigue pudiendo romper a mano, usando las frecuencias de las parejas. La aplicación de escritorio lo incluye con el ejemplo clásico de la Wikipedia.</p>
+
+<h2 id="lessons">Lo que enseñan los clásicos</h2>
+
+<ul>
+  <li><strong>El espacio de claves debe ser enorme</strong>, o gana la búsqueda exhaustiva (César).</li>
+  <li><strong>Un espacio de claves enorme no basta</strong>: el texto cifrado no debe dejar escapar la estadística del texto en claro (la sustitución y al-Kindi).</li>
+  <li><strong>Todo lo que se repite es un asidero</strong>: una clave que se repite convierte un cifrado difícil en varios fáciles (Vigenère y Kasiski).</li>
+  <li><strong>La estadística vence al secreto</strong>: el IC de Friedman no necesita ninguna conjetura sobre el texto en claro.</li>
+</ul>
+
+<p>El siguiente paso fue mecánico: una clave que en la práctica no se repite nunca, producida por una máquina. Esa máquina fue <a href="@ch:enigma">Enigma</a>.</p>
+
+<section class="references">
+  <h2 id="references">Para saber más</h2>
+  <ol>
+    <li>David Kahn, <em>The Codebreakers</em> (1967; revisado en 1996). La historia clásica, de Egipto a la era del ordenador.</li>
+    <li>Simon Singh, <em>Los códigos secretos</em> (1999). Los capítulos 1 y 2 tratan de María Estuardo, el análisis de frecuencias y Babbage.</li>
+    <li>Ibrahim A. Al-Kadi, «Origins of cryptology: the Arab contributions», <em>Cryptologia</em> 16(2), 1992.</li>
+    <li>William F. Friedman, <em>The Index of Coincidence and Its Applications in Cryptography</em> (1922).</li>
+  </ol>
+</section>

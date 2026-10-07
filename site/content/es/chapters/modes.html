@@ -1,0 +1,114 @@
+<!--meta
+{
+  "slug": "modos-de-operacion",
+  "title": "Modos de operación",
+  "chain": "Modos",
+  "headline": "Un bloque no basta: ECB, CBC, CTR, GCM",
+  "dek": "AES cifra dieciséis bytes. Todo lo demás (cómo encadenar bloques, dónde va la aleatoriedad, cómo detectar manipulaciones) es trabajo del modo de operación, y ahí es donde se producen la mayoría de las roturas reales: patrones que se transparentan, oráculos de relleno, nonces repetidos, textos cifrados que un atacante puede editar.",
+  "era": "1976 – 2018",
+  "people": ["William Ehrsam", "Carl Meyer", "Whitfield Diffie", "Martin Hellman", "Serge Vaudenay", "Phillip Rogaway", "David McGrew", "John Viega", "Daniel J. Bernstein"],
+  "theorems": ["El cifrado determinista revela igualdades", "Repetir el nonce en CTR es una libreta de dos usos", "Cifrar y luego autenticar es seguro (Bellare–Namprempre)", "GHASH es un polinomio sobre $\\mathrm{GF}(2^{128})$"]
+}
+-->
+
+<p>Un cifrado en bloque es un objeto precioso con un trabajo pequeño: transforma 16 bytes en 16 bytes con una clave. Los mensajes reales son más largos, tienen longitudes arbitrarias y se envían muchos con la misma clave. Un <strong>modo de operación</strong> convierte el cifrado en bloque en un cifrado de mensajes. Elegirlo mal puede deshacer todo el trabajo del <a href="@ch:block">capítulo anterior</a>: el AES más fuerte en un modo débil es un cifrado débil.</p>
+
+<h2 id="ecb">ECB: el libro de códigos</h2>
+
+<p>El modo ingenuo, <strong>electronic codebook</strong> (libro de códigos electrónico), corta el mensaje en bloques y cifra cada uno por separado: $c_i = E_k(m_i)$. Es un libro de códigos gigantesco con $2^{128}$ entradas, y tiene el defecto de todos los libros de códigos: <strong>bloques de texto en claro iguales dan bloques cifrados iguales</strong>. Lo que se repite en el texto en claro se repite en el cifrado.</p>
+
+<figure class="demo" data-demo="modes/penguin">
+  <figcaption>El «pingüino ECB», con un candado en lugar de Tux. La imagen está guardada con un byte por píxel, así que sus zonas lisas son series de bloques de 16 bytes idénticos. Cifrada con AES real en modo ECB, cada bloque idéntico se convierte en el mismo bloque cifrado, y la forma sobrevive. CBC y CTR, con la misma clave, la convierten en ruido.</figcaption>
+</figure>
+
+<div class="theorem">
+  <span class="th-title">Proposición <span class="th-name">(el cifrado determinista revela igualdades)</span></span>
+  <p>Ningún esquema de cifrado determinista, en el que el mismo mensaje con la misma clave da siempre el mismo texto cifrado, puede ser semánticamente seguro frente a un adversario que ve varios textos cifrados: cifrar dos veces el mismo mensaje se nota. El cifrado seguro tiene que ser <strong>aleatorizado</strong> (un IV aleatorio nuevo) o <strong>con estado</strong> (un contador, un nonce que no se repite nunca).</p>
+</div>
+
+<p>ECB sigue apareciendo en la práctica. En 2013 se filtraron 153 millones de contraseñas de Adobe, cifradas con triple DES en modo ECB, y los investigadores encontraron las más comunes contando textos cifrados idénticos y leyendo las pistas de contraseña que los usuarios habían dejado al lado. La aplicación de escritorio ofrece ECB por compatibilidad con cryptoKit 1.0 y lo marca en rojo.</p>
+
+<h2 id="cbc">CBC: encadenar con un IV</h2>
+
+<p>El <strong>encadenamiento de bloques cifrados</strong> (CBC), patentado por Ehrsam, Meyer, Smith y Tuchman en IBM en 1976 y estandarizado junto con DES en 1980, combina cada bloque de texto en claro con el bloque cifrado anterior antes de cifrarlo; el primero se combina con un <strong>vector de inicialización</strong>:</p>
+
+$$c_0 = \mathit{IV}, \qquad c_i = E_k(m_i \oplus c_{i-1}), \qquad m_i = D_k(c_i) \oplus c_{i-1}.$$
+
+<p>Ahora bloques iguales del texto en claro dan bloques cifrados distintos, porque lo que entra en $E_k$ es diferente cada vez. El IV debe ser <strong>impredecible</strong>: TLS 1.0 usaba como IV el último bloque cifrado del mensaje anterior, y en 2011 el ataque BEAST aprovechó esa previsibilidad para descifrar cookies. El IV no es secreto: viaja delante del texto cifrado, que es lo que hace la aplicación de escritorio cuando dejas vacío el campo IV.</p>
+
+<h3>Relleno</h3>
+
+<p>CBC cifra bloques completos, así que el mensaje se <strong>rellena</strong>. El esquema estándar, PKCS#7, añade $n$ bytes de valor $n$, de 1 a 16; un mensaje que ya llena su último bloque recibe un bloque extra entero de dieciséis bytes de valor 16, para que el relleno siempre se pueda quitar sin ambigüedad.</p>
+
+<figure class="demo" data-demo="modes/padding">
+  <figcaption>El relleno PKCS#7. El mensaje se corta en bloques de 16 bytes; los bytes resaltados son el relleno. Escribe un mensaje de exactamente 16 caracteres para ver el bloque extra.</figcaption>
+</figure>
+
+<p>El relleno se convirtió en un arma. En 2002 Serge Vaudenay mostró que si un servidor revela si el relleno de un mensaje descifrado es válido (con un mensaje de error, o simplemente tardando más), un atacante puede descifrar cualquier texto cifrado, byte a byte, enviando versiones modificadas: un <strong>oráculo de relleno</strong>. Sus variantes rompieron ASP.NET en 2010, TLS en 2013 (Lucky Thirteen) y SSL 3.0 en 2014 (POODLE). CBC no está roto, pero es muy fácil usarlo de forma insegura.</p>
+
+<h2 id="ctr">CTR: un cifrado en bloque se vuelve de flujo</h2>
+
+<p>El <strong>modo contador</strong>, propuesto por Diffie y Hellman en 1979, cifra valores sucesivos de un contador y combina los resultados con el mensaje mediante XOR:</p>
+
+$$c_i = m_i \oplus E_k(\mathit{nonce} \,\|\, i).$$
+
+<p>No necesita relleno, es paralelo (cada bloque se calcula por separado, en todos los núcleos) y solo usa el sentido de cifrado del cifrado en bloque. Es un <strong>cifrado de flujo</strong>: un flujo de clave pseudoaleatorio combinado con los datos, la versión computacional de la <a href="@ch:secrecy#otp">libreta de un solo uso</a>. Y hereda su única regla.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposición <span class="th-name">(repetir el nonce)</span></span>
+  <p>Si dos mensajes se cifran en modo CTR con la misma clave y el mismo nonce, entonces $c_1 \oplus c_2 = m_1 \oplus m_2$: el flujo de clave se cancela y el atacante vuelve a tener la <a href="@ch:secrecy#venona">libreta de dos usos</a>.</p>
+</div>
+
+<h2 id="malleability">Cifrar no es proteger la integridad</h2>
+
+<p>CTR tiene una segunda propiedad que sorprende a mucha gente: es <strong>maleable</strong>. Invertir un bit del texto cifrado invierte exactamente el mismo bit del texto descifrado. Un atacante que conozca (o adivine) parte de un mensaje puede convertirlo en cualquier otro de la misma longitud sin conocer la clave: $c' = c \oplus (m \oplus m')$ se descifra como $m'$. CBC también es maleable, de una forma algo más enrevesada.</p>
+
+<figure class="demo" data-demo="modes/malleable">
+  <figcaption>Editar un texto cifrado sin la clave. Una orden de pago se cifra con AES; el atacante conoce su formato y quiere cambiar el importe y el beneficiario. En modo CTR, el texto cifrado falsificado se descifra exactamente como el texto del atacante. En GCM (AES-GCM real del WebCrypto de tu navegador), la misma edición se detecta: la etiqueta de autenticación ya no coincide y el descifrado falla.</figcaption>
+</figure>
+
+<p>La confidencialidad no basta: los sistemas reales necesitan <strong>cifrado autenticado</strong>. Una forma es añadir un <a href="@ch:hashing#hmac">código de autenticación de mensajes</a>. El orden importa.</p>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(Bellare y Namprempre, 2000)</span></span>
+  <p>Si el esquema de cifrado es seguro frente a ataques de texto en claro elegido y el MAC es fuertemente infalsificable, entonces <strong>cifrar y luego autenticar</strong> (cifrar y después autenticar el texto cifrado) da cifrado autenticado, seguro frente a ataques de texto cifrado elegido. Autenticar y luego cifrar, o cifrar y autenticar por separado, no lo dan en general.</p>
+</div>
+
+<p>SSH usaba cifrar-y-autenticar, TLS autenticar-y-luego-cifrar (de ahí los oráculos de relleno), IPsec cifrar-y-luego-autenticar. En lugar de dejar la composición a cada protocolo, los criptógrafos diseñaron modos que hacen las dos cosas a la vez: AEAD, cifrado autenticado con datos asociados.</p>
+
+<h2 id="gcm">GCM: modo contador con un polinomio</h2>
+
+<p>El <strong>modo Galois/Counter</strong>, de David McGrew y John Viega (2004, NIST SP 800-38D en 2007), cifra con CTR y autentica con <strong>GHASH</strong>, un polinomio evaluado en el cuerpo $\mathrm{GF}(2^{128})$. Con la clave de hash $H = E_k(0^{128})$ y los bloques del texto cifrado (y de los datos asociados) $X_1, \dots, X_n$,</p>
+
+$$\mathrm{GHASH}_H(X) = X_1 H^n \oplus X_2 H^{n-1} \oplus \dots \oplus X_n H,$$
+
+<p>y la etiqueta de 16 bytes es $T = \mathrm{GHASH}_H(X) \oplus E_k(J_0)$, donde $J_0$ se deriva del nonce. Dos mensajes distintos dan dos polinomios distintos, y un polinomio de grado $n$ tiene como mucho $n$ raíces, así que una falsificación tiene éxito con probabilidad como mucho de unos $n / 2^{128}$. Los <strong>datos asociados</strong> (una cabecera, un número de paquete, el identificador de una fila de la base de datos) se autentican pero no se cifran: no se pueden cambiar sin que se detecte.</p>
+
+<p>GCM es rápido (los procesadores tienen instrucciones de multiplicación sin acarreo para GHASH), paralelo y el modo por defecto de TLS 1.3. También es implacable: si alguna vez se repite un nonce, el atacante puede despejar $H$ (el «ataque prohibido» de Antoine Joux, 2006) y falsificar cualquier mensaje. Un rastreo de Internet de 2016 encontró 184 servidores HTTPS que repetían nonces de GCM. Con nonces aleatorios de 96 bits, el NIST limita una clave a $2^{32}$ mensajes. La aplicación de escritorio genera un nonce aleatorio salvo que escribas uno, y te avisa si lo haces.</p>
+
+<h2 id="chacha">ChaCha20-Poly1305</h2>
+
+<p>No todos los procesadores tienen instrucciones AES; los móviles de principios de la década de 2010 no las tenían, y el AES por software es lento y filtra información por los tiempos de la caché. <strong>ChaCha20</strong> (2008), de Daniel J. Bernstein, es un cifrado de flujo construido solo con sumas de 32 bits, rotaciones y XOR («ARX»), rápido y de tiempo constante por naturaleza en software; <strong>Poly1305</strong> (2005) es un autenticador de un solo uso que evalúa un polinomio módulo el primo $2^{130} - 5$. Juntos, tal como los estandarizan la RFC 7539 (2015) y la RFC 8439, forman un AEAD que usan TLS 1.3, SSH, WireGuard y el QUIC de Google. AES-GCM y ChaCha20-Poly1305 aparecen como recomendados en la aplicación de escritorio.</p>
+
+<h2 id="choosing">¿Qué modo elegir?</h2>
+
+<div class="compare-wrap"><table class="theory-table">
+  <thead><tr><th>Modo</th><th>Qué da</th><th>Qué vigilar</th></tr></thead>
+  <tbody>
+    <tr><td>ECB</td><td>nada más allá de un bloque</td><td>nunca para datos: se ven los patrones</td></tr>
+    <tr><td>CBC</td><td>confidencialidad</td><td>IV impredecible; oráculos de relleno; añadir un MAC</td></tr>
+    <tr><td>CTR</td><td>confidencialidad, en paralelo</td><td>no repetir nunca el nonce; maleable; añadir un MAC</td></tr>
+    <tr><td>GCM</td><td>cifrado autenticado</td><td>no repetir nunca el nonce</td></tr>
+    <tr><td>ChaCha20-Poly1305</td><td>cifrado autenticado</td><td>no repetir nunca el nonce</td></tr>
+  </tbody>
+</table></div>
+
+<section class="references">
+  <h2 id="references">Para saber más</h2>
+  <ol>
+    <li>Serge Vaudenay, «Security Flaws Induced by CBC Padding», EUROCRYPT 2002.</li>
+    <li>Mihir Bellare y Chanathip Namprempre, «Authenticated Encryption: Relations among Notions and Analysis of the Generic Composition Paradigm», ASIACRYPT 2000.</li>
+    <li>David McGrew y John Viega, «The Galois/Counter Mode of Operation (GCM)» (2004); NIST SP 800-38D (2007).</li>
+    <li>Yoav Nir y Adam Langley, RFC 8439, <em>ChaCha20 and Poly1305 for IETF Protocols</em> (2018).</li>
+  </ol>
+</section>

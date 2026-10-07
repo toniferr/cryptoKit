@@ -1,0 +1,92 @@
+<!--meta {"kicker": "Aplicación de escritorio · versión {version}", "title": "La app", "dek": "cryptoKit es una aplicación de escritorio libre (y una herramienta de línea de comandos) para cifrar, descifrar, resumir y firmar con los 44 algoritmos de esta web, de César y Enigma a AES-GCM, Argon2id, Ed25519 y el ML-KEM poscuántico. Cada algoritmo lleva una etiqueta de seguridad y un enlace al capítulo que lo explica."} -->
+
+<div class="download">
+  <a class="cta primary" href="{jar}">Descargar cryptoKit {version} (.jar)</a>
+  <a class="cta" href="{release}">Todas las descargas y notas de la versión</a>
+  <a class="cta" href="{repo}">Código fuente</a>
+</div>
+<p class="download-note">El jar necesita <strong>Java 21 o posterior</strong> (cualquier distribución: Temurin, Oracle, Microsoft, el OpenJDK de Ubuntu…). Haz doble clic en él o ejecuta <code>java -jar cryptoKit-{version}.jar</code>. La página de la versión tiene también paquetes portables para Windows, macOS y Linux que incluyen su propio Java.</p>
+
+<figure class="shots">
+  <img src="@img/app-ml-kem-es.png" alt="cryptoKit en español con el tema claro: ML-KEM-768 seleccionado, un par de claves PEM generado y un texto cifrado en Base64." width="1170" height="750" loading="lazy">
+  <figcaption>ML-KEM-768 poscuántico, con un par de claves recién generado y el formato del resultado explicado debajo.</figcaption>
+</figure>
+
+<div class="shots-grid">
+  <figure class="shots"><img src="@img/app-aes-gcm-en.png" alt="cryptoKit en inglés: AES-GCM con una clave aleatoria en hex y un mensaje cifrado con un nonce aleatorio antepuesto." width="1170" height="750" loading="lazy"><figcaption>AES-GCM, en inglés.</figcaption></figure>
+  <figure class="shots"><img src="@img/app-enigma-en.png" alt="cryptoKit con el tema oscuro y el simulador de Enigma I: rotores, anillos, posiciones iniciales y clavijero." width="1170" height="750" loading="lazy"><figcaption>Enigma I, tema oscuro.</figcaption></figure>
+  <figure class="shots"><img src="@img/app-ed25519-es.png" alt="cryptoKit verificando una firma Ed25519: una franja verde indica que la firma es válida." width="1170" height="750" loading="lazy"><figcaption>Una firma Ed25519, verificada.</figcaption></figure>
+</div>
+
+<h2 id="new">Novedades de la 2.0</h2>
+
+<p>La versión 1.0 (2022) era una pequeña ventana Swing con quince algoritmos. La versión 2 es una reescritura que conserva su espíritu y su compatibilidad:</p>
+
+<ul>
+  <li><strong>44 algoritmos en ocho familias</strong>, cada uno con una etiqueta de seguridad (recomendado, heredado, roto, histórico, codificación), una descripción y un enlace <em>Cómo funciona</em> a esta web.</li>
+  <li><strong>Nuevos</strong>: cifrados clásicos (César, Vigenère, Playfair, Enigma I), Base32, Base58 y Base64URL, BLAKE2b, BLAKE3 y RIPEMD-160, HMAC, hash de contraseñas (Argon2id, scrypt, bcrypt, PBKDF2), AES-CTR, ChaCha20-Poly1305, AES-GCM con contraseña y Argon2id, cifrado de clave pública (RSA-OAEP, X25519 + AES-GCM, ML-KEM-768) y firmas (Ed25519, ECDSA P-256, RSA-PSS, ML-DSA-65).</li>
+  <li><strong>Una interfaz moderna</strong>: temas claro y oscuro, inglés y español, una lista con buscador, generadores de claves e IV, generación de pares de claves, entrada y salida en texto, hex o Base64, carga y guardado de ficheros, y un botón <em>usar el resultado</em> que devuelve un texto cifrado para descifrarlo o un resumen para verificarlo.</li>
+  <li><strong>Valores por defecto más seguros</strong>: si dejas vacío el IV o el nonce, se genera uno aleatorio y se antepone; los modos autenticados rechazan los datos manipulados; las verificaciones comparan en tiempo constante; los errores se explican en lugar de imprimirse como resultado.</li>
+  <li><strong>Una herramienta de línea de comandos</strong> en el mismo jar, para scripts.</li>
+  <li><strong>Probada</strong>: 89 pruebas automáticas con vectores oficiales (NIST, RFC) y con textos cifrados producidos por el jar real de la 1.0.</li>
+</ul>
+
+<h2 id="algorithms">Los 44 algoritmos</h2>
+
+<div class="compare-wrap"><table class="alg-table">
+  <thead><tr><th>Familia</th><th>Algoritmos</th></tr></thead>
+  <tbody>
+    <tr><td>Cifrados clásicos</td><td><span class="sec edu">César</span> <span class="sec edu">Vigenère</span> <span class="sec edu">Playfair</span> <span class="sec edu">Enigma I</span></td></tr>
+    <tr><td>Codificaciones</td><td><span class="sec enc">Hexadecimal</span> <span class="sec enc">Base32</span> <span class="sec enc">Base58</span> <span class="sec enc">Base64</span> <span class="sec enc">Base64URL</span></td></tr>
+    <tr><td>Funciones hash</td><td><span class="sec ok">SHA-256</span> <span class="sec ok">SHA-512</span> <span class="sec ok">SHA3-256</span> <span class="sec ok">SHA3-512</span> <span class="sec ok">BLAKE2b-512</span> <span class="sec ok">BLAKE3</span> <span class="sec legacy">RIPEMD-160</span> <span class="sec broken">SHA-1</span> <span class="sec broken">MD5</span></td></tr>
+    <tr><td>Autenticación de mensajes</td><td><span class="sec ok">HMAC-SHA256</span> <span class="sec ok">HMAC-SHA512</span> <span class="sec ok">HMAC-SHA3-256</span></td></tr>
+    <tr><td>Hash de contraseñas</td><td><span class="sec ok">Argon2id</span> <span class="sec ok">scrypt</span> <span class="sec ok">bcrypt</span> <span class="sec ok">PBKDF2-HMAC-SHA256</span></td></tr>
+    <tr><td>Cifrado simétrico</td><td><span class="sec ok">AES-GCM</span> <span class="sec ok">ChaCha20-Poly1305</span> <span class="sec ok">AES-GCM + Argon2id</span> <span class="sec legacy">AES-CTR</span> <span class="sec legacy">AES-CBC</span> <span class="sec broken">AES-ECB</span> <span class="sec legacy">Triple DES-CBC</span> <span class="sec legacy">Blowfish-CBC</span> <span class="sec legacy">Blowfish-ECB</span> <span class="sec broken">DES-CBC</span> <span class="sec broken">DES-ECB</span> <span class="sec legacy">PBE AES-256 (Jasypt)</span></td></tr>
+    <tr><td>Cifrado de clave pública</td><td><span class="sec ok">ML-KEM-768 + AES-GCM</span> <span class="sec ok">X25519 + AES-GCM</span> <span class="sec ok">RSA-OAEP</span></td></tr>
+    <tr><td>Firmas digitales</td><td><span class="sec ok">ML-DSA-65</span> <span class="sec ok">Ed25519</span> <span class="sec ok">ECDSA P-256</span> <span class="sec ok">RSA-PSS</span></td></tr>
+  </tbody>
+</table></div>
+<p class="legend"><span class="sec ok">recomendado</span> <span class="sec legacy">heredado</span> <span class="sec broken">roto</span> <span class="sec edu">histórico</span> <span class="sec enc">codificación (no es cifrado)</span></p>
+
+<h2 id="cli">Desde la línea de comandos</h2>
+
+<p>El mismo jar es una herramienta de línea de comandos cuando recibe argumentos. El texto es el último argumento o la entrada estándar; las opciones son los parámetros del algoritmo; las verificaciones devuelven el código de salida 1 cuando fallan. Los verbos van en inglés (<code>encrypt</code>, <code>decrypt</code>, <code>hash</code>, <code>sign</code>, <code>verify</code>…) y los mensajes salen en el idioma del sistema, o en el que indiques con <code>--lang=es</code>.</p>
+
+<pre class="code"><code>java -jar cryptoKit-{version}.jar list
+java -jar cryptoKit-{version}.jar sha256 hash "hola"
+java -jar cryptoKit-{version}.jar aes-gcm encrypt --key=00112233445566778899aabbccddeeff --key-format=hex "atacad al alba"
+java -jar cryptoKit-{version}.jar argon2id hash "caballo correcto grapa batería"
+java -jar cryptoKit-{version}.jar keygen ed25519 &gt; claves.pem
+java -jar cryptoKit-{version}.jar ed25519 sign --private=@claves.pem "te debo 10 euros"
+java -jar cryptoKit-{version}.jar enigma encrypt --rotors="IV II V" --positions="B L A" "WETTERBERICHT"
+java -jar cryptoKit-{version}.jar --lang=es info ml-kem-768</code></pre>
+
+<h2 id="compatibility">Compatible con la versión 1.0</h2>
+
+<p>Los textos cifrados con cryptoKit 1.0 se siguen descifrando: DES, AES y Blowfish en ECB y CBC, AES-GCM y el PBE de Jasypt, con las claves y los IV escritos como texto exactamente igual que antes (la versión 1 escribía «(hexadecimal)» tras el resultado; basta con no copiarlo). Las pruebas lo comprueban contra la salida del jar real de la 1.0. La propia versión 1.0 sigue disponible en <a href="https://github.com/toniferr/cryptoKit/releases/tag/1.0.0">su página de descarga</a> y en la rama <code>legacy</code> del repositorio.</p>
+
+<h2 id="security">Notas de seguridad</h2>
+
+<ul>
+  <li>La aplicación es una herramienta para aprender y para tareas cotidianas, no un producto auditado. Sus algoritmos vienen de la plataforma Java y de Bouncy Castle, ambos muy revisados; la aplicación los combina con cuidado, pero no ha pasado una auditoría independiente.</li>
+  <li>Las claves escritas como texto (como en la versión 1) son débiles salvo que sean largas y aleatorias: mejor el dado, que genera claves aleatorias en hex, o el AES-GCM + Argon2id con contraseña.</li>
+  <li>No se envía nada por la red; no se guarda nada salvo el tema, el idioma y el último algoritmo.</li>
+</ul>
+
+<h2 id="build">Compilar desde el código fuente</h2>
+
+<pre class="code"><code>git clone https://github.com/toniferr/cryptoKit.git
+cd cryptoKit
+mvn verify                      # compila, pasa las pruebas y genera target/cryptoKit-{version}.jar
+java -jar target/cryptoKit-{version}.jar</code></pre>
+
+<p>Requisitos: JDK 21 o posterior y Maven 3.8 o posterior. El portal que estás leyendo vive en el mismo repositorio, en <code>site/</code>, y se genera con <code>python site/build.py</code>.</p>
+
+<h2 id="history">Historia del proyecto</h2>
+
+<ul>
+  <li><strong>2017</strong>: primera versión, un proyecto de Eclipse con cifrados simétricos, hashes y Base64 sobre Bouncy Castle 1.57.</li>
+  <li><strong>2020</strong>: Java 11, Maven, SHA-2 y SHA-3, AES-GCM y Blowfish, integración continua y una wiki en español.</li>
+  <li><strong>2022</strong>: versión 1.0.0, un jar ejecutable con dependencias y cifrado con contraseña mediante Jasypt.</li>
+  <li><strong>2026</strong>: versión 2.0.0, reescrita desde el núcleo, con este portal.</li>
+</ul>

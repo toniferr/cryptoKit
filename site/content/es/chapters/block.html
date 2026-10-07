@@ -1,0 +1,133 @@
+<!--meta
+{
+  "slug": "cifrado-en-bloque",
+  "title": "Cifrado en bloque",
+  "chain": "DES y AES",
+  "headline": "Confusión y difusión: de DES a AES",
+  "dek": "Un cifrado en bloque revuelve un bloque de bits de tamaño fijo bajo una clave, tan a fondo que sin la clave parece una permutación aleatoria. Lucifer, de IBM, se convirtió en el estándar estadounidense DES en 1977; veinte años después su clave de 56 bits cayó ante una máquina construida por 250.000 dólares, y un concurso abierto eligió a su sucesor: Rijndael, hoy AES, el cifrado más usado de la historia.",
+  "era": "1971 – 2001",
+  "people": ["Horst Feistel", "Don Coppersmith", "Whitfield Diffie", "Eli Biham", "Adi Shamir", "Mitsuru Matsui", "Bruce Schneier", "Joan Daemen", "Vincent Rijmen"],
+  "theorems": ["Una red de Feistel es invertible para cualquier función de ronda", "Luby–Rackoff", "Encuentro a medio camino: el doble DES no es el doble de fuerte", "$\\mathrm{GF}(2^8)$ es un cuerpo"]
+}
+-->
+
+<p>Los cifrados de la era del ordenador cifran bits, y la mayoría trabaja por <strong>bloques</strong>: 64 o 128 bits a la vez. Un cifrado en bloque es una familia de permutaciones $E_k : \{0,1\}^n \to \{0,1\}^n$, una para cada clave $k$. Lo que le pedimos es fácil de enunciar y difícil de conseguir: para quien no conozca $k$, $E_k$ debe ser indistinguible de una permutación elegida completamente al azar entre las $(2^n)!$ posibles. Es una <strong>permutación pseudoaleatoria</strong>. Cómo cifrar mensajes de más de un bloque es el tema del <a href="@ch:modes">capítulo siguiente</a>; este trata del bloque en sí.</p>
+
+<h2 id="feistel">La red de Horst Feistel</h2>
+
+<p>Horst Feistel emigró de Alemania a Estados Unidos en 1934 y, tras años trabajando en criptografía para la Fuerza Aérea, entró en IBM, donde a comienzos de los setenta diseñó <strong>Lucifer</strong>, un cifrado para bancos. Su estructura, hoy llamada red de Feistel, resuelve con elegancia un problema de diseño: cómo construir una función <em>invertible</em> a partir de funciones de ronda que no tienen por qué serlo.</p>
+
+<p>Se parte el bloque en dos mitades $(L_0, R_0)$. Cada ronda, con su propia subclave $k_i$, hace</p>
+
+$$L_{i+1} = R_i, \qquad R_{i+1} = L_i \oplus F(R_i, k_i).$$
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(Feistel)</span></span>
+  <p>Para cualquier función $F$, invertible o no, cada ronda de Feistel es una biyección, y su inversa se calcula con la misma $F$: $R_i = L_{i+1}$ y $L_i = R_{i+1} \oplus F(L_{i+1}, k_i)$. Descifrar es cifrar con las subclaves en orden inverso.</p>
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>A partir de $(L_{i+1}, R_{i+1})$ se lee directamente $R_i = L_{i+1}$. Entonces se puede recalcular $F(R_i, k_i)$, y $L_i = R_{i+1} \oplus F(R_i, k_i)$ porque $x \oplus y \oplus y = x$. A $F$ solo se la evalúa, nunca se la invierte.</p>
+  </div>
+</details>
+
+<figure class="demo" data-demo="block/feistel">
+  <figcaption>Una red de Feistel de juguete sobre 16 bits (dos letras), con cuatro rondas y una función de ronda F que pierde información a propósito: muchas entradas dan la misma salida, así que F no tiene inversa. Aun así la red descifra perfectamente: la última fila recorre la misma red hacia atrás con las subclaves al revés.</figcaption>
+</figure>
+
+<p>En 1988 Michael Luby y Charles Rackoff demostraron lo que Feistel había encontrado por ingeniería: si las funciones de ronda son funciones aleatorias, <strong>tres</strong> rondas ya dan una permutación pseudoaleatoria, y <strong>cuatro</strong> dan una que resiste incluso a un adversario que también puede pedir descifrados. Los cifrados reales usan muchas más rondas porque sus funciones de ronda no son aleatorias, solo rápidas.</p>
+
+<h2 id="des">DES: el Data Encryption Standard</h2>
+
+<p>En 1973 la Oficina Nacional de Estándares de Estados Unidos pidió un cifrado público para proteger datos gubernamentales y comerciales. IBM presentó una versión de Lucifer; tras la revisión de la NSA se publicó en 1977 como <strong>DES</strong> (FIPS 46): una red de Feistel de 16 rondas sobre bloques de 64 bits con una clave de 56 bits. Su función de ronda expande la media palabra a 48 bits, la combina con la subclave, pasa el resultado por ocho <strong>S-boxes</strong> (pequeñas tablas de 6 bits de entrada y 4 de salida, la única parte no lineal) y permuta los bits.</p>
+
+<p>Dos cambios de la NSA fueron polémicos. La clave se acortó de los 128 bits de Lucifer a 56, y Whitfield Diffie y Martin Hellman calcularon en 1977 que una máquina de 20 millones de dólares encontraría una clave DES en un día. Y las S-boxes se cambiaron sin explicación, lo que hizo sospechar una puerta trasera. La verdad salió en 1990, cuando Eli Biham y Adi Shamir publicaron el <strong>criptoanálisis diferencial</strong>, que sigue cómo se propagan por las rondas las diferencias entre parejas de textos en claro: DES lo resistía mucho mejor de lo que lo harían unas S-boxes aleatorias. En 1994 Don Coppersmith, de IBM, confirmó que los diseñadores conocían la técnica desde 1974 y habían elegido las S-boxes contra ella. En 1993 Mitsuru Matsui descubrió el <strong>criptoanálisis lineal</strong>, que aproxima el cifrado por ecuaciones lineales que se cumplen algo más de la mitad de las veces; rompe DES con $2^{43}$ textos en claro conocidos, lo que tampoco era práctico.</p>
+
+<p>Lo que mató a DES fue la longitud de la clave. En 1998 la Electronic Frontier Foundation construyó <strong>Deep Crack</strong>, una máquina de 1.856 chips a medida que costó unos 250.000 dólares y encontró una clave DES en 56 horas; en enero de 1999, con ayuda de los voluntarios de distributed.net, tardó 22 horas y 15 minutos. Hoy una clave cae en minutos. La aplicación de escritorio conserva DES solo para leer datos antiguos, y lo marca en rojo.</p>
+
+<h3>¿Por qué no un doble DES?</h3>
+
+<p>El arreglo evidente, cifrar dos veces con dos claves, $c = E_{k_2}(E_{k_1}(m))$, apenas ayuda.</p>
+
+<div class="theorem">
+  <span class="th-title">Teorema <span class="th-name">(encuentro a medio camino, Diffie y Hellman 1977)</span></span>
+  <p>Con una sola pareja conocida $(m, c)$, el cifrado doble con dos claves de $n$ bits se rompe con unos $2^{n+1}$ cifrados y $2^n$ de memoria, no $2^{2n}$.</p>
+</div>
+
+<details class="proof">
+  <summary>El ataque</summary>
+  <div>
+    <p>Se cifra $m$ con todas las $k_1$ y se guardan los $2^n$ resultados $E_{k_1}(m)$ en una tabla. Después se descifra $c$ con todas las $k_2$ y se busca $D_{k_2}(c)$ en la tabla: una coincidencia significa $E_{k_1}(m) = D_{k_2}(c)$, así que $(k_1, k_2)$ es candidata. Una segunda pareja conocida elimina los falsos candidatos. Las dos mitades se encuentran en el medio.</p>
+  </div>
+</details>
+
+<p>De ahí el <strong>triple DES</strong>, $E_{k_3}(D_{k_2}(E_{k_1}(m)))$, con una fuerza efectiva de unos 112 bits. Mantuvo funcionando a bancos y tarjetas de pago veinte años más. Su bloque de 64 bits fue su perdición: tras unos $2^{32}$ bloques con la misma clave, las colisiones de bloques se vuelven probables (la <a href="@ch:hashing#birthday">cota del cumpleaños</a>), y el ataque Sweet32 de 2016 lo explotó en HTTPS y OpenVPN. El NIST prohibió el triple DES para cifrar a partir de 2023.</p>
+
+<h2 id="blowfish">Blowfish</h2>
+
+<p>En 1993 Bruce Schneier publicó <strong>Blowfish</strong>, una alternativa a DES rápida, libre y sin patentes: una red de Feistel de 16 rondas sobre bloques de 64 bits con claves de hasta 448 bits, cuyas S-boxes se generan a partir de la clave con un procedimiento deliberadamente lento. No se conoce ningún ataque práctico contra Blowfish completo, pero su bloque de 64 bits tiene el mismo problema del cumpleaños que el triple DES, y el propio Schneier recomienda sus sucesores. Su lenta preparación de clave sobrevive en <a href="@ch:passwords#bcrypt">bcrypt</a>, el hash de contraseñas. cryptoKit 1.0 ofrecía Blowfish, así que la versión 2 lo mantiene, marcado como heredado.</p>
+
+<h2 id="aes-competition">El concurso AES</h2>
+
+<p>En 1997 el NIST hizo algo nuevo: en vez de diseñar el sustituto de DES a puerta cerrada, organizó un <strong>concurso internacional abierto</strong>. En 1998 se presentaron quince candidatos de doce países; la comunidad criptográfica los atacó en público durante dos años; quedaron cinco finalistas (MARS, RC6, Rijndael, Serpent y Twofish). En octubre de 2000 el NIST eligió <strong>Rijndael</strong>, de los criptógrafos belgas Joan Daemen y Vincent Rijmen, por su combinación de seguridad, rapidez en todo, desde tarjetas inteligentes hasta servidores, y claridad matemática. Se convirtió en el <strong>Advanced Encryption Standard</strong>, FIPS 197, en noviembre de 2001. El modelo de concurso funcionó tan bien que se ha repetido para las funciones hash (<a href="@ch:hashing#sha3">SHA-3</a>), el hash de contraseñas (<a href="@ch:passwords#argon2">Argon2</a>) y la <a href="@ch:postquantum">criptografía poscuántica</a>.</p>
+
+<h2 id="aes">Dentro de AES</h2>
+
+<p>AES no es una red de Feistel sino una <strong>red de sustitución y permutación</strong>: cada ronda transforma el bloque entero de 128 bits, dispuesto como una cuadrícula de $4 \times 4$ bytes llamada <strong>estado</strong>. Su aritmética vive en un cuerpo finito.</p>
+
+<div class="definition">
+  <span class="th-title">Definición <span class="th-name">(el cuerpo de AES)</span></span>
+  <p>Un byte $b_7 b_6 \dots b_0$ se lee como el polinomio $b_7 x^7 + \dots + b_1 x + b_0$ con coeficientes en $\{0, 1\}$. Los bytes se suman con $\oplus$ y se multiplican como polinomios módulo el polinomio irreducible $m(x) = x^8 + x^4 + x^3 + x + 1$. Con estas operaciones, los 256 bytes forman el cuerpo $\mathrm{GF}(2^8)$.</p>
+</div>
+
+<div class="theorem">
+  <span class="th-title">Teorema</span>
+  <p>Como $m(x)$ es irreducible sobre $\mathrm{GF}(2)$, todo byte $a$ no nulo tiene inverso multiplicativo $a^{-1}$, y $a^{-1} = a^{254}$.</p>
+</div>
+
+<details class="proof">
+  <summary>Demostración</summary>
+  <div>
+    <p>Los polinomios módulo un polinomio irreducible forman un cuerpo (como los enteros módulo un primo): si $a(x) \neq 0$, entonces $\mathrm{mcd}(a(x), m(x)) = 1$ y el algoritmo de Euclides extendido da un $u(x)$ con $u(x)a(x) \equiv 1 \pmod{m(x)}$. Los elementos no nulos forman un grupo de orden 255, así que $a^{255} = 1$ por el teorema de Lagrange y $a^{-1} = a^{254}$.</p>
+  </div>
+</details>
+
+<p>Cada una de las 10 rondas de AES-128 (12 en AES-192, 14 en AES-256) aplica cuatro pasos:</p>
+
+<ol>
+  <li><strong>SubBytes</strong>: cada byte $a$ se sustituye por $S(a) = A \cdot a^{-1} \oplus \texttt{63}$, el inverso en $\mathrm{GF}(2^8)$ seguido de una transformación afín fija $A$ sobre los bits. La inversión es muy no lineal; la transformación afín elimina sus puntos fijos. Es la <em>confusión</em>.</li>
+  <li><strong>ShiftRows</strong>: la fila $r$ del estado rota $r$ bytes a la izquierda.</li>
+  <li><strong>MixColumns</strong>: cada columna se multiplica por la matriz de filas $(2\ 3\ 1\ 1)$, $(1\ 2\ 3\ 1)$, $(1\ 1\ 2\ 3)$, $(3\ 1\ 1\ 2)$ sobre $\mathrm{GF}(2^8)$. Es <em>de distancia máxima separable</em>: cambiar $t$ bytes de una columna cambia al menos $5 - t$ bytes del resultado. Junto con ShiftRows, es la <em>difusión</em>.</li>
+  <li><strong>AddRoundKey</strong>: XOR con una subclave derivada de la clave por la expansión de clave.</li>
+</ol>
+
+<p>La última ronda omite MixColumns, y hay un AddRoundKey adicional antes de la primera ronda. La <strong>estrategia de rastro ancho</strong> de Daemen y Rijmen demuestra que cualquier rastro diferencial o lineal a lo largo de cuatro rondas activa al menos 25 S-boxes, lo que acota la probabilidad del mejor rastro muy por debajo de nada aprovechable.</p>
+
+<figure class="demo" data-demo="block/aes">
+  <figcaption>AES-128, paso a paso, con el ejemplo del apéndice B de FIPS-197 (puedes escribir tu propio texto en claro y tu clave en hex). Cada casilla es un byte del estado, coloreado según su valor; las recuadradas cambiaron en el último paso. Observa cómo SubBytes cambia todos los bytes, ShiftRows los mueve, MixColumns reparte cada uno por su columna y la clave entra en cada AddRoundKey. El último paso muestra el texto cifrado 3925841d…, como en el estándar. La propia S-box se calcula en el navegador a partir del inverso en GF(2⁸), no se copia de una tabla.</figcaption>
+</figure>
+
+<h2 id="avalanche">El efecto avalancha</h2>
+
+<p>La difusión tiene una firma visible: si se invierte un bit del texto en claro, tras unas pocas rondas cambia aproximadamente la mitad de los bits de salida, con un patrón que parece aleatorio. Horst Feistel lo llamó <strong>efecto avalancha</strong>. AES alcanza la difusión completa en dos rondas: tras la segunda, cada byte de salida depende de todos los bytes de entrada.</p>
+
+<figure class="demo" data-demo="block/avalanche">
+  <figcaption>El efecto avalancha en AES-128. Elige qué bit del texto en claro invertir; las barras muestran cuántos de los 128 bits del estado difieren entre los dos cifrados tras cada ronda: un bit en la entrada, unos pocos tras la ronda 1 y alrededor de 64 (la mitad) a partir de la ronda 2 o 3. La cuadrícula muestra qué bits del texto cifrado final difieren.</figcaption>
+</figure>
+
+<h2 id="aes-today">AES hoy</h2>
+
+<p>Un cuarto de siglo después de su elección, el mejor ataque contra AES-128 completo, el ataque biclique de 2011, necesita $2^{126{,}1}$ operaciones: un factor cuatro mejor que la fuerza bruta, y sin importancia práctica. Los ataques reales han sido contra las implementaciones: Daniel Bernstein mostró en 2005 que el software basado en tablas filtra la clave a través de los tiempos de la caché. Desde 2010 casi todos los procesadores incluyen instrucciones <strong>AES-NI</strong>, que ejecutan cada ronda en hardware, rápido y en tiempo constante. Frente a los ordenadores cuánticos, el algoritmo de Grover reduciría la seguridad de una clave de $k$ bits a unos $k/2$ bits, así que AES-256 es la opción prudente para datos que deban seguir secretos durante décadas (ver el <a href="@ch:postquantum#grover">capítulo 10</a>).</p>
+
+<section class="references">
+  <h2 id="references">Para saber más</h2>
+  <ol>
+    <li>Horst Feistel, «Cryptography and Computer Privacy», <em>Scientific American</em> 228(5), 1973.</li>
+    <li>Don Coppersmith, «The Data Encryption Standard (DES) and its strength against attacks», <em>IBM Journal of Research and Development</em> 38(3), 1994.</li>
+    <li>Electronic Frontier Foundation, <em>Cracking DES</em> (1998).</li>
+    <li>Joan Daemen y Vincent Rijmen, <em>The Design of Rijndael</em> (2002; 2.ª ed. 2020).</li>
+    <li>NIST, FIPS 197, <em>Advanced Encryption Standard</em> (2001, actualizado en 2023).</li>
+  </ol>
+</section>

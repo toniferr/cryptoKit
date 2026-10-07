@@ -1,0 +1,12 @@
+{
+  "base_url": "https://toniferr.github.io/cryptoKit/",
+  "repo": "https://github.com/toniferr/cryptoKit",
+  "author": "Antonio Ferreiro",
+  "author_url": "https://toniferr.github.io/",
+  "version": "2.0.0",
+  "release": "https://github.com/toniferr/cryptoKit/releases/tag/2.0.0",
+  "jar": "https://github.com/toniferr/cryptoKit/releases/download/2.0.0/cryptoKit-2.0.0.jar",
+  "langs": ["en", "es"],
+  "default_lang": "en",
+  "chapters": ["classical", "enigma", "secrecy", "block", "modes", "hashing", "passwords", "publickey", "curves", "postquantum"]
+}

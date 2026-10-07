@@ -1,0 +1,134 @@
+<!--meta
+{
+  "slug": "post-quantum",
+  "title": "Post-quantum cryptography",
+  "chain": "Post-quantum",
+  "headline": "After Shor: lattices, ML-KEM and ML-DSA",
+  "dek": "A large quantum computer would break RSA, Diffie–Hellman and every elliptic curve in this site. It does not exist yet, but encrypted traffic recorded today could be read when it does. So in 2024, after an eight-year public competition, NIST standardised replacements built on lattices and hashes, and the migration of the whole Internet has begun.",
+  "era": "1994 – 2026",
+  "people": ["Peter Shor", "Lov Grover", "Robert McEliece", "Miklós Ajtai", "László Babai", "Oded Regev", "Chris Peikert", "Vadim Lyubashevsky", "Léo Ducas", "Wouter Castryck", "Thomas Decru"],
+  "theorems": ["Shor: factoring and discrete logarithms in polynomial time", "Grover: $\\sqrt{N}$ search, and no better", "Learning with errors is as hard as worst-case lattice problems (Regev)", "Correctness of Regev's encryption"]
+}
+-->
+
+<p>In 1994 Peter Shor, at Bell Labs, showed that a quantum computer could factor integers and compute discrete logarithms in polynomial time. Every public-key system in common use (RSA, finite-field and elliptic-curve Diffie–Hellman, ECDSA, Ed25519) rests on one of those two problems. The machine needed does not exist yet: today's quantum processors have hundreds or a few thousand noisy qubits, and breaking RSA-2048 needs on the order of a million of them, run with error correction for days. But cryptography has to plan for decades, and an adversary can <strong>harvest now and decrypt later</strong>: record encrypted traffic today and read it once the machine exists. Secrets that must last ten years are already at risk.</p>
+
+<h2 id="shor">What a quantum computer breaks</h2>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Shor, 1994)</span></span>
+  <p>A quantum computer can factor an $n$-bit integer, and compute discrete logarithms in any group where the group operation is efficient (including elliptic curves), in time polynomial in $n$, roughly $O(n^3)$ gates.</p>
+</div>
+
+<p>The key idea is to turn the problem into finding the <strong>period</strong> of a function such as $x \mapsto a^x \bmod N$, and to find periods with the quantum Fourier transform. The sister site <a href="https://toniferr.github.io/math-of-quantum/shor/">Math of Quantum</a> develops the whole algorithm. Resource estimates keep falling: in 2019 Craig Gidney and Martin Ekerå estimated 20 million noisy qubits for eight hours; in 2025 Gidney brought it below one million qubits in under a week.</p>
+
+<h2 id="grover">What it barely touches</h2>
+
+<p>Symmetric cryptography is much less exposed.</p>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Grover 1996; Bennett, Bernstein, Brassard, Vazirani 1997)</span></span>
+  <p>A quantum computer can find one marked element among $N$ with about $\frac{\pi}{4}\sqrt{N}$ queries, and no quantum algorithm can do it with asymptotically fewer.</p>
+</div>
+
+<p>So a key search on a $k$-bit cipher drops from $2^k$ to about $2^{k/2}$, and only in theory: Grover's iterations are sequential and cannot be spread over many machines without losing the advantage. Doubling key sizes is enough: AES-256 and SHA-384 or SHA-512 are considered safe against quantum attack. Hash-function collisions gain even less.</p>
+
+<h2 id="families">Mathematics that resists</h2>
+
+<p>The replacements must use problems for which no quantum algorithm is known. Several families had been studied for decades:</p>
+
+<ul>
+  <li><strong>Codes</strong>. Robert McEliece's 1978 cryptosystem hides a message as a codeword of a secret error-correcting code plus deliberate errors; decoding a random-looking linear code is hard. It has never been broken, but its public keys are around a megabyte.</li>
+  <li><strong>Hash-based signatures</strong>. Leslie Lamport's one-time signatures (1979), combined into Merkle trees, rest only on the security of a hash function. SPHINCS+ (now SLH-DSA) is the conservative choice: large, slow signatures, minimal assumptions.</li>
+  <li><strong>Multivariate</strong> systems of quadratic equations, and <strong>isogenies</strong> between elliptic curves. SIKE, an isogeny scheme in the final round of the competition, was broken in July 2022 by Wouter Castryck and Thomas Decru in about an hour on a laptop, using a 1997 theorem of Ernst Kani: a reminder of why candidates are attacked in public for years.</li>
+  <li><strong>Lattices</strong>, which won.</li>
+</ul>
+
+<p>NIST opened its competition in 2016 and received 82 submissions. In 2022 it chose CRYSTALS-Kyber for key establishment and CRYSTALS-Dilithium, Falcon and SPHINCS+ for signatures. In August 2024 the first three standards were published: <strong>FIPS 203 (ML-KEM)</strong>, <strong>FIPS 204 (ML-DSA)</strong> and <strong>FIPS 205 (SLH-DSA)</strong>; in March 2025 NIST added the code-based HQC as a backup KEM.</p>
+
+<h2 id="lattices">Lattices</h2>
+
+<div class="definition">
+  <span class="th-title">Definition <span class="th-name">(lattice)</span></span>
+  <p>Given linearly independent vectors $b_1, \dots, b_n \in \mathbb{R}^n$ (a <strong>basis</strong>), the lattice they generate is the set of all their integer combinations, $\mathcal{L} = \{\, x_1 b_1 + \dots + x_n b_n : x_i \in \mathbb{Z} \,\}$: a regular grid of points.</p>
+</div>
+
+<p>The same lattice has infinitely many bases: multiplying a basis by an integer matrix of determinant $\pm 1$ gives another. Some bases are <strong>good</strong> (short, nearly orthogonal vectors) and some are <strong>bad</strong> (long, nearly parallel). Two problems are believed hard in high dimension, for classical and quantum computers alike:</p>
+
+<ul>
+  <li><strong>Shortest Vector Problem</strong> (SVP): find a shortest non-zero vector of $\mathcal{L}$.</li>
+  <li><strong>Closest Vector Problem</strong> (CVP): given a point $t$, find the lattice point closest to it.</li>
+</ul>
+
+<p>With a good basis, CVP is easy in practice: write $t$ in the basis and round each coordinate (László Babai's rounding, 1986). With a bad basis, rounding lands far away. That asymmetry is a trapdoor: the good basis is the private key, a bad basis of the same lattice the public one (the GGH idea of Goldreich, Goldwasser and Halevi, 1997). Miklós Ajtai proved in 1996 something unusual for cryptography: certain random lattice problems are as hard as the <em>worst case</em> of approximate SVP.</p>
+
+<figure class="demo" data-demo="postquantum/lattice">
+  <figcaption>The same two-dimensional lattice with two bases. Click to place a target point. With the good basis, Babai's rounding finds the closest lattice point; with the bad basis (same lattice, long nearly parallel vectors), rounding lands on a distant point. In two dimensions you can see the right answer; in the 768 dimensions of ML-KEM, nobody can.</figcaption>
+</figure>
+
+<h2 id="lwe">Learning with errors</h2>
+
+<p>In 2005 Oded Regev introduced the problem on which ML-KEM and ML-DSA are built.</p>
+
+<div class="definition">
+  <span class="th-title">Definition <span class="th-name">(LWE)</span></span>
+  <p>Fix a modulus $q$, a dimension $n$ and a secret $s \in \mathbb{Z}_q^n$. An LWE sample is a pair $(a, \langle a, s \rangle + e)$, with $a$ uniform in $\mathbb{Z}_q^n$ and $e$ a small random error. The problem is to recover $s$ (or just to distinguish such samples from uniformly random pairs) given many of them. In matrix form: given $A$ and $b = As + e \bmod q$, find $s$.</p>
+</div>
+
+<p>Without the error, $b = As$ is a linear system, solved by Gaussian elimination. The small error makes it, as far as anyone knows, hopeless: it is a CVP instance in a lattice built from $A$.</p>
+
+<div class="theorem">
+  <span class="th-title">Theorem <span class="th-name">(Regev, 2005)</span></span>
+  <p>For suitable parameters (Gaussian errors of size about $\alpha q \ge 2\sqrt n$), solving LWE on average is at least as hard as solving approximate SVP and related lattice problems in the <strong>worst case</strong>, by a quantum reduction.</p>
+</div>
+
+<p>Regev's public-key encryption of a bit is short enough to write down. The public key is $(A, b = As + e)$ with $m$ rows. To encrypt a bit $\mu$, pick a random subset $S$ of the rows and send</p>
+
+$$u = \sum_{i \in S} a_i, \qquad v = \sum_{i \in S} b_i + \mu \left\lfloor \tfrac{q}{2} \right\rfloor \pmod q.$$
+
+<p>To decrypt, compute $v - \langle u, s \rangle$ and output 0 if it is closer to 0 than to $q/2$, and 1 otherwise.</p>
+
+<div class="theorem">
+  <span class="th-title">Proposition <span class="th-name">(correctness)</span></span>
+  <p>$v - \langle u, s \rangle = \mu \lfloor q/2 \rfloor + \sum_{i \in S} e_i \pmod q$. So decryption is correct whenever $\left|\sum_{i \in S} e_i\right| &lt; q/4$.</p>
+</div>
+
+<details class="proof">
+  <summary>Proof</summary>
+  <div>
+    <p>$\sum_{i\in S} b_i = \sum_{i \in S} (\langle a_i, s\rangle + e_i) = \langle u, s \rangle + \sum_{i \in S} e_i$, so subtracting $\langle u, s\rangle$ leaves the message term plus the accumulated error. If the error stays below $q/4$ in absolute value, the result is on the correct side of the circle $\mathbb{Z}_q$.</p>
+  </div>
+</details>
+
+<figure class="demo" data-demo="postquantum/lwe">
+  <figcaption>A toy LWE cipher (dimension 8, 24 samples, $q = 401$) encrypting your message bit by bit. Each dot is one decrypted bit placed on the circle $\mathbb{Z}_q$ at the value $v - \langle u, s \rangle$: bits 0 cluster near 0 and bits 1 near $q/2$. Turn up the noise: the clusters spread, cross the boundary at $q/4$, and bits start to flip. Real parameters keep the probability of a decryption failure below $2^{-138}$.</figcaption>
+</figure>
+
+<p>Regev received the Gödel Prize in 2018 for this work. Plain LWE has big keys ($n \times m$ numbers). The standards use <strong>module-LWE</strong>, where the entries of $A$, $s$ and $e$ are polynomials in $\mathbb{Z}_q[x]/(x^{256}+1)$, multiplied fast with the number-theoretic transform: the same security reductions, keys of about a kilobyte.</p>
+
+<h2 id="mlkem">ML-KEM</h2>
+
+<p>ML-KEM (formerly CRYSTALS-Kyber, by Roberto Avanzi, Joppe Bos, Léo Ducas, Eike Kiltz and others) is a <strong>key encapsulation mechanism</strong>: rather than encrypting a message, it produces a fresh random 32-byte secret together with a ciphertext (“encapsulation”) that only the private key can open. The secret then keys a symmetric cipher. A Fujisaki–Okamoto transform turns the basic LWE encryption into a KEM secure against chosen-ciphertext attacks. ML-KEM-768, the recommended level (about AES-192 strength), has a 1,184-byte public key and a 1,088-byte ciphertext, and it is faster than X25519.</p>
+
+<p>Deployment was quick, and <strong>hybrid</strong>: combining ML-KEM with X25519, so the connection is safe if either one holds. Chrome and Cloudflare enabled X25519+Kyber in 2023–2024; Signal added PQXDH in 2023 and Apple's iMessage PQ3 in 2024; OpenSSH 10 (2025) made <code>mlkem768x25519</code> its default key exchange. By 2025 more than a third of the human web traffic seen by Cloudflare was post-quantum. The desktop app's “ML-KEM-768 + AES-GCM” encapsulates a key with ML-KEM and encrypts with AES-256-GCM, with real FIPS 203 keys.</p>
+
+<h2 id="mldsa">ML-DSA</h2>
+
+<p>ML-DSA (formerly CRYSTALS-Dilithium) signs with module lattices by the “Fiat–Shamir with aborts” technique of Vadim Lyubashevsky: the signer proves knowledge of a short secret, and restarts whenever the signature would leak information about it. ML-DSA-65 has a 1,952-byte public key and 3,309-byte signatures, about fifty times Ed25519's, which is the main cost of the migration: certificate chains get much larger. FN-DSA (Falcon) gives smaller signatures with more delicate floating-point arithmetic; SLH-DSA gives the most conservative security at the cost of 8 to 50 KB signatures.</p>
+
+<h2 id="migration">The migration</h2>
+
+<p>The US NSA's CNSA 2.0 suite (2022) requires post-quantum algorithms in national-security systems between 2025 and 2033. NIST's transition plan (IR 8547, 2024) deprecates RSA and elliptic curves at 112-bit security in 2030 and disallows them entirely in 2035. The lesson of DES, MD5 and SHA-1 is that migrations take a decade or more; this one has started early, and it is the first time the cryptographic community has replaced its public-key algorithms <em>before</em> they were broken.</p>
+
+<p>The story that began with Caesar's three-letter shift ends, for now, here: with a secret hidden in a lattice of 768 dimensions behind a little noise. The <a href="@timeline">history page</a> puts all of it on one line, and <a href="@app">the app</a> lets you try it, from Caesar to ML-KEM, on your own data.</p>
+
+<section class="references">
+  <h2 id="references">Further reading</h2>
+  <ol>
+    <li>Peter Shor, “Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer”, <em>SIAM Journal on Computing</em> 26(5), 1997.</li>
+    <li>Oded Regev, “On Lattices, Learning with Errors, Random Linear Codes, and Cryptography”, STOC 2005 (<em>Journal of the ACM</em> 56(6), 2009).</li>
+    <li>Chris Peikert, “A Decade of Lattice Cryptography”, <em>Foundations and Trends in Theoretical Computer Science</em> 10(4), 2016.</li>
+    <li>NIST, FIPS 203 (ML-KEM), FIPS 204 (ML-DSA) and FIPS 205 (SLH-DSA), August 2024; NIST IR 8547 (2024).</li>
+    <li>Wouter Castryck and Thomas Decru, “An efficient key recovery attack on SIDH”, EUROCRYPT 2023.</li>
+  </ol>
+</section>
